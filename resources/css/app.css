@@ -1,0 +1,222 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        background-color: rgb(var(--bg-slate-50));
+        background-image: radial-gradient(1200px 520px at 50% -12%, rgb(var(--fg-slate-900) / 0.035), transparent 65%);
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        font-family: theme('fontFamily.display');
+        letter-spacing: -0.015em;
+    }
+
+    a,
+    button,
+    input,
+    select,
+    textarea,
+    summary,
+    [role='button'] {
+        transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 180ms;
+    }
+
+    button:disabled,
+    input:disabled,
+    select:disabled,
+    textarea:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    ::selection {
+        background-color: theme('colors.brand.200');
+        color: theme('colors.slate.900');
+    }
+
+    /* Slim, unobtrusive scrollbars for a more polished feel */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background-color: theme('colors.slate.300');
+        border-radius: 9999px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: theme('colors.slate.400');
+    }
+
+    /* @tailwindcss/forms paints unstyled controls pure white; in dark mode give them
+       the card surface instead. Same specificity as the plugin's selectors, so any
+       explicit bg-/border- utility on the element still wins. */
+    .dark :is([type='text'], [type='email'], [type='url'], [type='password'], [type='number'], [type='date'], [type='datetime-local'], [type='month'], [type='search'], [type='tel'], [type='time'], [type='week'], [multiple], textarea, select) {
+        background-color: rgb(var(--bg-white));
+        border-color: rgb(var(--fg-slate-300));
+        color: rgb(var(--fg-slate-900));
+    }
+
+    .dark :is([type='checkbox'], [type='radio']) {
+        background-color: rgb(var(--bg-slate-100));
+        border-color: rgb(var(--fg-slate-300));
+    }
+
+    .dark :is([type='checkbox'], [type='radio']):checked {
+        background-color: rgb(var(--fg-slate-900));
+        border-color: transparent;
+    }
+}
+
+@layer components {
+    /* The single icon-chip style used across every module: solid ink with a white
+       glyph in light mode, inverted (light chip, dark glyph) in dark mode. */
+    .chip-ink {
+        background-color: #18181b;
+        color: #ffffff;
+    }
+
+    .dark .chip-ink {
+        background-color: #f4f4f5;
+        color: #18181b;
+    }
+
+    /* Modal / drawer backdrops stay a dark scrim in both themes. */
+    .dark .bg-slate-900\/40,
+    .dark .bg-slate-900\/60 {
+        background-color: rgb(0 0 0 / 0.6);
+    }
+
+    /* Applied for a moment while the theme flips so surfaces cross-fade instead of snapping. */
+    .theme-transition,
+    .theme-transition *,
+    .theme-transition *::before,
+    .theme-transition *::after {
+        transition-property: background-color, border-color, color, fill, stroke, box-shadow !important;
+        transition-duration: 250ms !important;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    /* Top-of-page navigation progress indicator, driven by app.js */
+    #nav-progress {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 3px;
+        width: 0%;
+        background: rgb(var(--fg-slate-900));
+        z-index: 9999;
+        transition: width 300ms ease-out, opacity 200ms ease-in;
+        box-shadow: 0 0 8px rgb(var(--fg-slate-900) / 0.35);
+    }
+
+    #nav-progress.nav-progress-active {
+        width: 80%;
+    }
+
+    #nav-progress.nav-progress-done {
+        width: 100%;
+        opacity: 0;
+    }
+
+    /* Turbo Drive ships its own top-of-page progress bar — suppressed in
+       favor of #nav-progress above, which already covers the same moments
+       (link clicks, form submits) plus our AJAX-region pagination/filters. */
+    .turbo-progress-bar {
+        display: none;
+    }
+
+    /* Frappe Gantt — restyled to match the app's ink/brand palette instead of the library default theme */
+    .bmpc-gantt {
+        --g-bar-color: theme('colors.slate.300');
+        --g-bar-border: theme('colors.slate.300');
+        --g-progress-color: theme('colors.slate.500');
+        --g-arrow-color: theme('colors.slate.300');
+        --g-tick-color-thick: theme('colors.slate.100');
+        --g-tick-color: theme('colors.slate.50');
+        --g-border-color: theme('colors.slate.200');
+        --g-text-muted: theme('colors.slate.500');
+        --g-text-light: #fff;
+        --g-text-dark: theme('colors.slate.800');
+        --g-header-background: rgb(var(--bg-white));
+        --g-row-color: rgb(var(--bg-white));
+        --g-row-border-color: theme('colors.slate.100');
+        --g-today-highlight: rgb(var(--fg-slate-900));
+        --g-weekend-highlight-color: theme('colors.slate.50');
+    }
+
+    .bmpc-gantt .gantt-container {
+        border-radius: theme('borderRadius.xl');
+        font-family: theme('fontFamily.sans');
+    }
+
+    .bmpc-gantt .bar-label {
+        font-family: theme('fontFamily.sans');
+        font-weight: 600;
+    }
+
+    /* Shimmering placeholder bar for async content (e.g. the notification
+       dropdown while it fetches) — pair with the `animate-shimmer` utility. */
+    .skeleton {
+        background-image: linear-gradient(90deg, theme('colors.slate.100') 0px, theme('colors.slate.200') 200px, theme('colors.slate.100') 400px);
+        background-size: 800px 100%;
+        background-repeat: no-repeat;
+    }
+
+    /* Diagonal light sweep on primary call-to-action buttons — a restrained,
+       one-shot hover flourish rather than a permanent shine/animation. */
+    .btn-sheen {
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+    }
+
+    .btn-sheen::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(115deg, transparent 20%, rgba(255, 255, 255, 0.16) 42%, rgba(255, 255, 255, 0.16) 46%, transparent 60%);
+        transform: translateX(-100%);
+        transition: transform 700ms theme('transitionTimingFunction.elegant');
+    }
+
+    .btn-sheen:hover::after {
+        transform: translateX(100%);
+    }
+
+    /* Bridges the hard navigation boundary between the logout splash (full-bleed
+       dark) and the guest layout (white form panel): the panel's own background
+       eases from dark to white right after paint, instead of the browser
+       snapping straight to white the instant the new document loads. Runs on
+       every guest-layout page load, so a normal visit to /login just sees a
+       quick, unobtrusive settle rather than a flash. */
+    .auth-panel-in {
+        animation: auth-panel-in 550ms theme('transitionTimingFunction.elegant') both;
+    }
+
+    @keyframes auth-panel-in {
+        from {
+            background-color: theme('colors.slate.950');
+        }
+        to {
+            background-color: theme('colors.white');
+        }
+    }
+}

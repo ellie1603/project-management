@@ -1,0 +1,42 @@
+# VCS / editor / agent tooling
+.git
+.github
+.idea
+.vscode
+.cursor
+.codex
+.zed
+.claude
+.mcp.json
+boost.json
+AGENTS.md
+CLAUDE.md
+
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+auth.json
+
+# Rebuilt inside the image
+node_modules
+vendor
+public/build
+public/hot
+public/storage
+bootstrap/cache/*.php
+
+# Runtime data belongs on the mounted storage volume, never in the image
+storage/*
+*.sql
+
+# Tests and local caches
+tests
+phpunit.xml
+.phpunit.cache
+.phpunit.result.cache
+*.log
+
+# Docker files that don't need to be in the build context
+Dockerfile
+.dockerignore
