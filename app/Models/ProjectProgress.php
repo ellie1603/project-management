@@ -24,6 +24,8 @@ class ProjectProgress extends Model
         'activities_remaining',
         'issues',
         'remarks',
+        'ai_assisted',
+        'site_notes',
     ];
 
     public function project(): BelongsTo
@@ -59,6 +61,7 @@ class ProjectProgress extends Model
         return [
             'progress_date' => 'date',
             'progress_percentage' => 'integer',
+            'ai_assisted' => 'boolean',
         ];
     }
 }

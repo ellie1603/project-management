@@ -8,14 +8,10 @@
     x-transition:enter="transition ease-out duration-200"
     x-transition:enter-start="opacity-0"
     x-transition:enter-end="opacity-100"
-    class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-slate-950 palette-fixed"
+    class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-brand-900 palette-fixed hero-brand"
     style="display: none;"
 >
     <div class="pointer-events-none absolute inset-0 overflow-hidden">
-        <div class="absolute -left-24 -top-24 h-[26rem] w-[26rem] animate-drift rounded-full bg-slate-500/20 blur-3xl"></div>
-        <div class="absolute -bottom-28 -right-16 h-[24rem] w-[24rem] animate-drift-slow rounded-full bg-white/5 blur-3xl"></div>
-        <div class="absolute inset-0 [background-image:linear-gradient(to_right,theme(colors.white/0.05)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.white/0.05)_1px,transparent_1px)] [background-size:56px_56px] [mask-image:radial-gradient(ellipse_60%_55%_at_50%_45%,black_15%,transparent_75%)]"></div>
-        <div class="absolute inset-0 bg-[radial-gradient(ellipse_60%_55%_at_50%_45%,transparent,rgba(9,9,11,0.65))]"></div>
     </div>
 
     <div class="relative flex flex-col items-center">

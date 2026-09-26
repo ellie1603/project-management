@@ -13,7 +13,7 @@
             <p class="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">403</p>
             <h1 class="mt-3 text-2xl font-semibold">Access denied</h1>
             <p class="mt-3 text-sm leading-6 text-slate-600">You do not have permission to access this resource.</p>
-            <a href="{{ auth()->check() ? route('dashboard') : route('login') }}" class="mt-6 inline-flex rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700">Return to BMPC</a>
+            <a href="{{ auth()->check() ? route('dashboard') : route('login') }}" class="mt-6 inline-flex rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">Return to BMPC</a>
         </section>
     </main>
 </body>

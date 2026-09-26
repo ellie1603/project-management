@@ -54,7 +54,7 @@
         </div>
 
         <div class="flex items-center justify-end border-t border-slate-100 bg-slate-50/60 px-6 py-4 sm:px-7">
-            <button type="submit" class="btn-sheen inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 ease-elegant hover:-translate-y-px hover:bg-slate-800 hover:shadow-elevated active:translate-y-0">
+            <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 ease-elegant hover:-translate-y-px hover:bg-brand-700 hover:shadow-elevated active:translate-y-0">
                 <i data-lucide="check" class="h-4 w-4"></i>
                 Save Settings
             </button>
@@ -106,7 +106,7 @@
             <input name="name" placeholder="New category name" aria-label="New category name" class="w-full rounded-xl border-slate-200 bg-white text-sm shadow-sm transition-all duration-150 ease-smooth focus:border-brand-400 focus:ring-2 focus:ring-brand-100 sm:w-48" required>
             <input name="description" placeholder="Description" aria-label="New category description" class="min-w-[10rem] flex-1 rounded-xl border-slate-200 bg-white text-sm shadow-sm transition-all duration-150 ease-smooth focus:border-brand-400 focus:ring-2 focus:ring-brand-100">
             <input type="hidden" name="status" value="active">
-            <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 ease-elegant hover:-translate-y-px hover:bg-slate-800 hover:shadow-elevated">
+            <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 ease-elegant hover:-translate-y-px hover:bg-brand-700 hover:shadow-elevated">
                 <i data-lucide="plus" class="h-3.5 w-3.5"></i>
                 Add Category
             </button>

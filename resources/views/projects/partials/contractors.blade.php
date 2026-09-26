@@ -60,7 +60,7 @@
             <input type="date" name="start_date" aria-label="Contract start date" class="rounded-md border-slate-300 text-sm">
             <input type="date" name="end_date" aria-label="Contract end date" class="rounded-md border-slate-300 text-sm">
             <textarea name="remarks" placeholder="Remarks" aria-label="Remarks" class="rounded-md border-slate-300 text-sm sm:col-span-2"></textarea>
-            <button class="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white sm:col-span-2">Attach Contractor</button>
+            <button class="rounded-md bg-brand-600 px-3 py-2 text-sm font-medium text-white sm:col-span-2">Attach Contractor</button>
         </form>
     @endcan
 </section>
@@ -107,7 +107,7 @@
             <input type="date" name="quotation_date" value="{{ now()->toDateString() }}" aria-label="Quotation date" class="rounded-md border-slate-300 text-sm" required>
             <input name="document_path" placeholder="Quotation document path" aria-label="Quotation document path" class="rounded-md border-slate-300 text-sm">
             <textarea name="remarks" placeholder="Remarks" aria-label="Remarks" class="rounded-md border-slate-300 text-sm sm:col-span-2"></textarea>
-            <button class="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white sm:col-span-2">Record Quotation</button>
+            <button class="rounded-md bg-brand-600 px-3 py-2 text-sm font-medium text-white sm:col-span-2">Record Quotation</button>
         </form>
     @endcan
 </section>

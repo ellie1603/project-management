@@ -230,7 +230,7 @@ class Project extends Model
             });
     }
 
-    public function assignPersonnel(User $user, string $positionType, string $responsibility): ProjectAssignment
+    public function assignPersonnel(User $user, string $positionType, ?string $responsibility = null): ProjectAssignment
     {
         return $this->assignments()->firstOrCreate([
             'user_id' => $user->getKey(),

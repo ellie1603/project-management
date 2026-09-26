@@ -6,12 +6,12 @@
     $perPage = $perPage ?? 5;
 
     $health = [
-        'delayed' => ['label' => 'Delayed', 'dot' => 'bg-red-500', 'accent' => 'bg-red-500', 'bar' => 'bg-gradient-to-r from-red-500 to-rose-500'],
-        'approaching' => ['label' => 'Due soon', 'dot' => 'bg-amber-500', 'accent' => 'bg-amber-500', 'bar' => 'bg-gradient-to-r from-amber-400 to-orange-500'],
-        'onhold' => ['label' => 'On hold', 'dot' => 'bg-amber-400', 'accent' => 'bg-amber-400', 'bar' => 'bg-gradient-to-r from-amber-300 to-amber-400'],
-        'ongoing' => ['label' => 'On schedule', 'dot' => 'bg-emerald-500', 'accent' => 'bg-emerald-500', 'bar' => 'bg-gradient-to-r from-emerald-500 to-teal-500'],
-        'registered' => ['label' => 'Not started', 'dot' => 'bg-slate-300', 'accent' => 'bg-slate-300', 'bar' => 'bg-gradient-to-r from-slate-300 to-slate-400'],
-        'completed' => ['label' => 'Completed', 'dot' => 'bg-slate-900', 'accent' => 'bg-slate-900', 'bar' => 'bg-gradient-to-r from-slate-700 to-slate-900'],
+        'delayed' => ['label' => 'Delayed', 'dot' => 'bg-red-500', 'accent' => 'bg-red-500', 'bar' => 'bg-red-500'],
+        'approaching' => ['label' => 'Due soon', 'dot' => 'bg-amber-500', 'accent' => 'bg-amber-500', 'bar' => 'bg-amber-400'],
+        'onhold' => ['label' => 'On hold', 'dot' => 'bg-amber-400', 'accent' => 'bg-amber-400', 'bar' => 'bg-amber-300'],
+        'ongoing' => ['label' => 'On schedule', 'dot' => 'bg-emerald-500', 'accent' => 'bg-emerald-500', 'bar' => 'bg-emerald-500'],
+        'registered' => ['label' => 'Not started', 'dot' => 'bg-slate-300', 'accent' => 'bg-slate-300', 'bar' => 'bg-slate-300'],
+        'completed' => ['label' => 'Completed', 'dot' => 'bg-slate-900', 'accent' => 'bg-slate-900', 'bar' => 'bg-slate-700'],
     ];
 
     $needsAttention = $rows->where('needs_attention', true)->count();
@@ -119,13 +119,13 @@
                     // health. The time bar is the one that changes colour, so a red bar
                     // always means exactly one thing — the schedule is in trouble.
                     $workTone = $row['status_key'] === 'completed'
-                        ? 'bg-gradient-to-r from-emerald-500 to-emerald-600'
-                        : 'bg-gradient-to-r from-brand-500 to-brand-700';
+                        ? 'bg-emerald-500'
+                        : 'bg-brand-600';
 
                     $timeTone = match (true) {
                         $row['status_key'] === 'completed' => 'bg-slate-300',
-                        $row['status_key'] === 'delayed' => 'bg-gradient-to-r from-red-500 to-rose-500',
-                        $row['behind_pace'] || $row['status_key'] === 'approaching' => 'bg-gradient-to-r from-amber-400 to-orange-500',
+                        $row['status_key'] === 'delayed' => 'bg-red-500',
+                        $row['behind_pace'] || $row['status_key'] === 'approaching' => 'bg-amber-400',
                         default => 'bg-slate-300',
                     };
 
@@ -292,7 +292,7 @@
                                 <button
                                     type="button"
                                     @click="page = {{ $n }}"
-                                    :class="page === {{ $n }} ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-white hover:text-slate-900'"
+                                    :class="page === {{ $n }} ? 'bg-brand-600 text-white shadow-sm' : 'text-slate-600 hover:bg-white hover:text-slate-900'"
                                     class="h-8 min-w-[2rem] rounded-lg px-2 text-xs font-semibold tabular-nums transition-colors duration-150"
                                     :aria-current="page === {{ $n }} ? 'page' : null"
                                 >{{ $n }}</button>

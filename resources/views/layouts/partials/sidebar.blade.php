@@ -89,7 +89,7 @@
                     @foreach ($section['items'] as $item)
                         <a
                             href="{{ $item['href'] }}"
-                            class="group relative flex items-center gap-3 rounded-lg px-3 py-2 text-[13.5px] font-medium transition-all duration-150 ease-smooth focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 {{ $item['active'] ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}"
+                            class="group relative flex items-center gap-3 rounded-lg px-3 py-2 text-[13.5px] font-medium transition-all duration-150 ease-smooth focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 {{ $item['active'] ? 'bg-brand-600 text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}"
                         >
                             <i data-lucide="{{ $item['icon'] }}" class="h-[17px] w-[17px] shrink-0 transition-colors duration-150 {{ $item['active'] ? 'text-white' : 'text-slate-400 group-hover:text-slate-600' }}"></i>
                             <span>{{ $item['label'] }}</span>

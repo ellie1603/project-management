@@ -1,6 +1,9 @@
 import Alpine from 'alpinejs';
+import progressUpdate from './progress-update';
 
 window.Alpine = Alpine;
+
+Alpine.data('progressUpdate', progressUpdate);
 
 /**
  * Switches the light/dark theme, remembers the choice, and briefly enables a
@@ -323,9 +326,37 @@ const navProgress = (function navProgress() {
         event.preventDefault();
 
         const params = new URLSearchParams(new FormData(form)).toString();
-        const url = form.action + (params ? `?${params}` : '');
+        // Without an action attribute, form.action is the current URL including its old query string.
+        const url = form.action.split('?')[0] + (params ? `?${params}` : '');
 
         loadInto(region, url);
+    });
+
+    const ajaxFormOf = (element) => {
+        const form = element?.closest?.('form[data-ajax-form]');
+
+        return form && form.method.toLowerCase() === 'get' ? form : null;
+    };
+
+    document.addEventListener('change', (event) => {
+        const form = ajaxFormOf(event.target);
+
+        if (form && event.target.matches('select, input[type="date"], input[type="checkbox"], input[type="radio"]')) {
+            form.requestSubmit();
+        }
+    });
+
+    let searchTimer;
+
+    document.addEventListener('input', (event) => {
+        const form = ajaxFormOf(event.target);
+
+        if (!form || !event.target.matches('input[type="text"], input[type="search"]')) {
+            return;
+        }
+
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => form.requestSubmit(), 400);
     });
 
     window.addEventListener('popstate', () => {

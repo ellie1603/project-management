@@ -10,7 +10,7 @@
     >
         @if (auth()->user()->isAdmin())
             <x-slot name="aside">
-                <a href="{{ route('projects.create') }}" class="btn-sheen inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-glow transition-transform duration-200 ease-elegant hover:-translate-y-0.5">
+                <a href="{{ route('projects.create') }}" class="inline-flex items-center gap-2 rounded-xl bg-accent-500 px-4 py-2.5 text-sm font-semibold text-white shadow-glow hover:bg-accent-600 transition-transform duration-200 ease-elegant hover:-translate-y-0.5">
                     <i data-lucide="plus" class="h-4 w-4"></i>
                     Register Project
                 </a>
@@ -65,7 +65,7 @@
             </select>
         </div>
 
-        <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 ease-elegant hover:-translate-y-px hover:bg-slate-800 hover:shadow-elevated active:translate-y-0">
+        <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 ease-elegant hover:-translate-y-px hover:bg-brand-700 hover:shadow-elevated active:translate-y-0">
             <i data-lucide="filter" class="h-4 w-4"></i>
             Filter
         </button>

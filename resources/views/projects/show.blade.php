@@ -40,7 +40,7 @@
     >
         @if (auth()->user()->isAdmin())
             <x-slot name="aside">
-                <button type="button" @click="$dispatch('open-modal', 'edit-project')" class="btn-sheen inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-glow transition-transform duration-200 ease-elegant hover:-translate-y-0.5">
+                <button type="button" @click="$dispatch('open-modal', 'edit-project')" class="inline-flex items-center gap-2 rounded-xl bg-accent-500 px-4 py-2.5 text-sm font-semibold text-white shadow-glow hover:bg-accent-600 transition-transform duration-200 ease-elegant hover:-translate-y-0.5">
                     <i data-lucide="pencil" class="h-4 w-4"></i>
                     Edit Project
                 </button>
@@ -108,7 +108,7 @@
                 <button
                     type="button"
                     @click="tab = '{{ $tabItem['id'] }}'"
-                    :class="tab === '{{ $tabItem['id'] }}' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'"
+                    :class="tab === '{{ $tabItem['id'] }}' ? 'bg-brand-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'"
                     class="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-sm font-medium transition-all duration-200 ease-elegant focus:outline-none"
                 >
                     <i data-lucide="{{ $tabItem['icon'] }}" class="h-4 w-4"></i>

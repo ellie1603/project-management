@@ -2,11 +2,11 @@
 
 @php
     $fillClasses = match ($tone) {
-        'brand' => 'bg-gradient-to-r from-brand-500 to-brand-700',
-        'emerald' => 'bg-gradient-to-r from-emerald-500 to-teal-500',
-        'amber' => 'bg-gradient-to-r from-amber-400 to-orange-500',
-        'red' => 'bg-gradient-to-r from-red-500 to-rose-500',
-        default => 'bg-gradient-to-r from-slate-700 to-slate-900',
+        'brand' => 'bg-brand-600',
+        'emerald' => 'bg-emerald-500',
+        'amber' => 'bg-amber-400',
+        'red' => 'bg-red-500',
+        default => 'bg-slate-700',
     };
     $clamped = max(0, min(100, (float) $percent));
 @endphp

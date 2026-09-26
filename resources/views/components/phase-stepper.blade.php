@@ -19,7 +19,7 @@
             <div class="flex shrink-0 flex-col items-center gap-1.5">
                 <div
                     class="flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-semibold transition-colors duration-200 {{ match (true) {
-                        $isCompleted => 'border-slate-900 bg-slate-900 text-white',
+                        $isCompleted => 'border-brand-600 bg-brand-600 text-white',
                         $isCurrent => 'border-brand-600 bg-brand-50 text-brand-700',
                         default => 'border-slate-200 bg-white text-slate-400',
                     } }}"

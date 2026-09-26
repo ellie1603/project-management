@@ -19,5 +19,5 @@
         <p class="relative mt-2 truncate text-xs text-slate-500">{{ $sub }}</p>
     @endif
 
-    <div class="relative mt-4 h-0.5 w-8 rounded-full bg-brand-600 transition-all duration-500 ease-elegant group-hover:w-16"></div>
+    <div class="relative mt-4 h-0.5 w-8 rounded-full bg-accent-500 transition-all duration-500 ease-elegant group-hover:w-16"></div>
 </div>

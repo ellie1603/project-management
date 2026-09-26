@@ -46,4 +46,52 @@ class ProjectRegistrationTest extends TestCase
         $this->assertSame('Registered', $project->status);
         $this->assertDatabaseMissing('projects', ['project_code' => 'CLIENT-SUPPLIED-CODE']);
     }
+
+    public function test_project_can_be_registered_with_only_the_essential_fields(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'position_type' => null]);
+        $personnel = User::factory()->create(['role' => 'project_personnel', 'position_type' => 'Foreman']);
+        $category = ProjectCategory::factory()->create();
+
+        $this->actingAs($admin)
+            ->post('/projects', [
+                'title' => 'Quick Registration',
+                'category_id' => $category->id,
+                'location' => 'Barbaza, Antique',
+                'approved_budget' => 120000,
+                'planned_start_date' => now()->toDateString(),
+                'target_completion_date' => now()->addMonth()->toDateString(),
+                'personnel' => [['user_id' => $personnel->id]],
+            ])
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $project = Project::query()->where('title', 'Quick Registration')->firstOrFail();
+
+        $this->assertDatabaseHas('project_assignments', [
+            'project_id' => $project->id,
+            'user_id' => $personnel->id,
+            'position_type' => 'Foreman',
+        ]);
+    }
+
+    public function test_project_can_be_registered_without_personnel(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'position_type' => null]);
+        $category = ProjectCategory::factory()->create();
+
+        $this->actingAs($admin)
+            ->post('/projects', [
+                'title' => 'Unassigned Project',
+                'category_id' => $category->id,
+                'location' => 'Culasi, Antique',
+                'approved_budget' => 60000,
+                'planned_start_date' => now()->toDateString(),
+                'target_completion_date' => now()->addWeek()->toDateString(),
+            ])
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('projects', ['title' => 'Unassigned Project', 'status' => 'Registered']);
+    }
 }

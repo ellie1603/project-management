@@ -154,7 +154,7 @@
             <input name="payee" placeholder="Payee / Supplier" aria-label="Payee or supplier" class="rounded-md border-slate-300 text-sm">
             <input name="document_path" placeholder="Supporting document path" aria-label="Supporting document path" class="rounded-md border-slate-300 text-sm">
             <textarea name="description" placeholder="Description" aria-label="Expense description" class="rounded-md border-slate-300 text-sm sm:col-span-2" required></textarea>
-            <button class="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white sm:col-span-2">Record Expense</button>
+            <button class="rounded-md bg-brand-600 px-3 py-2 text-sm font-medium text-white sm:col-span-2">Record Expense</button>
         </form>
     </section>
 @endif

@@ -2,7 +2,7 @@
     $roleMeta = [
         'admin' => ['label' => 'Admin / CEO', 'chip' => 'chip-ink'],
         'project_personnel' => ['label' => 'Project Personnel', 'chip' => 'chip-ink'],
-        'finance_accounting' => ['label' => 'Finance &amp; Accounting', 'chip' => 'chip-ink'],
+        'finance_accounting' => ['label' => 'Finance & Accounting', 'chip' => 'chip-ink'],
     ];
 @endphp
 
@@ -64,6 +64,10 @@
                                             {{ $user->is_active ? 'Deactivate' : 'Activate' }}
                                         </button>
                                     </form>
+                                    <button type="button" @click="$dispatch('open-modal', 'delete-user-{{ $user->id }}')" class="inline-flex items-center gap-1 text-sm font-medium text-slate-500 transition-colors duration-150 hover:text-red-600">
+                                        <i data-lucide="trash-2" class="h-3.5 w-3.5"></i>
+                                        Delete
+                                    </button>
                                 @endif
                             </div>
                         </td>
@@ -116,11 +120,39 @@
 
             <div class="flex shrink-0 items-center justify-end gap-3 border-t border-slate-100 bg-slate-50/80 px-6 py-4">
                 <button type="button" @click="$dispatch('close-modal', 'edit-user-{{ $user->id }}')" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors duration-150 hover:bg-slate-50">Cancel</button>
-                <button type="submit" class="btn-sheen inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 ease-elegant hover:-translate-y-px hover:bg-slate-800 hover:shadow-elevated active:translate-y-0">
+                <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 ease-elegant hover:-translate-y-px hover:bg-brand-700 hover:shadow-elevated active:translate-y-0">
                     <i data-lucide="check" class="h-4 w-4"></i>
                     Save Changes
                 </button>
             </div>
         </form>
     </x-modal>
+
+    @if ($user->id !== auth()->id())
+        <x-modal :name="'delete-user-'.$user->id" max-width="md">
+            <form method="POST" action="{{ route('users.destroy', $user) }}" class="px-6 pb-6 pt-7">
+                @csrf
+                @method('DELETE')
+
+                <div class="flex items-start gap-4">
+                    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600">
+                        <i data-lucide="alert-triangle" class="h-5 w-5"></i>
+                    </span>
+                    <div>
+                        <h2 class="font-display text-lg font-semibold text-slate-900">Delete {{ $user->name }}?</h2>
+                        <p class="mt-1 text-sm text-slate-500">This permanently removes the login for <span class="font-medium text-slate-700">{{ $user->email }}</span> and any project assignments. It cannot be undone.</p>
+                        <p class="mt-2 text-sm text-slate-500">Accounts that already recorded project work cannot be deleted; deactivate them instead.</p>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex items-center justify-end gap-3">
+                    <button type="button" @click="$dispatch('close-modal', 'delete-user-{{ $user->id }}')" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors duration-150 hover:bg-slate-50">Cancel</button>
+                    <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors duration-150 hover:bg-red-700">
+                        <i data-lucide="trash-2" class="h-4 w-4"></i>
+                        Delete User
+                    </button>
+                </div>
+            </form>
+        </x-modal>
+    @endif
 @endforeach

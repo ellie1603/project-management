@@ -5,6 +5,7 @@
         <i data-lucide="{{ $icon }}" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"></i>
     @endif
     <input
+        type="password"
         :type="show ? 'text' : 'password'"
         @disabled($disabled)
         {{ $attributes->merge(['class' => 'w-full rounded-lg border-slate-300 shadow-sm transition-all duration-150 ease-smooth focus:border-brand-500 focus:ring-2 focus:ring-brand-100 '.($icon ? 'pl-10 pr-10' : 'pr-10')]) }}

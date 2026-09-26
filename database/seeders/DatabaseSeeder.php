@@ -11,21 +11,6 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
-/**
- * Seeds the BMPC Infrastructure Development Roadmap 2026.
- *
- * Projects, locations, activities, and schedules follow the roadmap:
- *   1. New Branch Office       — Altavas, Aklan (Q1–Q2); second site to be identified (Q3–Q4)
- *   2. New Satellite Office    — Roxas City, Capiz (Q1–Q2); second site to be identified (Q3–Q4)
- *   3. Main & Head Office New Building — Cubay, Barbaza (April–June)
- *   4. Dormitory Business Building     — Sibalom (October–December)
- *   5. Branch Repairs          — twelve branches, scheduled in quarterly batches
- *
- * Budgets, expenses, progress, contractors, and the repair batch dates are
- * fictional development data chosen so every monitoring scenario is covered:
- * within budget, approaching limit, budget exceeded, delayed, completed,
- * on hold, cancelled, and not yet started.
- */
 class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
@@ -89,8 +74,6 @@ class DatabaseSeeder extends Seeder
      */
     private function seedContractors(): array
     {
-        // Fixed fictional values (no Faker), so the seeder also runs in production
-        // images built without dev dependencies.
         $contractors = [
             'aklan' => ['Aklan Premier Builders', 'Ana Lim', 'Kalibo, Aklan', '0917-555-0101', 'contact@aklanpremier.test', 'DTI-10421'],
             'panay' => ['Panay Construction Supply', 'Mark Tan', 'Iloilo City, Iloilo', '0917-555-0102', 'sales@panaysupply.test', 'DTI-10987'],

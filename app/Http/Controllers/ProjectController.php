@@ -14,6 +14,7 @@ use App\Notifications\ProjectAssignmentNotification;
 use App\Notifications\ProjectCompletedNotification;
 use App\Notifications\ProjectProgressUpdatedNotification;
 use App\Services\AuditLogger;
+use App\Services\ProgressReportAssistant;
 use App\Services\ProjectNotifier;
 use App\Services\ProjectPhaseService;
 use Illuminate\Http\RedirectResponse;
@@ -28,6 +29,9 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProjectController extends Controller
 {
+    /** Attachments accepted with a progress update: site photos and report files. */
+    private const PROGRESS_FILE_TYPES = 'jpg,jpeg,png,webp,heic,heif,pdf,doc,docx,xls,xlsx';
+
     public function index(Request $request): View
     {
         $this->authorize('viewAny', Project::class);
@@ -79,19 +83,20 @@ class ProjectController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'category_id' => ['required', 'exists:project_categories,id'],
-            'project_type' => ['required', 'string', 'max:255'],
+            'project_type' => ['nullable', 'string', 'max:255'],
             'location' => ['required', 'string', 'max:255'],
-            'objective' => ['required', 'string'],
+            'objective' => ['nullable', 'string'],
+            'remarks' => ['nullable', 'string'],
             'approved_budget' => ['required', 'numeric', 'min:0'],
             'planned_start_date' => ['required', 'date'],
             'target_completion_date' => ['required', 'date', 'after_or_equal:planned_start_date'],
-            'personnel' => ['required', 'array', 'min:1'],
-            'personnel.*.user_id' => ['required', Rule::exists('users', 'id')->where(fn ($query) => $query->where('role', 'project_personnel'))],
-            'personnel.*.position_type' => ['required', Rule::in(ProjectAssignment::POSITION_TYPES)],
-            'personnel.*.responsibility' => ['required', 'string', 'max:255'],
+            'personnel' => ['nullable', 'array'],
+            'personnel.*.user_id' => ['required', 'distinct', Rule::exists('users', 'id')->where(fn ($query) => $query->where('role', 'project_personnel'))],
+            'personnel.*.position_type' => ['nullable', Rule::in(ProjectAssignment::POSITION_TYPES)],
+            'personnel.*.responsibility' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $personnel = $validated['personnel'];
+        $personnel = $validated['personnel'] ?? [];
         unset($validated['personnel']);
 
         $project = DB::transaction(function () use ($validated, $personnel): Project {
@@ -112,7 +117,7 @@ class ProjectController extends Controller
 
             foreach ($personnel as $row) {
                 $user = User::findOrFail($row['user_id']);
-                $project->assignPersonnel($user, $row['position_type'], $row['responsibility']);
+                $project->assignPersonnel($user, $row['position_type'] ?? $user->position_type ?? 'Staff', $row['responsibility'] ?? null);
                 $user->notify(new ProjectAssignmentNotification($project));
             }
 
@@ -129,7 +134,8 @@ class ProjectController extends Controller
             $project->toArray(),
         );
 
-        return redirect()->route('projects.show', $project);
+        return redirect()->route('projects.show', $project)
+            ->with('status', "Project {$project->project_code} registered successfully.");
     }
 
     public function show(Project $project): View
@@ -141,6 +147,7 @@ class ProjectController extends Controller
             'documents.uploader',
             'progress.user',
             'progress.phase',
+            'progress.projectDocuments',
             'phases',
             'assignments.user',
             'contractors',
@@ -156,8 +163,9 @@ class ProjectController extends Controller
             ? Contractor::query()->orderBy('name')->get()
             : collect();
         $activityLog = $project->activityLog();
+        $aiAssistEnabled = app(ProgressReportAssistant::class)->isEnabled();
 
-        return view('projects.show', compact('project', 'projectPersonnel', 'availableContractors', 'activityLog'));
+        return view('projects.show', compact('project', 'projectPersonnel', 'availableContractors', 'activityLog', 'aiAssistEnabled'));
     }
 
     public function edit(Project $project): View
@@ -310,6 +318,14 @@ class ProjectController extends Controller
         $this->authorize('view', $project);
         abort_unless($document->project_id === $project->id, 404);
 
+        // ?inline=1 lets progress photos render as thumbnails instead of downloading.
+        if (request()->boolean('inline') && str_starts_with((string) $document->file_type, 'image/')) {
+            return Storage::disk('local')->response($document->file_path, $document->document_name, [
+                'Content-Type' => $document->file_type,
+                'Cache-Control' => 'private, max-age=86400',
+            ]);
+        }
+
         return Storage::disk('local')->download($document->file_path, $document->document_name, [
             'Content-Type' => $document->file_type ?? 'application/octet-stream',
         ]);
@@ -322,15 +338,25 @@ class ProjectController extends Controller
         $validated = $request->validate([
             'phase_id' => ['required', Rule::exists('project_phases', 'id')->where('project_id', $project->id)],
             'phase_status' => ['required', Rule::in(['In Progress', 'Completed'])],
-            'progress_date' => ['required', 'date'],
-            'accomplishments' => ['required', 'string'],
-            'activities_completed' => ['nullable', 'string'],
-            'activities_remaining' => ['nullable', 'string'],
-            'issues' => ['nullable', 'string'],
-            'file' => ['nullable', 'file', 'max:20480'],
+            'progress_date' => ['required', 'date', 'before_or_equal:today'],
+            'accomplishments' => ['required', 'string', 'max:5000'],
+            'activities_completed' => ['nullable', 'string', 'max:5000'],
+            'activities_remaining' => ['nullable', 'string', 'max:5000'],
+            'issues' => ['nullable', 'string', 'max:5000'],
+            'ai_assisted' => ['nullable', 'boolean'],
+            'site_notes' => ['nullable', 'string', 'max:2000'],
+            // Site photos straight from a phone camera, or a report file.
+            'files' => ['nullable', 'array', 'max:10'],
+            'files.*' => ['file', 'max:20480', 'mimes:'.self::PROGRESS_FILE_TYPES],
+            'file' => ['nullable', 'file', 'max:20480', 'mimes:'.self::PROGRESS_FILE_TYPES],
+        ], [
+            'files.*.mimes' => 'Attach photos (JPG, PNG, WEBP, HEIC) or reports (PDF, Word, Excel) only.',
+            'files.*.max' => 'Each attachment must be 20 MB or smaller.',
+            'progress_date.before_or_equal' => 'The update date cannot be in the future.',
         ]);
 
         $phase = ProjectPhase::findOrFail($validated['phase_id']);
+        $previousPercentage = $project->completionPercentage();
         $percentage = app(ProjectPhaseService::class)->applyUpdate($project, $phase, $validated['phase_status'], $validated['progress_date']);
 
         // The system determines project status from completion automatically:
@@ -367,12 +393,15 @@ class ProjectController extends Controller
             'activities_completed' => $validated['activities_completed'] ?? null,
             'activities_remaining' => $validated['activities_remaining'] ?? null,
             'issues' => $validated['issues'] ?? null,
+            'ai_assisted' => (bool) ($validated['ai_assisted'] ?? false),
+            'site_notes' => ($validated['ai_assisted'] ?? false) ? ($validated['site_notes'] ?? null) : null,
         ]);
 
-        if ($request->hasFile('file')) {
-            $file = $request->file('file');
-            $documentType = $file->getClientMimeType() && str_contains($file->getClientMimeType(), 'image/') ? 'Progress Photo' : 'Progress Report';
-            $fileName = $this->buildDocumentFileName($file, $documentType, $progress->id);
+        // `file` is the legacy single-attachment field; `files[]` carries phone photos.
+        $attachments = array_values(array_filter([...$request->file('files', []), $request->file('file')]));
+        foreach ($attachments as $index => $file) {
+            $documentType = str_starts_with((string) $file->getMimeType(), 'image/') ? 'Progress Photo' : 'Progress Report';
+            $fileName = $this->buildDocumentFileName($file, $documentType, "{$progress->id}-".($index + 1));
             $path = $file->storeAs("projects/{$project->id}/progress", $fileName, 'local');
 
             $project->documents()->create([
@@ -381,7 +410,7 @@ class ProjectController extends Controller
                 'document_type' => $documentType,
                 'document_name' => $fileName,
                 'file_path' => $path,
-                'file_type' => $file->getClientMimeType() ?? 'application/octet-stream',
+                'file_type' => $file->getMimeType() ?? 'application/octet-stream',
                 'file_size' => $file->getSize(),
                 'version' => 1,
                 'is_current' => true,
@@ -390,12 +419,15 @@ class ProjectController extends Controller
             ]);
         }
 
+        $stageChange = $validated['phase_status'] === 'Completed' ? "finished {$phase->name}" : "working on {$phase->name}";
+
         app(AuditLogger::class)->record(
             $request,
             'created',
             'project_progress',
             $progress->id,
-            "Recorded progress for {$project->title}.",
+            "Recorded progress for {$project->title}: {$stageChange}, completion {$previousPercentage}% to {$percentage}%"
+                .(count($attachments) > 0 ? ', with '.count($attachments).' attachment'.(count($attachments) === 1 ? '' : 's') : '').'.',
             null,
             $progress->toArray(),
         );
@@ -406,7 +438,7 @@ class ProjectController extends Controller
         return redirect()->route('projects.show', $project)->with('status', 'Progress update saved successfully.');
     }
 
-    protected function buildDocumentFileName(UploadedFile $file, string $documentType, ?int $suffix = null): string
+    protected function buildDocumentFileName(UploadedFile $file, string $documentType, int|string|null $suffix = null): string
     {
         $sanitized = preg_replace('/[^A-Za-z0-9._-]+/', '-', strtolower($documentType));
         $name = trim((string) $sanitized, '-');

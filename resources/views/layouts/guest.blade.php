@@ -23,11 +23,8 @@
     <body class="bg-slate-950 font-sans text-slate-900 antialiased">
         <div class="flex min-h-screen">
             <!-- Brand panel — hidden on small screens, this is what carries the "enterprise" first impression -->
-            <div class="relative hidden w-[44%] shrink-0 overflow-hidden bg-slate-950 lg:flex lg:flex-col lg:justify-between lg:p-12 xl:p-16">
+            <div class="palette-fixed hero-brand relative hidden w-[44%] shrink-0 overflow-hidden bg-brand-600 lg:flex lg:flex-col lg:justify-between lg:p-12 xl:p-16">
                 <div class="pointer-events-none absolute inset-0">
-                    <div class="absolute -left-24 -top-24 h-[28rem] w-[28rem] animate-drift rounded-full bg-brand-500/30 blur-3xl"></div>
-                    <div class="absolute -bottom-32 -right-16 h-[24rem] w-[24rem] animate-drift-slow rounded-full bg-indigo-400/20 blur-3xl"></div>
-                    <div class="absolute inset-0 [background-image:linear-gradient(to_right,theme(colors.white/0.06)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.white/0.06)_1px,transparent_1px)] [background-size:64px_64px] [mask-image:radial-gradient(ellipse_70%_60%_at_30%_20%,black_20%,transparent_75%)]"></div>
                 </div>
 
                 <a href="/" class="relative z-10 flex w-fit animate-rise-in items-center gap-3 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950">
@@ -50,7 +47,7 @@
                             ['icon' => 'shield-check', 'text' => 'Role-based access with a full audit trail'],
                         ] as $i => $feature)
                             <li class="flex items-center gap-3 animate-rise-in" style="animation-delay: {{ 120 + $i * 60 }}ms">
-                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/10 text-brand-300 ring-1 ring-white/10">
+                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/10 text-highlight-400 ring-1 ring-white/10">
                                     <i data-lucide="{{ $feature['icon'] }}" class="h-4 w-4"></i>
                                 </span>
                                 <span class="text-sm text-slate-300">{{ $feature['text'] }}</span>

@@ -2,6 +2,11 @@
 
 @section('content')
 <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <a href="{{ route('budget.overview') }}" class="mb-5 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition-colors duration-150 hover:text-slate-900">
+        <i data-lucide="arrow-left" class="h-4 w-4"></i>
+        Back to Budget
+    </a>
+
     <div class="mb-6">
         <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Finance</p>
         <h1 class="mt-1 text-2xl font-semibold tracking-tight text-slate-900">Budget Requests</h1>
@@ -13,7 +18,7 @@
             @foreach (['Pending', 'Approved', 'Rejected'] as $option)
                 <a
                     href="{{ route('budget.requests', ['status' => $option] + request()->except('page')) }}"
-                    class="rounded-lg px-3.5 py-1.5 text-sm font-medium transition-colors duration-150 {{ $status === $option ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100' }}"
+                    class="rounded-lg px-3.5 py-1.5 text-sm font-medium transition-colors duration-150 {{ $status === $option ? 'bg-brand-600 text-white' : 'text-slate-600 hover:bg-slate-100' }}"
                 >{{ $option }}</a>
             @endforeach
         </nav>

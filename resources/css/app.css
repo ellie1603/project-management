@@ -11,9 +11,6 @@
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         background-color: rgb(var(--bg-slate-50));
-        background-image: radial-gradient(1200px 520px at 50% -12%, rgb(var(--fg-slate-900) / 0.035), transparent 65%);
-        background-repeat: no-repeat;
-        background-attachment: fixed;
     }
 
     h1, h2, h3, h4, h5, h6 {
@@ -80,22 +77,28 @@
     }
 
     .dark :is([type='checkbox'], [type='radio']):checked {
-        background-color: rgb(var(--fg-slate-900));
+        background-color: rgb(var(--bg-brand-600));
         border-color: transparent;
     }
 }
 
 @layer components {
-    /* The single icon-chip style used across every module: solid ink with a white
-       glyph in light mode, inverted (light chip, dark glyph) in dark mode. */
+    /* The single icon-chip style used across every module: brand dark blue with a
+       white glyph (slightly brighter blue in dark mode via the brand variables). */
     .chip-ink {
-        background-color: #18181b;
+        background-color: rgb(var(--bg-brand-600));
         color: #ffffff;
     }
 
-    .dark .chip-ink {
-        background-color: #f4f4f5;
-        color: #18181b;
+    /* Dark blue brand surfaces (page hero, login panel, splash screens): muted grey
+       text shades were tuned for a neutral background, so retint them pale blue
+       to keep secondary text readable on #0c2d6b. */
+    .palette-fixed.hero-brand {
+        --fg-slate-200: 225 234 249;
+        --fg-slate-300: 200 216 243;
+        --fg-slate-400: 169 193 234;
+        --fg-slate-500: 142 170 222;
+        --fg-brand-300: 169 193 234;
     }
 
     /* Modal / drawer backdrops stay a dark scrim in both themes. */
@@ -121,10 +124,10 @@
         left: 0;
         height: 3px;
         width: 0%;
-        background: rgb(var(--fg-slate-900));
+        background: theme('colors.accent.500');
         z-index: 9999;
         transition: width 300ms ease-out, opacity 200ms ease-in;
-        box-shadow: 0 0 8px rgb(var(--fg-slate-900) / 0.35);
+        box-shadow: 0 0 8px rgb(255 87 34 / 0.5);
     }
 
     #nav-progress.nav-progress-active {
@@ -143,11 +146,11 @@
         display: none;
     }
 
-    /* Frappe Gantt — restyled to match the app's ink/brand palette instead of the library default theme */
+    /* Frappe Gantt — restyled to match the app's brand palette instead of the library default theme */
     .bmpc-gantt {
         --g-bar-color: theme('colors.slate.300');
         --g-bar-border: theme('colors.slate.300');
-        --g-progress-color: theme('colors.slate.500');
+        --g-progress-color: rgb(var(--bg-brand-600));
         --g-arrow-color: theme('colors.slate.300');
         --g-tick-color-thick: theme('colors.slate.100');
         --g-tick-color: theme('colors.slate.50');
@@ -158,7 +161,7 @@
         --g-header-background: rgb(var(--bg-white));
         --g-row-color: rgb(var(--bg-white));
         --g-row-border-color: theme('colors.slate.100');
-        --g-today-highlight: rgb(var(--fg-slate-900));
+        --g-today-highlight: theme('colors.accent.500');
         --g-weekend-highlight-color: theme('colors.slate.50');
     }
 
@@ -178,27 +181,6 @@
         background-image: linear-gradient(90deg, theme('colors.slate.100') 0px, theme('colors.slate.200') 200px, theme('colors.slate.100') 400px);
         background-size: 800px 100%;
         background-repeat: no-repeat;
-    }
-
-    /* Diagonal light sweep on primary call-to-action buttons — a restrained,
-       one-shot hover flourish rather than a permanent shine/animation. */
-    .btn-sheen {
-        position: relative;
-        overflow: hidden;
-        isolation: isolate;
-    }
-
-    .btn-sheen::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(115deg, transparent 20%, rgba(255, 255, 255, 0.16) 42%, rgba(255, 255, 255, 0.16) 46%, transparent 60%);
-        transform: translateX(-100%);
-        transition: transform 700ms theme('transitionTimingFunction.elegant');
-    }
-
-    .btn-sheen:hover::after {
-        transform: translateX(100%);
     }
 
     /* Bridges the hard navigation boundary between the logout splash (full-bleed

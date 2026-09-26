@@ -112,7 +112,7 @@
         <x-dropdown align="right" width="48">
             <x-slot name="trigger">
                 <button class="flex items-center gap-2.5 rounded-lg py-1.5 pl-1.5 pr-2 text-slate-600 transition-colors duration-150 hover:bg-slate-100">
-                    <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white">
+                    <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-600 text-xs font-semibold text-white">
                         {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                     </div>
                     <div class="hidden text-left leading-tight md:block">

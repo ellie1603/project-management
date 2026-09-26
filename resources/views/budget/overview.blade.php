@@ -10,7 +10,7 @@
     >
         <x-slot name="aside">
             <div class="flex flex-wrap items-center gap-3">
-                <a href="{{ route('budget.expenses') }}" class="btn-sheen inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-glow transition-transform duration-200 ease-elegant hover:-translate-y-0.5">
+                <a href="{{ route('budget.expenses') }}" class="inline-flex items-center gap-2 rounded-xl bg-accent-500 px-4 py-2.5 text-sm font-semibold text-white shadow-glow hover:bg-accent-600 transition-transform duration-200 ease-elegant hover:-translate-y-0.5">
                     <i data-lucide="receipt" class="h-4 w-4"></i>
                     Expenses
                 </a>
@@ -28,7 +28,7 @@
             </div>
             <div class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
                 <div
-                    class="h-full origin-left animate-grow-x rounded-full bg-gradient-to-r {{ $stats['overall_utilization_percent'] >= 100 ? 'from-red-500 to-rose-400' : ($stats['overall_utilization_percent'] >= 80 ? 'from-amber-400 to-orange-400' : 'from-slate-300 to-white') }}"
+                    class="h-full origin-left animate-grow-x rounded-full {{ $stats['overall_utilization_percent'] >= 100 ? 'bg-red-500' : ($stats['overall_utilization_percent'] >= 80 ? 'bg-amber-400' : 'bg-white') }}"
                     style="width: {{ min(100, (float) $stats['overall_utilization_percent']) }}%; animation-delay: 250ms"
                 ></div>
             </div>

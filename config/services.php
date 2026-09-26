@@ -35,4 +35,23 @@ return [
         ],
     ],
 
+    // AI assistant that turns personnel's rough site notes into a progress report.
+    // "gemini" (free tier available) or "anthropic". The assistant is hidden
+    // unless the chosen provider's API key is set.
+    'progress_ai' => [
+        'provider' => env('AI_PROVIDER', 'gemini'),
+    ],
+
+    'gemini' => [
+        'key' => env('GEMINI_API_KEY'),
+        'model' => env('GEMINI_MODEL', 'gemini-3.8-flash'),
+        // Used when the main model is overloaded or out of free quota.
+        'fallback_model' => env('GEMINI_FALLBACK_MODEL', 'gemini-3.5-flash'),
+    ],
+
+    'anthropic' => [
+        'key' => env('ANTHROPIC_API_KEY'),
+        'model' => env('ANTHROPIC_MODEL', 'claude-opus-5'),
+    ],
+
 ];

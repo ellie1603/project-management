@@ -4,12 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Exports\ArrayReportExport;
 use App\Exports\ProjectStatusExport;
-use App\Models\Contractor;
 use App\Models\FinanceReport;
 use App\Models\Project;
-use App\Models\ProjectCategory;
 use App\Models\ProjectDocument;
-use App\Models\User;
 use App\Services\AuditLogger;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
@@ -29,10 +26,6 @@ class ReportController extends Controller
     {
         $this->authorizeReportAccess();
         $user = Auth::user();
-
-        $categories = ProjectCategory::query()->orderBy('name')->get();
-        $contractors = Contractor::query()->orderBy('name')->get();
-        $personnel = User::query()->where('role', 'project_personnel')->orderBy('name')->get();
 
         $projectOptions = $user->isFinance()
             ? Project::query()->orderBy('title')->get(['id', 'title', 'project_code'])
@@ -56,7 +49,6 @@ class ReportController extends Controller
             : collect();
 
         return view('reports.index', compact(
-            'categories', 'contractors', 'personnel',
             'projectOptions', 'myFinanceReports', 'financeReports', 'personnelReports'
         ));
     }

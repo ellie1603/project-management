@@ -22,7 +22,7 @@
 
         <div>
             <label for="user-password" class="mb-1.5 block text-sm font-medium text-slate-700">Password {{ $user ? '(leave blank to keep current)' : '' }}</label>
-            <x-password-input id="user-password" name="password" class="rounded-xl border-slate-200 bg-slate-50/60 focus:border-brand-400 focus:bg-white focus:ring-brand-100" @if (! $user) required @endif />
+            <x-password-input id="user-password" name="password" class="rounded-xl border-slate-200 bg-slate-50/60 focus:border-brand-400 focus:bg-white focus:ring-brand-100" :required="! $user" autocomplete="new-password" />
         </div>
 
         <div>
@@ -30,7 +30,7 @@
             <select id="user-role" name="role" x-model="role" class="w-full rounded-xl border-slate-200 bg-slate-50/60 shadow-sm transition-all duration-150 ease-smooth focus:border-brand-400 focus:bg-white focus:ring-2 focus:ring-brand-100" required>
                 <option value="admin">Admin / CEO</option>
                 <option value="project_personnel">Project Personnel</option>
-                <option value="finance_accounting">Finance &amp; Accounting</option>
+                <option value="finance_accounting">Finance & Accounting</option>
             </select>
         </div>
 

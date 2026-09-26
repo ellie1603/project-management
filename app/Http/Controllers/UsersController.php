@@ -15,6 +15,12 @@ use Illuminate\View\View;
 
 class UsersController extends Controller
 {
+    private const ROLE_LABELS = [
+        'admin' => 'Admin / CEO',
+        'project_personnel' => 'Project Personnel',
+        'finance_accounting' => 'Finance & Accounting',
+    ];
+
     public function index(Request $request): View
     {
         $this->authorize('viewAny', User::class);
@@ -73,7 +79,61 @@ class UsersController extends Controller
             $user->makeHidden('password')->toArray(),
         );
 
-        return redirect()->route('users.index')->with('status', 'User account created successfully.');
+        return redirect()->route('users.index')->with('created_user', [
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => self::ROLE_LABELS[$user->role],
+            'position_type' => $user->position_type,
+        ]);
+    }
+
+    public function destroy(Request $request, User $user): RedirectResponse
+    {
+        $this->authorize('delete', $user);
+        // Gate::before grants admins every ability, so the self-check must live here.
+        abort_if($user->is($request->user()), 403, 'You cannot delete your own account.');
+
+        $blockingRecords = $this->recordsOwnedBy($user);
+
+        if ($blockingRecords !== []) {
+            return redirect()->route('users.index')->with('error', "{$user->name} cannot be deleted because they have recorded ".implode(', ', $blockingRecords).'. Deactivate the account instead to keep the project history intact.');
+        }
+
+        $oldValues = $user->makeHidden('password')->toArray();
+        $name = $user->name;
+        $user->delete();
+
+        app(AuditLogger::class)->record(
+            $request,
+            'deleted',
+            'users',
+            $oldValues['id'],
+            "Deleted user account for {$name}.",
+            $oldValues,
+            null,
+        );
+
+        return redirect()->route('users.index')->with('status', "User account for {$name} was deleted.");
+    }
+
+    /**
+     * Records that must keep pointing at this user, so deleting would either
+     * fail on a foreign key or erase who did what on a project.
+     *
+     * @return array<int, string>
+     */
+    private function recordsOwnedBy(User $user): array
+    {
+        $checks = [
+            'registered projects' => DB::table('projects')->where('created_by', $user->id),
+            'progress updates' => DB::table('project_progress')->where('user_id', $user->id),
+            'uploaded documents' => DB::table('project_documents')->where('uploaded_by', $user->id),
+            'project expenses' => DB::table('project_expenses')->where('created_by', $user->id),
+            'budget requests' => DB::table('budget_requests')->where('requested_by', $user->id),
+            'finance reports' => DB::table('finance_reports')->where('generated_by', $user->id),
+        ];
+
+        return array_keys(array_filter($checks, fn ($query): bool => $query->exists()));
     }
 
     public function update(Request $request, User $user): RedirectResponse
@@ -119,6 +179,7 @@ class UsersController extends Controller
     public function toggleStatus(Request $request, User $user): RedirectResponse
     {
         $this->authorize('toggleStatus', $user);
+        abort_if($user->is($request->user()), 403, 'You cannot deactivate your own account.');
 
         $oldValues = $user->toArray();
         $user->update(['is_active' => ! $user->is_active]);

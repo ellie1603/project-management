@@ -73,7 +73,7 @@
 
         <div class="flex items-center justify-end gap-3">
             <a href="{{ route('projects.show', $project) }}" class="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors duration-150 hover:bg-slate-50">Cancel</a>
-            <button type="submit" class="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all duration-150 hover:bg-slate-800 hover:shadow-md active:scale-[0.98]">Update Project</button>
+            <button type="submit" class="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all duration-150 hover:bg-brand-700 hover:shadow-md active:scale-[0.98]">Update Project</button>
         </div>
     </form>
 </div>

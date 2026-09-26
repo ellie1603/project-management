@@ -1,10 +1,10 @@
 @php
     $statusMeta = [
-        'Ongoing' => ['accent' => 'from-brand-500 to-brand-700', 'chip' => 'chip-ink'],
-        'Completed' => ['accent' => 'from-slate-700 to-slate-900', 'chip' => 'chip-ink'],
-        'On Hold' => ['accent' => 'from-amber-400 to-orange-500', 'chip' => 'chip-ink'],
-        'Cancelled' => ['accent' => 'from-red-400 to-rose-500', 'chip' => 'chip-ink'],
-        'Registered' => ['accent' => 'from-slate-300 to-slate-400', 'chip' => 'chip-ink'],
+        'Ongoing' => ['accent' => 'bg-brand-600', 'chip' => 'chip-ink'],
+        'Completed' => ['accent' => 'bg-slate-700', 'chip' => 'chip-ink'],
+        'On Hold' => ['accent' => 'bg-amber-400', 'chip' => 'chip-ink'],
+        'Cancelled' => ['accent' => 'bg-red-400', 'chip' => 'chip-ink'],
+        'Registered' => ['accent' => 'bg-slate-300', 'chip' => 'chip-ink'],
     ];
 @endphp
 
@@ -16,7 +16,7 @@
             class="group relative flex animate-rise-in flex-col overflow-hidden rounded-3xl bg-white p-5 shadow-soft ring-1 ring-slate-900/5 transition-all duration-300 ease-elegant hover:-translate-y-0.5 hover:shadow-elevated"
             style="animation-delay: {{ min($loop->index, 8) * 50 }}ms"
         >
-            <span class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r {{ $meta['accent'] }}"></span>
+            <span class="absolute inset-x-0 top-0 h-1 {{ $meta['accent'] }}"></span>
 
             <div class="flex items-start justify-between gap-3">
                 <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $meta['chip'] }} text-white shadow-sm">

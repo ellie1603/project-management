@@ -3,18 +3,19 @@
 @section('content')
 <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8" x-data="{}">
     <x-flash-toast />
+    <x-flash-toast :message="session('error')" type="error" />
 
     <x-page-hero
         eyebrow="Administration"
         title="Users"
-        subtitle="Manage login accounts for Admin, Finance &amp; Accounting, and Project Personnel — including contractor/provider profiles."
+        subtitle="Manage login accounts for Admin, Finance & Accounting, and Project Personnel — including contractor/provider profiles."
         class="animate-rise-in"
     >
         <x-slot name="aside">
             <button
                 type="button"
                 x-on:click="$dispatch('open-modal', 'create-user')"
-                class="btn-sheen inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-glow transition-transform duration-200 ease-elegant hover:-translate-y-0.5"
+                class="inline-flex items-center gap-2 rounded-xl bg-accent-500 px-4 py-2.5 text-sm font-semibold text-white shadow-glow hover:bg-accent-600 transition-transform duration-200 ease-elegant hover:-translate-y-0.5"
             >
                 <i data-lucide="plus" class="h-4 w-4"></i>
                 New User
@@ -39,20 +40,8 @@
             <option value="">All Roles</option>
             <option value="admin" @selected(request('role') === 'admin')>Admin / CEO</option>
             <option value="project_personnel" @selected(request('role') === 'project_personnel')>Project Personnel</option>
-            <option value="finance_accounting" @selected(request('role') === 'finance_accounting')>Finance &amp; Accounting</option>
+            <option value="finance_accounting" @selected(request('role') === 'finance_accounting')>Finance & Accounting</option>
         </select>
-
-        <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 ease-elegant hover:-translate-y-px hover:bg-slate-800 hover:shadow-elevated active:translate-y-0">
-            <i data-lucide="filter" class="h-4 w-4"></i>
-            Filter
-        </button>
-
-        @if (request()->hasAny(['search', 'role']))
-            <a href="{{ route('users.index') }}" data-turbo="false" class="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition-colors duration-150 hover:text-slate-800">
-                <i data-lucide="x" class="h-3.5 w-3.5"></i>
-                Clear
-            </a>
-        @endif
     </form>
 
     <div id="ajax-results" data-ajax-region class="mt-5">
@@ -84,13 +73,44 @@
 
             <div class="flex shrink-0 items-center justify-end gap-3 border-t border-slate-100 bg-slate-50/80 px-6 py-4">
                 <button type="button" x-on:click="$dispatch('close')" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors duration-150 hover:bg-slate-50">Cancel</button>
-                <button type="submit" class="btn-sheen inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 ease-elegant hover:-translate-y-px hover:bg-slate-800 hover:shadow-elevated active:translate-y-0">
+                <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 ease-elegant hover:-translate-y-px hover:bg-brand-700 hover:shadow-elevated active:translate-y-0">
                     <i data-lucide="check" class="h-4 w-4"></i>
                     Create User
                 </button>
             </div>
         </form>
     </x-modal>
+
+    @if ($createdUser = session('created_user'))
+        <x-modal name="user-created" :show="true" max-width="md">
+            <div class="px-6 pb-6 pt-7 text-center">
+                <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 ring-8 ring-emerald-50/50">
+                    <i data-lucide="check" class="h-7 w-7"></i>
+                </span>
+                <h2 class="mt-4 font-display text-lg font-semibold text-slate-900">User account created</h2>
+                <p class="mt-1 text-sm text-slate-500">The new account can now sign in with the email and password you set.</p>
+
+                <dl class="mt-5 divide-y divide-slate-100 rounded-2xl bg-slate-50 text-left text-sm ring-1 ring-slate-900/5">
+                    <div class="flex items-center justify-between gap-4 px-4 py-2.5">
+                        <dt class="text-slate-500">Name</dt>
+                        <dd class="truncate font-medium text-slate-900">{{ $createdUser['name'] }}</dd>
+                    </div>
+                    <div class="flex items-center justify-between gap-4 px-4 py-2.5">
+                        <dt class="text-slate-500">Email</dt>
+                        <dd class="truncate font-medium text-slate-900">{{ $createdUser['email'] }}</dd>
+                    </div>
+                    <div class="flex items-center justify-between gap-4 px-4 py-2.5">
+                        <dt class="text-slate-500">Role</dt>
+                        <dd class="font-medium text-slate-900">{{ $createdUser['role'] }}@if ($createdUser['position_type']) · {{ $createdUser['position_type'] }}@endif</dd>
+                    </div>
+                </dl>
+
+                <button type="button" x-on:click="$dispatch('close')" class="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors duration-150 hover:bg-brand-700">
+                    Done
+                </button>
+            </div>
+        </x-modal>
+    @endif
 </div>
 
 @push('scripts')

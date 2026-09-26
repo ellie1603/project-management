@@ -31,7 +31,7 @@
                 @endforeach
             </select>
             <input name="responsibility" placeholder="Responsibility" aria-label="Responsibility" class="rounded-md border-slate-300 text-sm" required>
-            <button class="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white sm:col-span-3">Assign Personnel</button>
+            <button class="rounded-md bg-brand-600 px-3 py-2 text-sm font-medium text-white sm:col-span-3">Assign Personnel</button>
         </form>
     @endif
 </section>

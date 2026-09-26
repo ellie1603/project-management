@@ -6,19 +6,13 @@
         x-transition:leave="transition-all ease-elegant duration-700"
         x-transition:leave-start="opacity-100 scale-100"
         x-transition:leave-end="opacity-0 scale-[1.04]"
-        class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-slate-950 palette-fixed"
+        class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-brand-900 palette-fixed hero-brand"
     >
         <div class="pointer-events-none absolute inset-0 overflow-hidden">
-            <div class="absolute -left-24 -top-24 h-[26rem] w-[26rem] animate-drift rounded-full bg-white/10 blur-3xl"></div>
-            <div class="absolute -bottom-28 -right-16 h-[24rem] w-[24rem] animate-drift-slow rounded-full bg-white/5 blur-3xl"></div>
-            <div class="absolute left-1/2 top-1/2 h-[22rem] w-[22rem] -translate-x-1/2 -translate-y-1/2 animate-drift rounded-full bg-white/5 blur-3xl" style="animation-delay: 1.4s"></div>
-            <div class="absolute inset-0 [background-image:linear-gradient(to_right,theme(colors.white/0.05)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.white/0.05)_1px,transparent_1px)] [background-size:64px_64px] [mask-image:radial-gradient(ellipse_60%_55%_at_50%_45%,black_15%,transparent_75%)]"></div>
-            <div class="absolute inset-0 bg-[radial-gradient(ellipse_60%_55%_at_50%_45%,transparent,rgba(9,9,11,0.65))]"></div>
         </div>
 
         <div class="relative flex flex-col items-center">
             <div class="relative flex h-36 w-36 items-center justify-center">
-                <div class="splash-orbit absolute h-52 w-52 rounded-full blur-xl"></div>
                 <div class="splash-halo absolute h-36 w-36 rounded-full bg-white/10 blur-2xl"></div>
 
                 <svg class="absolute inset-0 h-36 w-36 -rotate-90" viewBox="0 0 144 144">
@@ -44,7 +38,7 @@
             </p>
 
             <div class="splash-fade-in relative mt-9 h-[4px] w-56 overflow-hidden rounded-full bg-white/10" style="animation-delay: 600ms">
-                <span class="splash-sweep absolute inset-y-0 w-1/3 rounded-full bg-gradient-to-r from-transparent via-brand-300 to-transparent"></span>
+                <span class="splash-sweep absolute inset-y-0 w-1/3 rounded-full bg-brand-300/40"></span>
             </div>
         </div>
     </div>
@@ -78,14 +72,6 @@
             50% { opacity: 0.85; transform: scale(1.1); }
         }
 
-        .splash-orbit {
-            background: conic-gradient(from 0deg, transparent, rgba(228, 228, 231, 0.35), transparent 65%);
-            animation: splash-orbit-spin 3.6s linear infinite;
-        }
-
-        @keyframes splash-orbit-spin {
-            to { transform: rotate(360deg); }
-        }
 
         .splash-sweep {
             left: -40%;

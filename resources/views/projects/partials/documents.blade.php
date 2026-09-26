@@ -39,7 +39,7 @@
             </select>
             <input type="file" name="file" aria-label="Document file" class="w-full text-sm" required>
             <input name="description" placeholder="Description" aria-label="Document description" class="w-full rounded-md border-slate-300 text-sm">
-            <button class="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white">Upload Document</button>
+            <button class="rounded-md bg-brand-600 px-3 py-2 text-sm font-medium text-white">Upload Document</button>
         </form>
     @endif
 </section>

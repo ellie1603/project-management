@@ -9,6 +9,7 @@ use App\Http\Controllers\DocumentsController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectCategoryController;
+use App\Http\Controllers\ProgressAssistController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SearchController;
@@ -77,6 +78,10 @@ Route::middleware('auth')->group(function () {
         ->name('projects.documents.store');
     Route::post('/projects/{project}/progress', [ProjectController::class, 'storeProgress'])
         ->name('projects.progress.store');
+    // Up to 10 AI drafts per user per minute keeps a stuck retry loop from running up API costs.
+    Route::post('/projects/{project}/progress/assist', ProgressAssistController::class)
+        ->middleware('throttle:10,1')
+        ->name('projects.progress.assist');
     Route::get('/projects/{project}/documents/{document}/download', [ProjectController::class, 'downloadDocument'])
         ->name('projects.documents.download');
     Route::get('/projects/{project}/budget', [BudgetController::class, 'show'])
@@ -94,7 +99,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/budget/expenses', [BudgetController::class, 'expensesLog'])->name('budget.expenses');
     Route::get('/budget/requests', [BudgetRequestController::class, 'index'])->name('budget.requests');
 
-    Route::resource('users', UsersController::class)->except(['destroy', 'show', 'edit']);
+    Route::resource('users', UsersController::class)->except(['show', 'edit']);
     Route::patch('/users/{user}/toggle-status', [UsersController::class, 'toggleStatus'])->name('users.toggle-status');
 
     Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');

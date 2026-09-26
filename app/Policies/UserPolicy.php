@@ -47,12 +47,10 @@ class UserPolicy
     }
 
     /**
-     * Determine whether the user can delete the model.
-     *
-     * Users are never hard-deleted; deactivate them instead.
+     * Self-deletion and accounts with project history are blocked in the controller.
      */
     public function delete(User $user, User $model): bool
     {
-        return false;
+        return $user->isAdmin() && $user->isNot($model);
     }
 }
