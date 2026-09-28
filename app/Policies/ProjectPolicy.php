@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\Project;
+use App\Models\ProjectProgress;
 use App\Models\User;
 
 class ProjectPolicy
@@ -44,6 +45,16 @@ class ProjectPolicy
     public function createProgress(User $user, Project $project): bool
     {
         return $project->hasPersonnel($user);
+    }
+
+    /**
+     * Only the author, while still assigned, may correct their own update.
+     */
+    public function manageProgress(User $user, Project $project, ProjectProgress $progress): bool
+    {
+        return $progress->project_id === $project->id
+            && $progress->user_id === $user->id
+            && $project->hasPersonnel($user);
     }
 
     public function createBudgetRequest(User $user, Project $project): bool

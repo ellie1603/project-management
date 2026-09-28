@@ -1,4 +1,4 @@
-@props(['alt' => config('app.name', 'BMPC')])
+@props(['alt' => config('app.name', 'Project Management')])
 
 <img
     src="{{ route('branding.logo') }}"

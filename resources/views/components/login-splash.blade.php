@@ -24,11 +24,11 @@
                     />
                 </svg>
 
-                <x-application-logo class="splash-fade-in relative h-20 w-20 rounded-2xl bg-white p-3 shadow-glow" />
+                <x-application-logo class="splash-fade-in relative h-24 w-24 rounded-full bg-white p-3.5 shadow-glow" />
             </div>
 
             <p class="splash-fade-in mt-9 text-xs font-semibold uppercase tracking-[0.35em] text-brand-300" style="animation-delay: 260ms">
-                {{ config('app.name', 'BMPC') }}
+                {{ config('app.name', 'Project Management') }}
             </p>
             <p class="splash-fade-in mt-3 font-display text-2xl font-semibold tracking-tight text-white" style="animation-delay: 380ms">
                 Welcome back, {{ explode(' ', auth()->user()->name)[0] }}

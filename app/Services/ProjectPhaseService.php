@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Project;
 use App\Models\ProjectPhase;
+use App\Models\ProjectProgress;
 
 class ProjectPhaseService
 {
@@ -39,6 +40,46 @@ class ProjectPhaseService
                 'started_at' => $phase->started_at ?? $date,
             ]);
         }
+
+        $project->unsetRelation('phases');
+
+        return $project->completionPercentage();
+    }
+
+    /**
+     * Reset every stage and replay the remaining progress updates in order, so
+     * deleting an update also undoes the stage changes it made. Each update's
+     * stored percentage is recalculated, since later updates built on the removed one.
+     */
+    public function rebuildFromHistory(Project $project): int
+    {
+        $project->phases()->update(['status' => 'Not Started', 'started_at' => null, 'completed_at' => null]);
+
+        $phaseCount = max(1, $project->phases()->count());
+
+        $project->progress()
+            ->with('phase')
+            ->whereNotNull('phase_id')
+            ->orderBy('progress_date')
+            ->orderBy('id')
+            ->get()
+            ->each(function (ProjectProgress $entry) use ($project, $phaseCount): void {
+                if ($entry->phase === null) {
+                    return;
+                }
+
+                // Older rows predate phase_status; a finished stage is the only way completion reached its threshold.
+                $status = $entry->phase_status
+                    ?? ($entry->progress_percentage >= (int) round($entry->phase->sequence / $phaseCount * 100) ? 'Completed' : 'In Progress');
+
+                $percentage = $this->applyUpdate($project, $entry->phase->fresh(), $status, $entry->progress_date->toDateString());
+
+                $entry->fill(['progress_percentage' => $percentage, 'phase_status' => $status]);
+
+                if ($entry->isDirty()) {
+                    $entry->save();
+                }
+            });
 
         $project->unsetRelation('phases');
 

@@ -6,16 +6,18 @@
  * assistant turn that note (plus the photos) into a clear report for the admin.
  */
 
-const MAX_ATTACHMENTS = 10;
-const MAX_FILE_BYTES = 20 * 1024 * 1024;
-const MAX_AI_PHOTOS = 4;
+// Keep in sync with ProjectController::MAX_PROGRESS_ATTACHMENTS / MAX_PROGRESS_ATTACHMENT_KB.
+const MAX_ATTACHMENTS = 2;
+const MAX_FILE_BYTES = 5 * 1024 * 1024;
+const MAX_AI_PHOTOS = 2;
 const MAX_AI_PHOTO_BYTES = 5 * 1024 * 1024;
-const MAX_IMAGE_EDGE = 1920;
+const MAX_IMAGE_EDGE = 1600;
+const JPEG_QUALITY = 0.75;
 
 /**
- * Phone cameras produce 4-12 MB photos. Downscale to a sharp-enough 1920px JPEG
- * so uploads finish on mobile data. Formats the browser can't decode (e.g. HEIC
- * outside Safari) are sent as-is; the server accepts them.
+ * Phone cameras produce 4-12 MB photos. Downscale to a 1600px JPEG (usually
+ * 200-400 KB) so uploads finish on mobile data and storage stays small. Formats
+ * the browser can't decode (e.g. HEIC outside Safari) are sent as-is.
  */
 async function compressImage(file) {
     if (!/^image\/(jpeg|png|webp)$/.test(file.type) || typeof createImageBitmap !== 'function') {
@@ -26,7 +28,7 @@ async function compressImage(file) {
         const bitmap = await createImageBitmap(file);
         const scale = Math.min(1, MAX_IMAGE_EDGE / Math.max(bitmap.width, bitmap.height));
 
-        if (scale === 1 && file.size < 1.5 * 1024 * 1024) {
+        if (scale === 1 && file.size < 400 * 1024) {
             bitmap.close();
 
             return file;
@@ -42,7 +44,7 @@ async function compressImage(file) {
         context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
         bitmap.close();
 
-        const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.82));
+        const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', JPEG_QUALITY));
 
         if (!blob || blob.size >= file.size) {
             return file;
@@ -97,6 +99,7 @@ export default (config) => {
         attachments: [],
         processing: 0,
         fileError: '',
+        maxAttachments: MAX_ATTACHMENTS,
 
         cameraOpen: false,
         cameraError: '',
@@ -153,6 +156,10 @@ export default (config) => {
             return this.attachments.filter((a) => a.isImage).length;
         },
 
+        get isFull() {
+            return this.attachments.length + this.processing >= MAX_ATTACHMENTS;
+        },
+
         toggleIssueTag(tag) {
             this.issueTags = this.issueTags.includes(tag) ? this.issueTags.filter((t) => t !== tag) : [...this.issueTags, tag];
         },
@@ -171,7 +178,7 @@ export default (config) => {
                     const file = original.type.startsWith('image/') ? await compressImage(original) : original;
 
                     if (file.size > MAX_FILE_BYTES) {
-                        this.fileError = `${original.name} is larger than 20 MB.`;
+                        this.fileError = `${original.name} is larger than ${MAX_FILE_BYTES / 1024 / 1024} MB.`;
                         continue;
                     }
 

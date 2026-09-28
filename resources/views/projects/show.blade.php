@@ -25,8 +25,9 @@
         ];
 @endphp
 
-<div class="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8" x-data="{ tab: 'overview' }">
+<div class="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8" x-data="{ tab: @js(session('tab', old('_form') ? 'progress' : 'overview')) }">
     <x-flash-toast />
+    <x-flash-toast :message="session('error')" type="error" />
 
     <a href="{{ route('projects.index') }}" class="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition-colors duration-150 hover:text-slate-900">
         <i data-lucide="arrow-left" class="h-4 w-4"></i>
@@ -143,5 +144,7 @@
     @if (auth()->user()->isAdmin())
         @include('projects.partials.edit-modal')
     @endif
+
+    @include('projects.partials.progress-modals')
 </div>
 @endsection

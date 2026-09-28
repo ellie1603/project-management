@@ -74,7 +74,7 @@
 <div class="flex h-full flex-col bg-white">
     <div class="flex h-16 shrink-0 items-center gap-3 border-b border-slate-100 px-5">
         <a href="{{ route('dashboard') }}" class="flex items-center gap-3 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2">
-            <x-application-logo class="h-9 w-9 rounded-xl shadow-soft" />
+            <x-application-logo class="h-9 w-9" />
             <span class="font-display text-base font-semibold tracking-tight text-slate-900">{{ config('app.name', 'Project Management') }}</span>
         </a>
     </div>

@@ -27,13 +27,13 @@
                 />
             </svg>
 
-            <span class="logout-icon-out relative flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-slate-200 ring-1 ring-white/10">
+            <span class="logout-icon-out relative flex h-16 w-16 items-center justify-center rounded-full bg-white/10 text-slate-200 ring-1 ring-white/10">
                 <i data-lucide="log-out" class="h-7 w-7"></i>
             </span>
         </div>
 
         <p class="logout-fade-in mt-8 text-[11px] font-semibold uppercase tracking-[0.35em] text-slate-400" style="animation-delay: 150ms">
-            {{ config('app.name', 'BMPC') }}
+            {{ config('app.name', 'Project Management') }}
         </p>
         <p class="logout-fade-in mt-2 font-display text-xl font-semibold tracking-tight text-white" style="animation-delay: 260ms">
             Signing out&hellip;

@@ -16,6 +16,7 @@ class ProjectProgress extends Model
     protected $fillable = [
         'project_id',
         'phase_id',
+        'phase_status',
         'user_id',
         'progress_date',
         'progress_percentage',

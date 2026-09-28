@@ -78,6 +78,10 @@ Route::middleware('auth')->group(function () {
         ->name('projects.documents.store');
     Route::post('/projects/{project}/progress', [ProjectController::class, 'storeProgress'])
         ->name('projects.progress.store');
+    Route::put('/projects/{project}/progress/{progress}', [ProjectController::class, 'updateProgress'])
+        ->name('projects.progress.update');
+    Route::delete('/projects/{project}/progress/{progress}', [ProjectController::class, 'destroyProgress'])
+        ->name('projects.progress.destroy');
     // Up to 10 AI drafts per user per minute keeps a stuck retry loop from running up API costs.
     Route::post('/projects/{project}/progress/assist', ProgressAssistController::class)
         ->middleware('throttle:10,1')

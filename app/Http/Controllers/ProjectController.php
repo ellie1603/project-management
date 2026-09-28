@@ -8,12 +8,14 @@ use App\Models\ProjectAssignment;
 use App\Models\ProjectCategory;
 use App\Models\ProjectDocument;
 use App\Models\ProjectPhase;
+use App\Models\ProjectProgress;
 use App\Models\User;
 use App\Notifications\NewDocumentUploadedNotification;
 use App\Notifications\ProjectAssignmentNotification;
 use App\Notifications\ProjectCompletedNotification;
 use App\Notifications\ProjectProgressUpdatedNotification;
 use App\Services\AuditLogger;
+use App\Services\ImageCompressor;
 use App\Services\ProgressReportAssistant;
 use App\Services\ProjectNotifier;
 use App\Services\ProjectPhaseService;
@@ -24,6 +26,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -31,6 +34,10 @@ class ProjectController extends Controller
 {
     /** Attachments accepted with a progress update: site photos and report files. */
     private const PROGRESS_FILE_TYPES = 'jpg,jpeg,png,webp,heic,heif,pdf,doc,docx,xls,xlsx';
+
+    private const MAX_PROGRESS_ATTACHMENTS = 2;
+
+    private const MAX_PROGRESS_ATTACHMENT_KB = 5120;
 
     public function index(Request $request): View
     {
@@ -345,15 +352,14 @@ class ProjectController extends Controller
             'issues' => ['nullable', 'string', 'max:5000'],
             'ai_assisted' => ['nullable', 'boolean'],
             'site_notes' => ['nullable', 'string', 'max:2000'],
-            // Site photos straight from a phone camera, or a report file.
-            'files' => ['nullable', 'array', 'max:10'],
-            'files.*' => ['file', 'max:20480', 'mimes:'.self::PROGRESS_FILE_TYPES],
-            'file' => ['nullable', 'file', 'max:20480', 'mimes:'.self::PROGRESS_FILE_TYPES],
-        ], [
-            'files.*.mimes' => 'Attach photos (JPG, PNG, WEBP, HEIC) or reports (PDF, Word, Excel) only.',
-            'files.*.max' => 'Each attachment must be 20 MB or smaller.',
-            'progress_date.before_or_equal' => 'The update date cannot be in the future.',
-        ]);
+            ...$this->progressAttachmentRules(),
+        ], $this->progressAttachmentMessages());
+
+        $attachments = array_values(array_filter([...$request->file('files', []), $request->file('file')]));
+
+        if (count($attachments) > self::MAX_PROGRESS_ATTACHMENTS) {
+            throw ValidationException::withMessages(['files' => 'You can attach up to '.self::MAX_PROGRESS_ATTACHMENTS.' files per update.']);
+        }
 
         $phase = ProjectPhase::findOrFail($validated['phase_id']);
         $previousPercentage = $project->completionPercentage();
@@ -386,6 +392,7 @@ class ProjectController extends Controller
         $progress = $project->progress()->create([
             'project_id' => $project->id,
             'phase_id' => $phase->id,
+            'phase_status' => $validated['phase_status'],
             'user_id' => Auth::id(),
             'progress_date' => $validated['progress_date'],
             'progress_percentage' => $percentage,
@@ -397,27 +404,7 @@ class ProjectController extends Controller
             'site_notes' => ($validated['ai_assisted'] ?? false) ? ($validated['site_notes'] ?? null) : null,
         ]);
 
-        // `file` is the legacy single-attachment field; `files[]` carries phone photos.
-        $attachments = array_values(array_filter([...$request->file('files', []), $request->file('file')]));
-        foreach ($attachments as $index => $file) {
-            $documentType = str_starts_with((string) $file->getMimeType(), 'image/') ? 'Progress Photo' : 'Progress Report';
-            $fileName = $this->buildDocumentFileName($file, $documentType, "{$progress->id}-".($index + 1));
-            $path = $file->storeAs("projects/{$project->id}/progress", $fileName, 'local');
-
-            $project->documents()->create([
-                'project_id' => $project->id,
-                'progress_id' => $progress->id,
-                'document_type' => $documentType,
-                'document_name' => $fileName,
-                'file_path' => $path,
-                'file_type' => $file->getMimeType() ?? 'application/octet-stream',
-                'file_size' => $file->getSize(),
-                'version' => 1,
-                'is_current' => true,
-                'description' => 'Uploaded with project progress update',
-                'uploaded_by' => Auth::id(),
-            ]);
-        }
+        $this->storeProgressAttachments($project, $progress, $attachments);
 
         $stageChange = $validated['phase_status'] === 'Completed' ? "finished {$phase->name}" : "working on {$phase->name}";
 
@@ -435,7 +422,201 @@ class ProjectController extends Controller
         $notifier = app(ProjectNotifier::class);
         $notifier->notify($notifier->projectTeam($project), new ProjectProgressUpdatedNotification($project, $progress), Auth::user());
 
-        return redirect()->route('projects.show', $project)->with('status', 'Progress update saved successfully.');
+        return redirect()->route('projects.show', $project)
+            ->with(['status' => 'Progress update saved successfully.', 'tab' => 'progress']);
+    }
+
+    public function updateProgress(Request $request, Project $project, ProjectProgress $progress): RedirectResponse
+    {
+        abort_unless($progress->project_id === $project->id, 404);
+        $this->authorize('manageProgress', [$project, $progress]);
+
+        $validated = $request->validate([
+            'progress_date' => ['required', 'date', 'before_or_equal:today'],
+            'accomplishments' => ['required', 'string', 'max:5000'],
+            'activities_completed' => ['nullable', 'string', 'max:5000'],
+            'activities_remaining' => ['nullable', 'string', 'max:5000'],
+            'issues' => ['nullable', 'string', 'max:5000'],
+            'remove_documents' => ['nullable', 'array'],
+            'remove_documents.*' => ['integer', Rule::exists('project_documents', 'id')->where('progress_id', $progress->id)],
+            ...$this->progressAttachmentRules(),
+        ], [
+            ...$this->progressAttachmentMessages(),
+            'accomplishments.required' => 'Write a short note about what was done.',
+        ]);
+
+        $removeIds = array_map('intval', $validated['remove_documents'] ?? []);
+        $newFiles = $request->file('files', []);
+        $keptCount = $progress->projectDocuments()->whereKeyNot($removeIds)->count();
+
+        if ($keptCount + count($newFiles) > self::MAX_PROGRESS_ATTACHMENTS) {
+            throw ValidationException::withMessages(['files' => 'An update can have at most '.self::MAX_PROGRESS_ATTACHMENTS.' attachments. Remove one before adding another.']);
+        }
+
+        $oldValues = $progress->toArray();
+
+        DB::transaction(function () use ($project, $progress, $validated, $removeIds, $newFiles): void {
+            $progress->update([
+                'progress_date' => $validated['progress_date'],
+                'accomplishments' => $validated['accomplishments'],
+                'activities_completed' => $validated['activities_completed'] ?? null,
+                'activities_remaining' => $validated['activities_remaining'] ?? null,
+                'issues' => $validated['issues'] ?? null,
+            ]);
+
+            $this->deleteProgressDocuments($progress->projectDocuments()->whereKey($removeIds)->get());
+            $this->storeProgressAttachments($project, $progress, $newFiles);
+        });
+
+        app(AuditLogger::class)->record(
+            $request,
+            'updated',
+            'project_progress',
+            $progress->id,
+            "Edited progress update from {$progress->progress_date->format('M d, Y')} for {$project->title}"
+                .($removeIds !== [] || $newFiles !== [] ? ' (attachments changed)' : '').'.',
+            $oldValues,
+            $progress->fresh()->toArray(),
+        );
+
+        return redirect()->route('projects.show', $project)
+            ->with(['status' => 'Progress update edited.', 'tab' => 'progress']);
+    }
+
+    public function destroyProgress(Request $request, Project $project, ProjectProgress $progress): RedirectResponse
+    {
+        abort_unless($progress->project_id === $project->id, 404);
+        $this->authorize('manageProgress', [$project, $progress]);
+
+        $oldValues = $progress->toArray();
+        $previousPercentage = $project->completionPercentage();
+
+        $percentage = DB::transaction(function () use ($project, $progress): int {
+            $this->deleteProgressDocuments($progress->projectDocuments()->get());
+            $progress->delete();
+
+            $percentage = app(ProjectPhaseService::class)->rebuildFromHistory($project);
+            $earliestDate = $project->progress()->min('progress_date');
+            $startedWithDeleted = substr((string) $project->actual_start_date, 0, 10) === $progress->progress_date->toDateString();
+            $projectUpdates = [];
+
+            if ($percentage < 100 && $project->status === 'Completed') {
+                $projectUpdates['status'] = 'Ongoing';
+                $projectUpdates['actual_completion_date'] = null;
+            }
+
+            // The first update sets the actual start date automatically; follow it when that update is removed.
+            if ($startedWithDeleted && $earliestDate !== null) {
+                $projectUpdates['actual_start_date'] = substr((string) $earliestDate, 0, 10);
+            } elseif ($startedWithDeleted && $project->status === 'Ongoing') {
+                $projectUpdates['status'] = 'Registered';
+                $projectUpdates['actual_start_date'] = null;
+            }
+
+            if ($projectUpdates !== []) {
+                $project->update($projectUpdates);
+            }
+
+            return $percentage;
+        });
+
+        app(AuditLogger::class)->record(
+            $request,
+            'deleted',
+            'project_progress',
+            $oldValues['id'],
+            "Deleted progress update from {$progress->progress_date->format('M d, Y')} for {$project->title}; completion {$previousPercentage}% to {$percentage}%.",
+            $oldValues,
+            null,
+        );
+
+        return redirect()->route('projects.show', $project)
+            ->with(['status' => 'Progress update deleted.', 'tab' => 'progress']);
+    }
+
+    /**
+     * @return array<string, array<int, string>>
+     */
+    private function progressAttachmentRules(): array
+    {
+        return [
+            'files' => ['nullable', 'array', 'max:'.self::MAX_PROGRESS_ATTACHMENTS],
+            'files.*' => ['file', 'max:'.self::MAX_PROGRESS_ATTACHMENT_KB, 'mimes:'.self::PROGRESS_FILE_TYPES],
+            'file' => ['nullable', 'file', 'max:'.self::MAX_PROGRESS_ATTACHMENT_KB, 'mimes:'.self::PROGRESS_FILE_TYPES],
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function progressAttachmentMessages(): array
+    {
+        $maxMb = self::MAX_PROGRESS_ATTACHMENT_KB / 1024;
+
+        return [
+            'files.max' => 'You can attach up to '.self::MAX_PROGRESS_ATTACHMENTS.' files per update.',
+            'files.*.mimes' => 'Attach photos (JPG, PNG, WEBP, HEIC) or reports (PDF, Word, Excel) only.',
+            'files.*.max' => "Each attachment must be {$maxMb} MB or smaller.",
+            'file.max' => "Each attachment must be {$maxMb} MB or smaller.",
+            'progress_date.before_or_equal' => 'The update date cannot be in the future.',
+        ];
+    }
+
+    /**
+     * Photos are re-encoded as small JPEGs; reports are stored as uploaded.
+     *
+     * @param  array<int, UploadedFile>  $files
+     */
+    private function storeProgressAttachments(Project $project, ProjectProgress $progress, array $files): void
+    {
+        $compressor = app(ImageCompressor::class);
+        $offset = $progress->projectDocuments()->count();
+
+        foreach (array_values($files) as $index => $file) {
+            $isImage = str_starts_with((string) $file->getMimeType(), 'image/');
+            $documentType = $isImage ? 'Progress Photo' : 'Progress Report';
+            $baseName = $this->buildDocumentFileName($file, $documentType, "{$progress->id}-".($offset + $index + 1));
+            $directory = "projects/{$project->id}/progress";
+            $jpeg = $isImage ? $compressor->toJpeg($file) : null;
+
+            if ($jpeg !== null) {
+                $fileName = preg_replace('/\.[^.]+$/', '.jpg', $baseName);
+                $path = "{$directory}/{$fileName}";
+                Storage::disk('local')->put($path, $jpeg);
+                $mime = 'image/jpeg';
+                $size = strlen($jpeg);
+            } else {
+                $fileName = $baseName;
+                $path = $file->storeAs($directory, $fileName, 'local');
+                $mime = $file->getMimeType() ?? 'application/octet-stream';
+                $size = $file->getSize();
+            }
+
+            $project->documents()->create([
+                'project_id' => $project->id,
+                'progress_id' => $progress->id,
+                'document_type' => $documentType,
+                'document_name' => $fileName,
+                'file_path' => $path,
+                'file_type' => $mime,
+                'file_size' => $size,
+                'version' => 1,
+                'is_current' => true,
+                'description' => 'Uploaded with project progress update',
+                'uploaded_by' => Auth::id(),
+            ]);
+        }
+    }
+
+    /**
+     * @param  iterable<int, ProjectDocument>  $documents
+     */
+    private function deleteProgressDocuments(iterable $documents): void
+    {
+        foreach ($documents as $document) {
+            Storage::disk('local')->delete($document->file_path);
+            $document->delete();
+        }
     }
 
     protected function buildDocumentFileName(UploadedFile $file, string $documentType, int|string|null $suffix = null): string

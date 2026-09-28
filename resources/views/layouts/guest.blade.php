@@ -28,8 +28,8 @@
                 </div>
 
                 <a href="/" class="relative z-10 flex w-fit animate-rise-in items-center gap-3 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950">
-                    <x-application-logo class="h-14 w-14 rounded-xl bg-white p-1.5 shadow-glow" />
-                    <span class="font-display text-xl font-semibold tracking-tight text-white">{{ config('app.name', 'BMPC') }}</span>
+                    <x-application-logo class="h-14 w-14 rounded-full bg-white p-2 shadow-glow" />
+                    <span class="font-display text-xl font-semibold tracking-tight text-white">{{ config('app.name', 'Project Management') }}</span>
                 </a>
 
                 <div class="relative z-10 max-w-md animate-rise-in" style="animation-delay: 80ms">
@@ -57,7 +57,7 @@
                 </div>
 
                 <p class="relative z-10 animate-rise-in text-xs text-slate-500" style="animation-delay: 300ms">
-                    &copy; {{ now()->year }} {{ config('app.name', 'BMPC') }}. All rights reserved.
+                    &copy; {{ now()->year }} {{ config('app.name', 'Project Management') }}. All rights reserved.
                 </p>
             </div>
 
@@ -66,9 +66,9 @@
                 <div class="w-full max-w-sm">
                     <div class="mb-8 flex animate-rise-in flex-col items-center gap-2 text-center lg:hidden">
                         <a href="/" class="rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2">
-                            <x-application-logo class="h-14 w-14 rounded-xl bg-white p-1.5 shadow-elevated ring-1 ring-slate-900/5" />
+                            <x-application-logo class="h-16 w-16" />
                         </a>
-                        <p class="font-display text-base font-semibold tracking-tight text-slate-900">{{ config('app.name', 'BMPC') }}</p>
+                        <p class="font-display text-base font-semibold tracking-tight text-slate-900">{{ config('app.name', 'Project Management') }}</p>
                     </div>
 
                     <div class="animate-rise-in" style="animation-delay: 60ms">
@@ -76,7 +76,7 @@
                     </div>
 
                     <p class="mt-10 animate-rise-in text-center text-xs text-slate-400 lg:hidden" style="animation-delay: 140ms">
-                        &copy; {{ now()->year }} {{ config('app.name', 'BMPC') }}. All rights reserved.
+                        &copy; {{ now()->year }} {{ config('app.name', 'Project Management') }}. All rights reserved.
                     </p>
                 </div>
             </div>
