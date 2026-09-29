@@ -88,9 +88,10 @@
                 </span>
                 <h2 class="font-display text-[15px] font-semibold text-slate-900">My Saved Reports</h2>
             </div>
+            <div x-data="pager(10)" data-pager>
             <div class="divide-y divide-slate-100">
                 @forelse ($myFinanceReports as $report)
-                    <div class="flex items-center justify-between gap-4 px-6 py-3.5 sm:px-7">
+                    <div data-page-item class="flex items-center justify-between gap-4 px-6 py-3.5 sm:px-7">
                         <div class="min-w-0">
                             <p class="truncate text-sm font-medium text-slate-900">{{ $report->title }}</p>
                             <p class="text-xs text-slate-500">{{ $report->created_at->format('M d, Y h:i A') }}</p>
@@ -103,6 +104,8 @@
                 @empty
                     <div class="px-6 py-10 text-center text-sm text-slate-500">You haven't saved any reports yet.</div>
                 @endforelse
+            </div>
+            <x-pager-controls />
             </div>
         </section>
     @endif
@@ -120,9 +123,10 @@
                         </span>
                         <h3 class="text-sm font-semibold text-slate-900">Finance Reports</h3>
                     </div>
-                    <div class="max-h-80 divide-y divide-slate-100 overflow-y-auto">
+                    <div x-data="pager(8)" data-pager>
+                    <div class="divide-y divide-slate-100">
                         @forelse ($financeReports as $report)
-                            <div class="flex items-center justify-between gap-4 px-5 py-3">
+                            <div data-page-item class="flex items-center justify-between gap-4 px-5 py-3">
                                 <div class="min-w-0">
                                     <p class="truncate text-sm font-medium text-slate-900">{{ $report->title }}</p>
                                     <p class="text-xs text-slate-500">{{ $report->generator?->name ?? 'Finance' }} · {{ $report->created_at->format('M d, Y') }}</p>
@@ -136,6 +140,8 @@
                             <div class="px-5 py-10 text-center text-sm text-slate-500">No finance reports submitted yet.</div>
                         @endforelse
                     </div>
+                    <x-pager-controls />
+                    </div>
                 </section>
 
                 <section class="overflow-hidden rounded-3xl bg-white shadow-soft ring-1 ring-slate-900/5">
@@ -145,9 +151,10 @@
                         </span>
                         <h3 class="text-sm font-semibold text-slate-900">Personnel Reports</h3>
                     </div>
-                    <div class="max-h-80 divide-y divide-slate-100 overflow-y-auto">
+                    <div x-data="pager(8)" data-pager>
+                    <div class="divide-y divide-slate-100">
                         @forelse ($personnelReports as $document)
-                            <div class="flex items-center justify-between gap-4 px-5 py-3">
+                            <div data-page-item class="flex items-center justify-between gap-4 px-5 py-3">
                                 <div class="min-w-0">
                                     <p class="truncate text-sm font-medium text-slate-900">{{ $document->document_type }} — {{ $document->project?->title }}</p>
                                     <p class="text-xs text-slate-500">{{ $document->uploader?->name ?? 'Personnel' }} · {{ $document->created_at->format('M d, Y') }}</p>
@@ -162,6 +169,8 @@
                         @empty
                             <div class="px-5 py-10 text-center text-sm text-slate-500">No personnel reports submitted yet.</div>
                         @endforelse
+                    </div>
+                    <x-pager-controls />
                     </div>
                 </section>
             </div>

@@ -101,6 +101,12 @@
         --fg-brand-300: 169 193 234;
     }
 
+    /* The page hero keeps light-theme colours for its text, but its navy is
+       softened in dark mode to match the muted dark brand scale. */
+    .dark .hero-brand.bg-brand-600 {
+        background-color: #172a4f;
+    }
+
     /* Modal / drawer backdrops stay a dark scrim in both themes. */
     .dark .bg-slate-900\/40,
     .dark .bg-slate-900\/60 {

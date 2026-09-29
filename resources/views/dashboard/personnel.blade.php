@@ -24,9 +24,10 @@
         <div class="border-b border-slate-100 px-5 py-4">
             <h3 class="font-display text-lg font-semibold text-slate-900">Assigned Projects</h3>
         </div>
+        <div x-data="pager(10)" data-pager>
         <div class="divide-y divide-slate-100">
             @forelse ($projectRows as $row)
-                <div class="flex flex-col gap-3 px-5 py-4 transition-colors duration-150 hover:bg-slate-50/80 sm:flex-row sm:items-center sm:justify-between">
+                <div data-page-item class="flex flex-col gap-3 px-5 py-4 transition-colors duration-150 hover:bg-slate-50/80 sm:flex-row sm:items-center sm:justify-between">
                     <div class="min-w-0">
                         <p class="text-sm font-medium text-slate-900">{{ $row['project']->title }}</p>
                         <p class="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-slate-500">
@@ -49,6 +50,8 @@
             @empty
                 <div class="px-5 py-12 text-center text-sm text-slate-500">You have no assigned projects yet.</div>
             @endforelse
+        </div>
+        <x-pager-controls />
         </div>
     </div>
 </div>

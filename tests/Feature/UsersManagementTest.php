@@ -50,18 +50,46 @@ class UsersManagementTest extends TestCase
         $this->assertDatabaseHas('audit_logs', ['module' => 'users', 'action' => 'deleted', 'record_id' => $user->id]);
     }
 
-    public function test_user_with_project_history_cannot_be_deleted(): void
+    public function test_user_with_project_history_needs_typed_confirmation(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);
         $creator = User::factory()->create(['role' => 'admin']);
         Project::factory()->create(['created_by' => $creator->id]);
 
         $this->actingAs($admin)
-            ->delete('/users/'.$creator->id)
-            ->assertRedirect('/users')
-            ->assertSessionHas('error');
+            ->delete('/users/'.$creator->id, ['confirmation' => 'yes'])
+            ->assertSessionHasErrors('confirmation');
 
-        $this->assertDatabaseHas('users', ['id' => $creator->id]);
+        $this->assertNotSoftDeleted($creator);
+    }
+
+    public function test_force_delete_removes_the_login_but_keeps_project_history(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $creator = User::factory()->create(['role' => 'admin', 'email' => 'old.admin@bmpc.test', 'password' => bcrypt('password123')]);
+        $project = Project::factory()->create(['created_by' => $creator->id]);
+        $project->assignPersonnel($creator, 'Staff');
+
+        $this->actingAs($admin)
+            ->delete('/users/'.$creator->id, ['confirmation' => ' Confirm '])
+            ->assertRedirect('/users')
+            ->assertSessionHas('status');
+
+        $this->assertSoftDeleted($creator);
+        $this->assertSame($creator->name, $project->fresh()->creator->name, 'History must still show who registered the project.');
+        $this->assertDatabaseMissing('project_assignments', ['user_id' => $creator->id]);
+        $this->assertDatabaseHas('audit_logs', ['module' => 'users', 'action' => 'force_deleted', 'record_id' => $creator->id]);
+
+        $this->actingAs($admin)->get('/users')->assertDontSee('old.admin@bmpc.test');
+
+        auth()->logout();
+        $this->post('/login', ['email' => 'old.admin@bmpc.test', 'password' => 'password123'])->assertSessionHasErrors('email');
+        $this->assertGuest();
+
+        // The email is free to reuse for a new account.
+        $this->actingAs($admin)
+            ->post('/users', ['name' => 'New Admin', 'email' => 'old.admin@bmpc.test', 'password' => 'password123', 'role' => 'admin'])
+            ->assertSessionHasNoErrors();
     }
 
     public function test_admin_cannot_delete_own_account_and_others_cannot_delete(): void

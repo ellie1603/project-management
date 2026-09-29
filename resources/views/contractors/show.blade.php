@@ -49,11 +49,11 @@
         </dl>
     </div>
 
-    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm" x-data="pager(10)" data-pager>
         <h2 class="font-semibold text-slate-900">Project History</h2>
         <ul class="mt-4 divide-y divide-slate-100">
             @forelse ($contractor->projects as $project)
-                <li class="flex flex-wrap items-center justify-between gap-2 py-3">
+                <li data-page-item class="flex flex-wrap items-center justify-between gap-2 py-3">
                     <a class="font-medium text-slate-900 hover:underline" href="{{ route('projects.show', $project) }}">{{ $project->title }}</a>
                     <span class="text-sm text-slate-500">
                         {{ $project->pivot->role }} ·
@@ -65,6 +65,7 @@
                 <li class="py-3 text-sm text-slate-500">No project history.</li>
             @endforelse
         </ul>
+        <x-pager-controls class="!px-0" />
     </div>
 </div>
 @endsection

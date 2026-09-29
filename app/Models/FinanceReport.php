@@ -25,6 +25,6 @@ class FinanceReport extends Model
 
     public function generator(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'generated_by');
+        return $this->belongsTo(User::class, 'generated_by')->withTrashed();
     }
 }

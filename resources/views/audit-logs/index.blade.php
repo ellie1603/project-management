@@ -29,17 +29,7 @@
             @endforeach
         </select>
 
-        <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 ease-elegant hover:-translate-y-px hover:bg-brand-700 hover:shadow-elevated active:translate-y-0">
-            <i data-lucide="filter" class="h-4 w-4"></i>
-            Filter
-        </button>
-
-        @if (request()->hasAny(['search', 'module']))
-            <a href="{{ route('audit-logs.index') }}" data-turbo="false" class="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition-colors duration-150 hover:text-slate-800">
-                <i data-lucide="x" class="h-3.5 w-3.5"></i>
-                Clear
-            </a>
-        @endif
+        <x-filter-reset />
     </form>
 
     <div id="ajax-results" data-ajax-region class="mt-5">

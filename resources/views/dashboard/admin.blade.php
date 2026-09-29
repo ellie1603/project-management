@@ -127,7 +127,8 @@
                     <span class="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold tabular-nums text-slate-600">{{ $attention->count() }}</span>
                 </div>
 
-                <div class="max-h-80 divide-y divide-slate-100 overflow-y-auto">
+                <div x-data="pager(6)" data-pager>
+                <div class="divide-y divide-slate-100">
                     @php
                         $reasonIcons = [
                             'Delayed project' => 'triangle-alert',
@@ -139,7 +140,7 @@
                         ];
                     @endphp
                     @forelse ($attention as $item)
-                        <a href="{{ route('projects.show', $item['project']) }}" class="group flex items-center justify-between gap-3 px-5 py-3.5 transition-colors duration-150 hover:bg-slate-50/80">
+                        <a data-page-item href="{{ route('projects.show', $item['project']) }}" class="group flex items-center justify-between gap-3 px-5 py-3.5 transition-colors duration-150 hover:bg-slate-50/80">
                             <div class="flex min-w-0 items-center gap-3">
                                 <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600 transition-transform duration-300 ease-elegant group-hover:scale-110">
                                     <i data-lucide="{{ $reasonIcons[$item['reason']] ?? 'triangle-alert' }}" class="h-4 w-4"></i>
@@ -163,6 +164,8 @@
                             <p class="mt-1 text-xs text-slate-500">No schedule, budget, or documentation exceptions right now.</p>
                         </div>
                     @endforelse
+                </div>
+                <x-pager-controls />
                 </div>
             </section>
         </div>

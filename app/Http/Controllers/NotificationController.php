@@ -20,6 +20,19 @@ class NotificationController extends Controller
         return view('notifications.partials.dropdown', compact('notifications'));
     }
 
+    /**
+     * Clicking a notification marks it read, then takes the user to its project.
+     */
+    public function open(string $notification): RedirectResponse
+    {
+        $record = Auth::user()->notifications()->whereKey($notification)->firstOrFail();
+        $record->markAsRead();
+
+        $projectId = $record->data['project_id'] ?? null;
+
+        return $projectId ? redirect()->route('projects.show', $projectId) : back();
+    }
+
     public function markAsRead(string $notification): Response
     {
         $record = Auth::user()->notifications()->whereKey($notification)->firstOrFail();

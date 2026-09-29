@@ -18,8 +18,8 @@ class BudgetRequest extends Model
     ];
 
     public function project(): BelongsTo { return $this->belongsTo(Project::class); }
-    public function requester(): BelongsTo { return $this->belongsTo(User::class, 'requested_by'); }
-    public function reviewer(): BelongsTo { return $this->belongsTo(User::class, 'reviewed_by'); }
+    public function requester(): BelongsTo { return $this->belongsTo(User::class, 'requested_by')->withTrashed(); }
+    public function reviewer(): BelongsTo { return $this->belongsTo(User::class, 'reviewed_by')->withTrashed(); }
     public function expense(): BelongsTo { return $this->belongsTo(ProjectExpense::class, 'expense_id'); }
 
     protected function casts(): array

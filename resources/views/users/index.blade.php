@@ -3,7 +3,7 @@
 @section('content')
 <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8" x-data="{}">
     <x-flash-toast />
-    <x-flash-toast :message="session('error')" type="error" />
+    <x-flash-toast type="error" />
 
     <x-page-hero
         eyebrow="Administration"
@@ -42,13 +42,15 @@
             <option value="project_personnel" @selected(request('role') === 'project_personnel')>Project Personnel</option>
             <option value="finance_accounting" @selected(request('role') === 'finance_accounting')>Finance & Accounting</option>
         </select>
+
+        <x-filter-reset />
     </form>
 
     <div id="ajax-results" data-ajax-region class="mt-5">
         @include('users.partials.results')
     </div>
 
-    <x-modal name="create-user" :show="$errors->isNotEmpty()" max-width="lg">
+    <x-modal name="create-user" :show="$errors->isNotEmpty() && ! old('_editing_user_id') && ! old('_deleting_user_id')" max-width="lg">
         <form method="POST" action="{{ route('users.store') }}" class="flex max-h-[85vh] flex-col">
             @csrf
 

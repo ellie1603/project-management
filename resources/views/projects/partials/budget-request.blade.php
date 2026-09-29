@@ -50,6 +50,7 @@
 
 <section class="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
     <h3 class="text-sm font-semibold text-slate-900">My Budget Requests</h3>
+    <div x-data="pager(10)" data-pager>
     <div class="mt-3 overflow-x-auto">
         <table class="min-w-full text-left text-sm">
             <thead class="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
@@ -62,7 +63,7 @@
             </thead>
             <tbody class="divide-y divide-slate-100">
                 @forelse ($project->budgetRequests->sortByDesc('created_at') as $budgetRequest)
-                    <tr>
+                    <tr data-page-item>
                         <td class="px-2 py-2 whitespace-nowrap">{{ $budgetRequest->created_at->format('M d, Y') }}</td>
                         <td class="px-2 py-2">
                             {{ $budgetRequest->purpose }}
@@ -78,5 +79,7 @@
                 @endforelse
             </tbody>
         </table>
+    </div>
+    <x-pager-controls class="!px-0" />
     </div>
 </section>

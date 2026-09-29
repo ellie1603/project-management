@@ -6,6 +6,49 @@ window.Alpine = Alpine;
 Alpine.data('progressUpdate', progressUpdate);
 
 /**
+ * Client-side paging for lists already rendered on the page (project tabs,
+ * dashboard panels). Mark the wrapper with x-data="pager(10)" and each row with
+ * data-page-item, then drop <x-pager-controls /> inside the wrapper.
+ */
+Alpine.data('pager', (perPage = 10) => ({
+    page: 1,
+    perPage,
+    total: 0,
+    items: [],
+
+    init() {
+        this.items = Array.from(this.$el.querySelectorAll('[data-page-item]')).filter((item) => item.closest('[data-pager]') === this.$el);
+        this.total = this.items.length;
+        this.render();
+    },
+
+    get pages() {
+        return Math.max(1, Math.ceil(this.total / this.perPage));
+    },
+
+    get from() {
+        return this.total === 0 ? 0 : (this.page - 1) * this.perPage + 1;
+    },
+
+    get to() {
+        return Math.min(this.total, this.page * this.perPage);
+    },
+
+    go(page) {
+        this.page = Math.min(Math.max(1, page), this.pages);
+        this.render();
+        this.$el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    },
+
+    render() {
+        // Inline display (not the hidden attribute) so rows with flex/grid classes still hide.
+        this.items.forEach((item, index) => {
+            item.style.display = Math.floor(index / this.perPage) + 1 === this.page ? '' : 'none';
+        });
+    },
+}));
+
+/**
  * Switches the light/dark theme, remembers the choice, and briefly enables a
  * cross-fade so every surface transitions together. Pages with charts listen
  * for `bmpc:theme` to redraw with the new palette. Returns the new state.
@@ -54,9 +97,18 @@ window.markNotificationRead = function markNotificationRead(id, button) {
             'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
         },
     }).then(() => {
-        const row = button.closest('div.flex.items-start');
-        row?.classList.remove('bg-brand-50/40');
-        button.remove();
+        const row = button.closest('[data-notification-row]');
+
+        if (!row?.hasAttribute('data-unread')) {
+            return;
+        }
+
+        row.removeAttribute('data-unread');
+        row.classList.remove('bg-brand-50/60');
+        row.querySelector('[data-notification-dot]')?.remove();
+        row.querySelector('[data-notification-title]')?.classList.replace('font-semibold', 'font-medium');
+        row.querySelector('[data-notification-icon]')?.classList.remove('bg-brand-600', 'text-white');
+        row.querySelector('[data-notification-icon]')?.classList.add('bg-slate-100', 'text-slate-400');
 
         const badge = document.getElementById('notification-badge');
         if (badge) {
@@ -344,6 +396,27 @@ const navProgress = (function navProgress() {
         if (form && event.target.matches('select, input[type="date"], input[type="checkbox"], input[type="radio"]')) {
             form.requestSubmit();
         }
+    });
+
+    document.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-filter-reset]');
+        const form = ajaxFormOf(button);
+
+        if (!form) {
+            return;
+        }
+
+        form.querySelectorAll('input:not([type="hidden"]), select').forEach((field) => {
+            if (field instanceof HTMLSelectElement) {
+                field.selectedIndex = 0;
+            } else if (field.type === 'checkbox' || field.type === 'radio') {
+                field.checked = false;
+            } else {
+                field.value = '';
+            }
+        });
+
+        form.requestSubmit();
     });
 
     let searchTimer;

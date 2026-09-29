@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class UsersController extends Controller
@@ -93,48 +94,37 @@ class UsersController extends Controller
         // Gate::before grants admins every ability, so the self-check must live here.
         abort_if($user->is($request->user()), 403, 'You cannot delete your own account.');
 
-        $blockingRecords = $this->recordsOwnedBy($user);
-
-        if ($blockingRecords !== []) {
-            return redirect()->route('users.index')->with('error', "{$user->name} cannot be deleted because they have recorded ".implode(', ', $blockingRecords).'. Deactivate the account instead to keep the project history intact.');
-        }
-
+        $history = $user->recordedWork();
         $oldValues = $user->makeHidden('password')->toArray();
         $name = $user->name;
-        $user->delete();
+
+        if ($history === []) {
+            $user->removeAccount();
+
+            app(AuditLogger::class)->record($request, 'deleted', 'users', $oldValues['id'], "Deleted user account for {$name}.", $oldValues, null);
+
+            return redirect()->route('users.index')->with('status', "User account for {$name} was deleted.");
+        }
+
+        if (strtolower(trim((string) $request->input('confirmation'))) !== 'confirm') {
+            throw ValidationException::withMessages(['confirmation' => 'Type "confirm" to force delete this account.']);
+        }
+
+        $user->removeAccount();
 
         app(AuditLogger::class)->record(
             $request,
-            'deleted',
+            'force_deleted',
             'users',
             $oldValues['id'],
-            "Deleted user account for {$name}.",
+            "Force deleted user account for {$name}; their ".implode(', ', $history).' were kept for project history.',
             $oldValues,
             null,
         );
 
-        return redirect()->route('users.index')->with('status', "User account for {$name} was deleted.");
+        return redirect()->route('users.index')->with('status', "User account for {$name} was force deleted. Their project records were kept.");
     }
 
-    /**
-     * Records that must keep pointing at this user, so deleting would either
-     * fail on a foreign key or erase who did what on a project.
-     *
-     * @return array<int, string>
-     */
-    private function recordsOwnedBy(User $user): array
-    {
-        $checks = [
-            'registered projects' => DB::table('projects')->where('created_by', $user->id),
-            'progress updates' => DB::table('project_progress')->where('user_id', $user->id),
-            'uploaded documents' => DB::table('project_documents')->where('uploaded_by', $user->id),
-            'project expenses' => DB::table('project_expenses')->where('created_by', $user->id),
-            'budget requests' => DB::table('budget_requests')->where('requested_by', $user->id),
-            'finance reports' => DB::table('finance_reports')->where('generated_by', $user->id),
-        ];
-
-        return array_keys(array_filter($checks, fn ($query): bool => $query->exists()));
-    }
 
     public function update(Request $request, User $user): RedirectResponse
     {

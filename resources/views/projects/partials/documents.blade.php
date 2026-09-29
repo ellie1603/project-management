@@ -8,9 +8,10 @@
         <span class="text-sm text-slate-500">{{ $project->documents->count() }} files</span>
     </div>
 
+    <div x-data="pager(10)" data-pager>
     <ul class="mt-4 divide-y divide-slate-100">
         @forelse ($project->documents as $document)
-            <li class="flex items-center justify-between gap-4 py-3 text-sm">
+            <li data-page-item class="flex items-center justify-between gap-4 py-3 text-sm">
                 <div>
                     <p class="font-medium text-slate-800">
                         {{ $document->document_type }}
@@ -27,6 +28,8 @@
             <li class="py-3 text-sm text-slate-500">No documents uploaded.</li>
         @endforelse
     </ul>
+    <x-pager-controls class="!px-0" />
+    </div>
 
     @if (auth()->user()->isAdmin() || $canWriteProgress)
         <form method="POST" action="{{ route('projects.documents.store', $project) }}" enctype="multipart/form-data" class="mt-4 space-y-3 border-t border-slate-100 pt-4">

@@ -38,10 +38,11 @@ const highlight = { 50: '#fefbe8', 100: '#fdf5c4', 200: '#fbeb8c', 300: '#f7dc4b
 const dark = {
     fgSlate: { 50: '#1d1d20', 100: '#26262a', 200: '#303035', 300: '#3f3f46', 400: '#7c7c85', 500: '#a1a1aa', 600: '#c4c4cc', 700: '#d9d9de', 800: '#e8e8ec', 900: '#f4f4f5', 950: '#fafafa' },
     bgSlate: { 50: '#0a0a0b', 100: '#232326', 200: '#2c2c30', 300: '#3a3a40', 400: '#52525b', 500: '#71717a', 600: '#8b8b94', 700: '#52525b', 800: '#46464e', 900: '#34343a', 950: '#1f1f23' },
-    // On dark surfaces blue text/borders lighten to pale blue for contrast,
-    // while blue backgrounds (buttons, chips) brighten just enough to stand out.
+    // On dark surfaces blue text/borders lighten to pale blue for contrast, while
+    // blue backgrounds (buttons, chips, active nav) use a muted navy that sits
+    // calmly on near-black instead of a bright saturated blue.
     fgBrand: { 50: '#141b2b', 100: '#1a2540', 200: '#23335a', 300: '#34508c', 400: '#5d82c9', 500: '#86a6de', 600: '#a9c1ea', 700: '#c8d8f3', 800: '#e1eaf9', 900: '#f1f5fd', 950: '#ffffff' },
-    bgBrand: { 50: '#131a2c', 100: '#18223d', 200: '#1f2d52', 300: '#2a3f73', 400: '#34508f', 500: '#3f66b4', 600: '#2f5bb0', 700: '#264c96', 800: '#1f3e7c', 900: '#183163', 950: '#11244a' },
+    bgBrand: { 50: '#10172a', 100: '#141d33', 200: '#1a2744', 300: '#223459', 400: '#2a4170', 500: '#2f4b80', 600: '#244177', 700: '#1d3665', 800: '#182d55', 900: '#132446', 950: '#0e1b36' },
 };
 
 const toRgb = (hex) => {

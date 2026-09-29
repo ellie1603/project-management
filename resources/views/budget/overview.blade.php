@@ -54,6 +54,7 @@
             </div>
         </div>
 
+        <div x-data="pager(10)" data-pager>
         <div class="overflow-x-auto">
             <table class="min-w-full">
                 <thead>
@@ -69,7 +70,7 @@
                 <tbody class="divide-y divide-slate-100">
                     @forelse ($projectRows as $row)
                         @php $remaining = (float) $row['budget']['remaining_budget']; @endphp
-                        <tr class="group transition-colors duration-150 hover:bg-slate-50/80">
+                        <tr data-page-item class="group transition-colors duration-150 hover:bg-slate-50/80">
                             <td class="px-5 py-3.5">
                                 <a href="{{ route('projects.show', $row['project']) }}" class="text-sm font-semibold text-slate-900 transition-colors duration-150 group-hover:text-brand-700">{{ $row['project']->title }}</a>
                                 <p class="mt-0.5 text-xs text-slate-400">{{ $row['project']->project_code }}</p>
@@ -107,6 +108,8 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+        <x-pager-controls />
         </div>
     </section>
 </div>

@@ -29,7 +29,7 @@
                 <i data-lucide="search" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"></i>
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Search project or purpose" aria-label="Search project or purpose" class="w-64 rounded-md border-slate-300 py-2 pl-9 pr-3 text-sm shadow-sm transition-all duration-150 focus:border-brand-400 focus:ring-2 focus:ring-brand-100">
             </div>
-            <button type="submit" class="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors duration-150 hover:bg-slate-50">Search</button>
+            <x-filter-reset class="!rounded-md !py-2" />
         </form>
     </div>
 

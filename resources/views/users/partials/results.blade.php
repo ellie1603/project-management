@@ -129,27 +129,68 @@
     </x-modal>
 
     @if ($user->id !== auth()->id())
-        <x-modal :name="'delete-user-'.$user->id" max-width="md">
-            <form method="POST" action="{{ route('users.destroy', $user) }}" class="px-6 pb-6 pt-7">
+        @php
+            $recordedWork = $user->recordedWork();
+            $needsForce = $recordedWork !== [];
+            $isDeleteError = (string) old('_deleting_user_id') === (string) $user->id;
+        @endphp
+        <x-modal :name="'delete-user-'.$user->id" :show="$isDeleteError && $errors->has('confirmation')" max-width="md">
+            <form method="POST" action="{{ route('users.destroy', $user) }}" class="px-6 pb-6 pt-7" x-data="{ typed: '' }">
                 @csrf
                 @method('DELETE')
+                <input type="hidden" name="_deleting_user_id" value="{{ $user->id }}">
 
                 <div class="flex items-start gap-4">
                     <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600">
-                        <i data-lucide="alert-triangle" class="h-5 w-5"></i>
+                        <i data-lucide="triangle-alert" class="h-5 w-5"></i>
                     </span>
-                    <div>
-                        <h2 class="font-display text-lg font-semibold text-slate-900">Delete {{ $user->name }}?</h2>
-                        <p class="mt-1 text-sm text-slate-500">This permanently removes the login for <span class="font-medium text-slate-700">{{ $user->email }}</span> and any project assignments. It cannot be undone.</p>
-                        <p class="mt-2 text-sm text-slate-500">Accounts that already recorded project work cannot be deleted; deactivate them instead.</p>
+                    <div class="min-w-0">
+                        <h2 class="font-display text-lg font-semibold text-slate-900">{{ $needsForce ? 'Force delete' : 'Delete' }} {{ $user->name }}?</h2>
+                        @if ($needsForce)
+                            <p class="mt-1 text-sm text-slate-500">
+                                This account has recorded <span class="font-medium text-slate-700">{{ implode(', ', $recordedWork) }}</span>.
+                            </p>
+                            <ul class="mt-3 space-y-1.5 rounded-xl border border-red-200 bg-red-50 px-3.5 py-3 text-sm text-red-700">
+                                <li class="flex gap-2"><i data-lucide="x" class="mt-0.5 h-3.5 w-3.5 shrink-0"></i>The login for {{ $user->email }} is removed and can no longer sign in.</li>
+                                <li class="flex gap-2"><i data-lucide="x" class="mt-0.5 h-3.5 w-3.5 shrink-0"></i>They are removed from every project they are assigned to.</li>
+                                <li class="flex gap-2"><i data-lucide="check" class="mt-0.5 h-3.5 w-3.5 shrink-0"></i>Their recorded work stays, still showing their name.</li>
+                            </ul>
+                            <p class="mt-3 text-sm font-medium text-slate-700">This cannot be undone.</p>
+                        @else
+                            <p class="mt-1 text-sm text-slate-500">This permanently removes the login for <span class="font-medium text-slate-700">{{ $user->email }}</span> and any project assignments. It cannot be undone.</p>
+                        @endif
                     </div>
                 </div>
 
+                @if ($needsForce)
+                    <div class="mt-5">
+                        <label for="delete-confirm-{{ $user->id }}" class="mb-1.5 block text-sm text-slate-600">Type <span class="font-mono font-semibold text-slate-900">confirm</span> to continue</label>
+                        <input
+                            id="delete-confirm-{{ $user->id }}"
+                            name="confirmation"
+                            x-model="typed"
+                            autocomplete="off"
+                            spellcheck="false"
+                            placeholder="confirm"
+                            class="w-full rounded-xl border-slate-200 bg-slate-50/60 font-mono shadow-sm focus:border-red-400 focus:bg-white focus:ring-2 focus:ring-red-100"
+                        >
+                        @if ($isDeleteError)
+                            @error('confirmation')
+                                <p class="mt-1.5 text-xs font-medium text-red-600">{{ $message }}</p>
+                            @enderror
+                        @endif
+                    </div>
+                @endif
+
                 <div class="mt-6 flex items-center justify-end gap-3">
                     <button type="button" @click="$dispatch('close-modal', 'delete-user-{{ $user->id }}')" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors duration-150 hover:bg-slate-50">Cancel</button>
-                    <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors duration-150 hover:bg-red-700">
+                    <button
+                        type="submit"
+                        @if ($needsForce) :disabled="typed.trim().toLowerCase() !== 'confirm'" @endif
+                        class="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors duration-150 hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
                         <i data-lucide="trash-2" class="h-4 w-4"></i>
-                        Delete User
+                        {{ $needsForce ? 'Force Delete' : 'Delete User' }}
                     </button>
                 </div>
             </form>

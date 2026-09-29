@@ -10,7 +10,7 @@
     />
 
     <x-flash-toast />
-    <x-flash-toast :message="session('error')" type="error" />
+    <x-flash-toast type="error" />
 
     <form method="POST" action="{{ route('settings.update') }}" class="animate-rise-in overflow-hidden rounded-3xl bg-white shadow-soft ring-1 ring-slate-900/5" style="animation-delay: 80ms">
         @csrf
