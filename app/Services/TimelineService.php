@@ -32,14 +32,17 @@ class TimelineService
         // planned date — a project that hasn't broken ground yet has 0 elapsed days.
         $daysElapsed = $actualStart !== null ? (int) max(0, $actualStart->diffInDays($today)) : 0;
         $daysRemaining = (int) max(0, $today->diffInDays($target, false));
-        $delayDays = $today->greaterThan($target) && $project->status !== 'Completed'
+        $closed = in_array($project->status, ['Completed', 'Cancelled'], true);
+        $delayDays = $today->greaterThan($target) && ! $closed
             ? (int) $target->diffInDays($today)
             : 0;
 
+        // A missed deadline counts as Delayed even if work never started.
         $status = match (true) {
             $project->status === 'Completed' => 'Completed',
-            $actualStart === null => 'Not Started',
+            $project->status === 'Cancelled' => 'Cancelled',
             $today->greaterThan($target) => 'Delayed',
+            $actualStart === null => 'Not Started',
             $daysRemaining <= 7 => 'Approaching Deadline',
             default => 'On Schedule',
         };

@@ -27,9 +27,13 @@ class ProjectPolicy
         return $user->isAdmin();
     }
 
+    /**
+     * Editing project information and assigning personnel are Admin-only;
+     * personnel record their work through progress updates instead.
+     */
     public function update(User $user, Project $project): bool
     {
-        return $user->isAdmin() || ($user->isProjectPersonnel() && $project->hasPersonnel($user));
+        return $user->isAdmin();
     }
 
     public function uploadDocument(User $user, Project $project): bool

@@ -29,7 +29,7 @@ class BudgetRequestController extends Controller
             'amount' => ['required', 'numeric', 'gt:0'],
             'purpose' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'document' => ['nullable', 'file', 'max:20480'],
+            'document' => ['nullable', 'file', 'max:20480', 'mimes:'.ProjectController::DOCUMENT_FILE_TYPES],
         ]);
 
         $documentPath = null;

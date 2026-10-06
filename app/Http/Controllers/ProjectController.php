@@ -22,10 +22,12 @@ use App\Services\ProjectPhaseService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Exists;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -34,6 +36,12 @@ class ProjectController extends Controller
 {
     /** Attachments accepted with a progress update: site photos and report files. */
     private const PROGRESS_FILE_TYPES = 'jpg,jpeg,png,webp,heic,heif,pdf,doc,docx,xls,xlsx';
+
+    /** Project documents: office files, images, and design drawings — nothing a browser would execute. */
+    public const DOCUMENT_FILE_TYPES = 'pdf,doc,docx,xls,xlsx,ppt,pptx,csv,txt,jpg,jpeg,png,webp,heic,heif,dwg,dxf';
+
+    /** Only raster images are safe to display inline; SVG can carry scripts. */
+    private const INLINE_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
     private const MAX_PROGRESS_ATTACHMENTS = 2;
 
@@ -77,7 +85,7 @@ class ProjectController extends Controller
         $this->authorize('create', Project::class);
 
         $categories = ProjectCategory::query()->orderBy('name')->get();
-        $projectPersonnel = User::query()->where('role', 'project_personnel')->orderBy('name')->get();
+        $projectPersonnel = $this->assignablePersonnel();
 
         return view('projects.create', compact('categories', 'projectPersonnel'));
     }
@@ -98,7 +106,7 @@ class ProjectController extends Controller
             'planned_start_date' => ['required', 'date'],
             'target_completion_date' => ['required', 'date', 'after_or_equal:planned_start_date'],
             'personnel' => ['nullable', 'array'],
-            'personnel.*.user_id' => ['required', 'distinct', Rule::exists('users', 'id')->where(fn ($query) => $query->where('role', 'project_personnel'))],
+            'personnel.*.user_id' => ['required', 'distinct', $this->assignablePersonnelRule()],
             'personnel.*.position_type' => ['nullable', Rule::in(ProjectAssignment::POSITION_TYPES)],
             'personnel.*.responsibility' => ['nullable', 'string', 'max:255'],
         ]);
@@ -163,9 +171,7 @@ class ProjectController extends Controller
             'budgetRequests.requester',
             'budgetRequests.reviewer',
         ]);
-        $projectPersonnel = Auth::user()->isAdmin()
-            ? User::query()->where('role', 'project_personnel')->orderBy('name')->get()
-            : collect();
+        $projectPersonnel = Auth::user()->isAdmin() ? $this->assignablePersonnel() : collect();
         $availableContractors = (Auth::user()->isAdmin())
             ? Contractor::query()->orderBy('name')->get()
             : collect();
@@ -240,7 +246,7 @@ class ProjectController extends Controller
         $this->authorize('update', $project);
 
         $validated = $request->validate([
-            'user_id' => ['required', Rule::exists('users', 'id')->where(fn ($query) => $query->where('role', 'project_personnel'))],
+            'user_id' => ['required', $this->assignablePersonnelRule()],
             'position_type' => ['required', Rule::in(ProjectAssignment::POSITION_TYPES)],
             'responsibility' => ['required', 'string'],
         ]);
@@ -266,7 +272,9 @@ class ProjectController extends Controller
         $validated = $request->validate([
             'document_type' => ['required', 'string', Rule::in(Project::DOCUMENT_TYPES)],
             'description' => ['nullable', 'string', 'max:255'],
-            'file' => ['required', 'file', 'max:20480'],
+            'file' => ['required', 'file', 'max:20480', 'mimes:'.self::DOCUMENT_FILE_TYPES],
+        ], [
+            'file.mimes' => 'Upload a PDF, Word, Excel, PowerPoint, CSV/text, image (JPG, PNG, WEBP, HEIC), or CAD (DWG, DXF) file.',
         ]);
 
         $this->authorize(
@@ -326,15 +334,17 @@ class ProjectController extends Controller
         abort_unless($document->project_id === $project->id, 404);
 
         // ?inline=1 lets progress photos render as thumbnails instead of downloading.
-        if (request()->boolean('inline') && str_starts_with((string) $document->file_type, 'image/')) {
+        if (request()->boolean('inline') && in_array($document->file_type, self::INLINE_IMAGE_TYPES, true)) {
             return Storage::disk('local')->response($document->file_path, $document->document_name, [
                 'Content-Type' => $document->file_type,
                 'Cache-Control' => 'private, max-age=86400',
+                'X-Content-Type-Options' => 'nosniff',
             ]);
         }
 
         return Storage::disk('local')->download($document->file_path, $document->document_name, [
             'Content-Type' => $document->file_type ?? 'application/octet-stream',
+            'X-Content-Type-Options' => 'nosniff',
         ]);
     }
 
@@ -631,11 +641,25 @@ class ProjectController extends Controller
         return $name.'-'.time().'.'.$file->getClientOriginalExtension();
     }
 
+    private function assignablePersonnelRule(): Exists
+    {
+        return Rule::exists('users', 'id')
+            ->where('role', 'project_personnel')
+            ->where('is_active', true)
+            ->whereNull('deleted_at');
+    }
+
+    private function assignablePersonnel(): Collection
+    {
+        return User::query()->where('role', 'project_personnel')->where('is_active', true)->orderBy('name')->get();
+    }
+
     protected function generateProjectCode(): string
     {
         $year = now()->year;
         $prefix = "BMPC-PRJ-{$year}-";
-        $latestCode = Project::query()
+        // Archived projects keep their codes, so they must count too.
+        $latestCode = Project::withTrashed()
             ->where('project_code', 'like', $prefix.'%')
             ->lockForUpdate()
             ->max('project_code');

@@ -49,6 +49,64 @@ Alpine.data('pager', (perPage = 10) => ({
 }));
 
 /**
+ * Tabs with a gooey sliding highlight and directional content slides.
+ * Markup: nav[x-ref="tabNav"] holding span[x-ref="tabPill"] and
+ * buttons[data-tab="id"]; the panes' wrapper binds :data-dir="direction".
+ */
+Alpine.data('tabSlide', (initial = 'overview', order = []) => ({
+    tab: initial,
+    direction: 'forward',
+    order,
+
+    init() {
+        this.$nextTick(() => this.placePill(false));
+        window.addEventListener('resize', () => this.placePill(false));
+    },
+
+    switchTab(next) {
+        if (next === this.tab) {
+            return;
+        }
+
+        this.direction = this.order.indexOf(next) > this.order.indexOf(this.tab) ? 'forward' : 'back';
+        this.tab = next;
+        this.$nextTick(() => this.placePill(true));
+    },
+
+    placePill(animate) {
+        const pill = this.$refs.tabPill;
+        const button = this.$refs.tabNav?.querySelector(`[data-tab="${this.tab}"]`);
+
+        if (!pill || !button) {
+            return;
+        }
+
+        const to = { left: button.offsetLeft, width: button.offsetWidth };
+        const from = { left: pill.offsetLeft, width: pill.offsetWidth };
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        pill.style.left = `${to.left}px`;
+        pill.style.width = `${to.width}px`;
+        pill.style.opacity = '1';
+        button.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+
+        if (!animate || reduced || from.width === 0) {
+            return;
+        }
+
+        // Stretch across both tabs first, then pull the trailing edge in (the "goo").
+        const spanLeft = Math.min(from.left, to.left);
+        const spanRight = Math.max(from.left + from.width, to.left + to.width);
+
+        pill.animate([
+            { left: `${from.left}px`, width: `${from.width}px` },
+            { left: `${spanLeft}px`, width: `${spanRight - spanLeft}px`, offset: 0.45 },
+            { left: `${to.left}px`, width: `${to.width}px` },
+        ], { duration: 520, easing: 'cubic-bezier(0.65, 0, 0.35, 1)' });
+    },
+}));
+
+/**
  * Switches the light/dark theme, remembers the choice, and briefly enables a
  * cross-fade so every surface transitions together. Pages with charts listen
  * for `bmpc:theme` to redraw with the new palette. Returns the new state.

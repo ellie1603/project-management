@@ -41,7 +41,7 @@
             </div>
             <div class="sm:col-span-2">
                 <label for="request-document" class="mb-1 block text-sm font-medium text-slate-700">Supporting Document</label>
-                <input id="request-document" type="file" name="document" class="w-full text-sm">
+                <input id="request-document" type="file" name="document" accept=".{{ str_replace(',', ',.', \App\Http\Controllers\ProjectController::DOCUMENT_FILE_TYPES) }}" class="w-full text-sm">
             </div>
             <button class="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all duration-150 hover:bg-brand-700 sm:col-span-2">Submit Request</button>
         </form>

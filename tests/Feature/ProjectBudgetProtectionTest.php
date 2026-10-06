@@ -26,9 +26,9 @@ class ProjectBudgetProtectionTest extends TestCase
                 'title' => 'Updated title',
                 'approved_budget' => 1,
             ])
-            ->assertRedirect('/projects/'.$project->id);
+            ->assertForbidden();
 
         $this->assertSame('100000.00', $project->fresh()->approved_budget);
-        $this->assertSame('Updated title', $project->fresh()->title);
+        $this->assertNotSame('Updated title', $project->fresh()->title);
     }
 }

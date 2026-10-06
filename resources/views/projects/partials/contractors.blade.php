@@ -4,7 +4,7 @@
 @endphp
 
 <div class="mb-6">
-    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Contractors &amp; Providers</p>
+    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Contractors & Providers</p>
     <h2 class="mt-1 text-xl font-semibold text-slate-900">{{ $project->title }}</h2>
 </div>
 

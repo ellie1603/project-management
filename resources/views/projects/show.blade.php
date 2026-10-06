@@ -25,7 +25,7 @@
         ];
 @endphp
 
-<div class="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8" x-data="{ tab: @js(session('tab', old('_form') ? 'progress' : 'overview')) }">
+<div class="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8" x-data="tabSlide(@js(session('tab', old('_form') ? 'progress' : 'overview')), @js(array_column($tabs, 'id')))">
     <x-flash-toast />
     <x-flash-toast type="error" />
 
@@ -104,13 +104,15 @@
     </div>
 
     <div class="sticky top-16 z-10 -mx-4 bg-slate-50/95 px-4 py-2 backdrop-blur sm:mx-0 sm:px-0 sm:py-0 sm:bg-transparent sm:backdrop-blur-0">
-        <nav class="flex gap-1 overflow-x-auto rounded-2xl bg-white p-1.5 shadow-soft ring-1 ring-slate-900/5 sm:inline-flex">
+        <nav x-ref="tabNav" class="relative flex gap-1 overflow-x-auto rounded-2xl bg-white p-1.5 shadow-soft ring-1 ring-slate-900/5 sm:inline-flex">
+            <span x-ref="tabPill" aria-hidden="true" class="pointer-events-none absolute bottom-1.5 top-1.5 rounded-xl bg-brand-600 opacity-0 shadow-sm" style="left: 0; width: 0;"></span>
             @foreach ($tabs as $tabItem)
                 <button
                     type="button"
-                    @click="tab = '{{ $tabItem['id'] }}'"
-                    :class="tab === '{{ $tabItem['id'] }}' ? 'bg-brand-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'"
-                    class="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-sm font-medium transition-all duration-200 ease-elegant focus:outline-none"
+                    data-tab="{{ $tabItem['id'] }}"
+                    @click="switchTab('{{ $tabItem['id'] }}')"
+                    :class="tab === '{{ $tabItem['id'] }}' ? 'text-white delay-200' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'"
+                    class="relative z-10 flex shrink-0 items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-sm font-medium transition-colors duration-300 ease-elegant focus:outline-none"
                 >
                     <i data-lucide="{{ $tabItem['icon'] }}" class="h-4 w-4"></i>
                     {{ $tabItem['label'] }}
@@ -119,27 +121,27 @@
         </nav>
     </div>
 
-    <div
-        x-show="tab === 'overview'"
-        x-transition:enter="transition ease-smooth duration-200"
-        x-transition:enter-start="opacity-0 translate-y-1"
-        x-transition:enter-end="opacity-100 translate-y-0"
-    >@include('projects.partials.overview')</div>
-    <div x-show="tab === 'progress'" x-transition:enter="transition ease-smooth duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">@include('projects.partials.progress')</div>
-    @unless ($isPersonnel)
-        <div x-show="tab === 'budget'" x-transition:enter="transition ease-smooth duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">@include('projects.partials.budget')</div>
-    @endunless
-    @if ($isPersonnel)
-        <div x-show="tab === 'budget-request'" x-transition:enter="transition ease-smooth duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">@include('projects.partials.budget-request')</div>
-    @endif
-    @unless ($isPersonnel)
-        <div x-show="tab === 'personnel'" x-transition:enter="transition ease-smooth duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">@include('projects.partials.personnel')</div>
-        <div x-show="tab === 'contractors'" x-transition:enter="transition ease-smooth duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">@include('projects.partials.contractors')</div>
-    @endunless
-    <div x-show="tab === 'documents'" x-transition:enter="transition ease-smooth duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">@include('projects.partials.documents')</div>
-    @unless ($isPersonnel)
-        <div x-show="tab === 'activity'" x-transition:enter="transition ease-smooth duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">@include('projects.partials.activity')</div>
-    @endunless
+    @php
+        $paneTransition = 'x-transition:enter="tab-pane-enter" x-transition:enter-start="tab-pane-enter-start" x-transition:enter-end="tab-pane-enter-end"';
+    @endphp
+    <div class="tab-stage" :data-dir="direction">
+        <div x-show="tab === 'overview'" {!! $paneTransition !!}>@include('projects.partials.overview')</div>
+        <div x-show="tab === 'progress'" {!! $paneTransition !!} style="display: none;">@include('projects.partials.progress')</div>
+        @unless ($isPersonnel)
+            <div x-show="tab === 'budget'" {!! $paneTransition !!} style="display: none;">@include('projects.partials.budget')</div>
+        @endunless
+        @if ($isPersonnel)
+            <div x-show="tab === 'budget-request'" {!! $paneTransition !!} style="display: none;">@include('projects.partials.budget-request')</div>
+        @endif
+        @unless ($isPersonnel)
+            <div x-show="tab === 'personnel'" {!! $paneTransition !!} style="display: none;">@include('projects.partials.personnel')</div>
+            <div x-show="tab === 'contractors'" {!! $paneTransition !!} style="display: none;">@include('projects.partials.contractors')</div>
+        @endunless
+        <div x-show="tab === 'documents'" {!! $paneTransition !!} style="display: none;">@include('projects.partials.documents')</div>
+        @unless ($isPersonnel)
+            <div x-show="tab === 'activity'" {!! $paneTransition !!} style="display: none;">@include('projects.partials.activity')</div>
+        @endunless
+    </div>
 
     @if (auth()->user()->isAdmin())
         @include('projects.partials.edit-modal')

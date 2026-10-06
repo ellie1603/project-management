@@ -208,3 +208,37 @@
         }
     }
 }
+
+/* Project tabs: the pane slides in from the side you're heading towards. */
+.tab-stage {
+    overflow-x: clip;
+}
+
+.tab-pane-enter {
+    transition: transform 460ms cubic-bezier(0.22, 1, 0.36, 1), opacity 320ms ease-out;
+}
+
+.tab-stage[data-dir='forward'] .tab-pane-enter-start {
+    opacity: 0;
+    transform: translateX(72px);
+}
+
+.tab-stage[data-dir='back'] .tab-pane-enter-start {
+    opacity: 0;
+    transform: translateX(-72px);
+}
+
+.tab-pane-enter-end {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tab-pane-enter {
+        transition: opacity 150ms ease-out;
+    }
+
+    .tab-stage .tab-pane-enter-start {
+        transform: none;
+    }
+}
