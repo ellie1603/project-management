@@ -5,6 +5,7 @@ use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\BudgetRequestController;
 use App\Http\Controllers\ContractorController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DesktopInstallerController;
 use App\Http\Controllers\DocumentsController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
@@ -28,6 +29,11 @@ Route::get('/branding/logo', function () {
 
     return response()->file($path);
 })->name('branding.logo');
+
+// One-click Windows installer for the desktop app, offered on the login page.
+Route::get('/desktop-app/download', DesktopInstallerController::class)
+    ->middleware('throttle:10,1')
+    ->name('desktop.installer');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])

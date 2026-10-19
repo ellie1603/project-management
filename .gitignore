@@ -33,3 +33,6 @@ Thumbs.db
 
 # Personal Claude Code settings
 /.claude/settings.local.json
+
+# Internal development checklist (kept local only)
+/system-development-checklist.md

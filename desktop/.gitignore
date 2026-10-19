@@ -1,0 +1,5 @@
+# Build tools, intermediate files and packaged output (rebuild with build.ps1)
+/.tools/
+/build/
+/dist/
+

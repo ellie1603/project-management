@@ -43,4 +43,6 @@
             <i data-lucide="arrow-right" class="h-4 w-4"></i>
         </x-primary-button>
     </form>
+
+    <x-desktop-install-prompt />
 </x-guest-layout>
