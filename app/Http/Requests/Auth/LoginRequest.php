@@ -47,8 +47,16 @@ class LoginRequest extends FormRequest
         if (! Auth::attempt($credentials, $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
+            $remaining = RateLimiter::remaining($this->throttleKey(), $this->maxAttempts());
+
+            // The last allowed attempt locks sign-in, so say so now rather than on the next try.
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                'email' => $remaining > 0
+                    ? trans('auth.failed').' '.trans_choice(
+                        '{1} :count attempt left before sign-in is locked.|[2,*] :count attempts left before sign-in is locked.',
+                        $remaining,
+                    )
+                    : $this->lockoutMessage(),
             ]);
         }
 
@@ -62,19 +70,32 @@ class LoginRequest extends FormRequest
      */
     public function ensureIsNotRateLimited(): void
     {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+        if (! RateLimiter::tooManyAttempts($this->throttleKey(), $this->maxAttempts())) {
             return;
         }
 
         event(new Lockout($this));
 
+        throw ValidationException::withMessages([
+            'email' => $this->lockoutMessage(),
+        ]);
+    }
+
+    /**
+     * Failed sign-ins allowed for one email + IP address before it is locked.
+     */
+    private function maxAttempts(): int
+    {
+        return config('rate_limits.login_attempts');
+    }
+
+    private function lockoutMessage(): string
+    {
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
-        throw ValidationException::withMessages([
-            'email' => trans('auth.throttle', [
-                'seconds' => $seconds,
-                'minutes' => ceil($seconds / 60),
-            ]),
+        return trans('auth.throttle', [
+            'seconds' => $seconds,
+            'minutes' => ceil($seconds / 60),
         ]);
     }
 

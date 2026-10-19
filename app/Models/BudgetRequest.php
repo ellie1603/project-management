@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RestrictedToAssignedProjects;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class BudgetRequest extends Model
 {
-    use HasFactory;
+    use HasFactory, RestrictedToAssignedProjects;
 
     public const STATUSES = ['Pending', 'Approved', 'Rejected'];
 

@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RestrictedToAssignedProjects;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ContractorQuotation extends Model
 {
-    use HasFactory;
+    use HasFactory, RestrictedToAssignedProjects;
 
     protected $fillable = [
         'project_id',

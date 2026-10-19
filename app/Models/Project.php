@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RestrictedToAssignedProjects;
 use App\Services\BudgetService;
 use App\Services\TimelineService;
 use Illuminate\Database\Eloquent\Builder;
@@ -12,11 +13,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Validator;
 
 class Project extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, RestrictedToAssignedProjects, SoftDeletes;
 
     /**
      * The document types supported for project document uploads.
@@ -60,6 +63,24 @@ class Project extends Model
         'Building / Structural Development',
         'Installation & Finishing',
         'Inspection & Completion',
+    ];
+
+    /**
+     * Expected type of each query-string filter accepted by scopeFilter().
+     *
+     * @var array<string, array<int, string>>
+     */
+    private const FILTER_RULES = [
+        'status' => ['nullable', 'string', 'max:50'],
+        'category_id' => ['nullable', 'integer'],
+        'project_type' => ['nullable', 'string', 'max:255'],
+        'date_from' => ['nullable', 'date'],
+        'date_to' => ['nullable', 'date'],
+        'budget_min' => ['nullable', 'numeric'],
+        'budget_max' => ['nullable', 'numeric'],
+        'contractor_id' => ['nullable', 'integer'],
+        'assigned_user_id' => ['nullable', 'integer'],
+        'search' => ['nullable', 'string', 'max:255'],
     ];
 
     protected $fillable = [
@@ -210,18 +231,24 @@ class Project extends Model
      */
     public function scopeFilter(Builder $query, Request $request): Builder
     {
+        // Filters come straight from the URL, so a value of the wrong type is ignored rather than passed to the query.
+        $filters = array_filter(
+            Validator::make($request->only(array_keys(self::FILTER_RULES)), self::FILTER_RULES)->valid(),
+            fn (mixed $value): bool => filled($value),
+        );
+
         return $query
-            ->when($request->filled('status'), fn (Builder $q) => $q->where('status', $request->string('status')->toString()))
-            ->when($request->filled('category_id'), fn (Builder $q) => $q->where('category_id', $request->integer('category_id')))
-            ->when($request->filled('project_type'), fn (Builder $q) => $q->where('project_type', $request->string('project_type')->toString()))
-            ->when($request->filled('date_from'), fn (Builder $q) => $q->whereDate('planned_start_date', '>=', $request->date('date_from')))
-            ->when($request->filled('date_to'), fn (Builder $q) => $q->whereDate('target_completion_date', '<=', $request->date('date_to')))
-            ->when($request->filled('budget_min'), fn (Builder $q) => $q->where('approved_budget', '>=', $request->input('budget_min')))
-            ->when($request->filled('budget_max'), fn (Builder $q) => $q->where('approved_budget', '<=', $request->input('budget_max')))
-            ->when($request->filled('contractor_id'), fn (Builder $q) => $q->whereHas('contractors', fn (Builder $r) => $r->whereKey($request->integer('contractor_id'))))
-            ->when($request->filled('assigned_user_id'), fn (Builder $q) => $q->whereHas('assignments', fn (Builder $r) => $r->where('user_id', $request->integer('assigned_user_id'))))
-            ->when($request->filled('search'), function (Builder $q) use ($request): void {
-                $search = $request->string('search')->toString();
+            ->when(isset($filters['status']), fn (Builder $q) => $q->where('status', $filters['status']))
+            ->when(isset($filters['category_id']), fn (Builder $q) => $q->where('category_id', (int) $filters['category_id']))
+            ->when(isset($filters['project_type']), fn (Builder $q) => $q->where('project_type', $filters['project_type']))
+            ->when(isset($filters['date_from']), fn (Builder $q) => $q->whereDate('planned_start_date', '>=', Carbon::parse($filters['date_from'])))
+            ->when(isset($filters['date_to']), fn (Builder $q) => $q->whereDate('target_completion_date', '<=', Carbon::parse($filters['date_to'])))
+            ->when(isset($filters['budget_min']), fn (Builder $q) => $q->where('approved_budget', '>=', (float) $filters['budget_min']))
+            ->when(isset($filters['budget_max']), fn (Builder $q) => $q->where('approved_budget', '<=', (float) $filters['budget_max']))
+            ->when(isset($filters['contractor_id']), fn (Builder $q) => $q->whereHas('contractors', fn (Builder $r) => $r->whereKey((int) $filters['contractor_id'])))
+            ->when(isset($filters['assigned_user_id']), fn (Builder $q) => $q->whereHas('assignments', fn (Builder $r) => $r->where('user_id', (int) $filters['assigned_user_id'])))
+            ->when(isset($filters['search']), function (Builder $q) use ($filters): void {
+                $search = $filters['search'];
                 $q->where(function (Builder $nested) use ($search): void {
                     $nested->where('project_code', 'like', "%{$search}%")
                         ->orWhere('title', 'like', "%{$search}%")

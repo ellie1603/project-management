@@ -9,14 +9,20 @@ use App\Http\Controllers\DesktopInstallerController;
 use App\Http\Controllers\DocumentsController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ProjectCategoryController;
 use App\Http\Controllers\ProgressAssistController;
+use App\Http\Controllers\ProjectCategoryController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\UsersController;
 use Illuminate\Support\Facades\Route;
+
+// Record ids in URLs are always numeric; anything else is a 404 before the database is asked.
+Route::patterns(array_fill_keys(
+    ['project', 'document', 'progress', 'budgetRequest', 'contractor', 'user', 'category', 'report'],
+    '[0-9]+',
+));
 
 Route::get('/', function () {
     return redirect()->route(auth()->check() ? 'dashboard' : 'login');
@@ -44,7 +50,9 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::get('/search', [SearchController::class, 'index'])->name('search.index');
+    Route::get('/search', [SearchController::class, 'index'])
+        ->middleware('throttle:search')
+        ->name('search.index');
 
     Route::resource('projects', ProjectController::class);
     Route::get('/contractors/{contractor}', [ContractorController::class, 'show'])->name('contractors.show');
@@ -61,15 +69,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/documents', [DocumentsController::class, 'index'])->name('documents.index');
 
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-    Route::get('/reports/project-status', [ReportController::class, 'projectStatus'])
-        ->name('reports.project-status');
-    Route::get('/reports/budget', [ReportController::class, 'budget'])->name('reports.budget');
-    Route::get('/reports/accomplishment', [ReportController::class, 'accomplishment'])->name('reports.accomplishment');
-    Route::get('/reports/delayed-projects', [ReportController::class, 'delayedProjects'])->name('reports.delayed-projects');
-    Route::get('/reports/summary', [ReportController::class, 'summary'])->name('reports.summary');
-    Route::get('/reports/contractor-history', [ReportController::class, 'contractorHistory'])->name('reports.contractor-history');
-    Route::post('/reports/finance', [ReportController::class, 'storeFinanceReport'])->name('reports.finance.store');
-    Route::get('/reports/finance/{report}/download', [ReportController::class, 'financeReportDownload'])->name('reports.finance.download');
+    // Each report loads every visible project and may render a PDF or spreadsheet.
+    Route::middleware('throttle:reports')->group(function () {
+        Route::get('/reports/project-status', [ReportController::class, 'projectStatus'])
+            ->name('reports.project-status');
+        Route::get('/reports/budget', [ReportController::class, 'budget'])->name('reports.budget');
+        Route::get('/reports/accomplishment', [ReportController::class, 'accomplishment'])->name('reports.accomplishment');
+        Route::get('/reports/delayed-projects', [ReportController::class, 'delayedProjects'])->name('reports.delayed-projects');
+        Route::get('/reports/summary', [ReportController::class, 'summary'])->name('reports.summary');
+        Route::get('/reports/contractor-history', [ReportController::class, 'contractorHistory'])->name('reports.contractor-history');
+        Route::post('/reports/finance', [ReportController::class, 'storeFinanceReport'])->name('reports.finance.store');
+        Route::get('/reports/finance/{report}/download', [ReportController::class, 'financeReportDownload'])->name('reports.finance.download');
+    });
 
     Route::get('/audit-logs', [AuditLogController::class, 'index'])
         ->name('audit-logs.index');
@@ -83,10 +94,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/projects/{project}/quotations', [ContractorController::class, 'storeQuotation'])
         ->name('projects.quotations.store');
     Route::post('/projects/{project}/documents', [ProjectController::class, 'uploadDocument'])
+        ->middleware('throttle:uploads')
         ->name('projects.documents.store');
     Route::post('/projects/{project}/progress', [ProjectController::class, 'storeProgress'])
+        ->middleware('throttle:uploads')
         ->name('projects.progress.store');
     Route::put('/projects/{project}/progress/{progress}', [ProjectController::class, 'updateProgress'])
+        ->middleware('throttle:uploads')
         ->name('projects.progress.update');
     Route::delete('/projects/{project}/progress/{progress}', [ProjectController::class, 'destroyProgress'])
         ->name('projects.progress.destroy');
@@ -101,6 +115,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/projects/{project}/expenses', [BudgetController::class, 'storeExpense'])
         ->name('projects.expenses.store');
     Route::post('/projects/{project}/budget-requests', [BudgetRequestController::class, 'store'])
+        ->middleware('throttle:uploads')
         ->name('projects.budget-requests.store');
     Route::patch('/projects/{project}/budget-requests/{budgetRequest}/approve', [BudgetRequestController::class, 'approve'])
         ->name('projects.budget-requests.approve');

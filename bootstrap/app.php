@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureScalarQueryString;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -16,6 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // X-Forwarded-* so generated URLs use https and the real client IP is
         // what lands in the audit log.
         $middleware->trustProxies(at: '*');
+
+        // Baseline request ceiling for every page; heavier routes add their
+        // own stricter limiter in routes/web.php and routes/auth.php.
+        $middleware->web(append: ['throttle:global', EnsureScalarQueryString::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
