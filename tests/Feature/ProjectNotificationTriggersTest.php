@@ -44,9 +44,10 @@ class ProjectNotificationTriggersTest extends TestCase
         ]);
     }
 
-    public function test_submitting_a_budget_request_notifies_the_finance_team(): void
+    public function test_submitting_a_budget_request_notifies_the_admin_not_finance(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);
+        $finance = User::factory()->create(['role' => 'finance_accounting']);
         $personnel = User::factory()->create(['role' => 'project_personnel', 'position_type' => 'Foreman']);
         $project = Project::factory()->create([
             'project_code' => 'BMPC-PRJ-'.date('Y').'-0002',
@@ -63,9 +64,13 @@ class ProjectNotificationTriggersTest extends TestCase
             'notifiable_id' => $admin->id,
             'type' => BudgetRequestSubmittedNotification::class,
         ]);
+        $this->assertDatabaseMissing('notifications', [
+            'notifiable_id' => $finance->id,
+            'type' => BudgetRequestSubmittedNotification::class,
+        ]);
     }
 
-    public function test_approving_a_budget_request_notifies_the_requester_and_records_an_expense(): void
+    public function test_approving_a_budget_request_notifies_the_requester_without_recording_an_expense(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);
         $finance = User::factory()->create(['role' => 'finance_accounting']);
@@ -83,7 +88,7 @@ class ProjectNotificationTriggersTest extends TestCase
             'status' => 'Pending',
         ]);
 
-        $this->actingAs($finance)
+        $this->actingAs($admin)
             ->patch('/projects/'.$project->id.'/budget-requests/'.$budgetRequest->id.'/approve')
             ->assertRedirect();
 
@@ -91,10 +96,8 @@ class ProjectNotificationTriggersTest extends TestCase
             'notifiable_id' => $personnel->id,
             'type' => BudgetRequestApprovedNotification::class,
         ]);
-        $this->assertDatabaseHas('project_expenses', [
-            'project_id' => $project->id,
-            'amount' => '15000.00',
-        ]);
+        // Accounting records the actual payment as an expense; approval alone does not.
+        $this->assertSame(0, $project->expenses()->count());
         $this->assertSame('Approved', $budgetRequest->fresh()->status);
     }
 
@@ -115,11 +118,11 @@ class ProjectNotificationTriggersTest extends TestCase
             'status' => 'Pending',
         ]);
 
-        $this->actingAs($finance)
+        $this->actingAs($admin)
             ->patch('/projects/'.$project->id.'/budget-requests/'.$budgetRequest->id.'/reject', [])
             ->assertSessionHasErrors('remarks');
 
-        $this->actingAs($finance)
+        $this->actingAs($admin)
             ->patch('/projects/'.$project->id.'/budget-requests/'.$budgetRequest->id.'/reject', [
                 'remarks' => 'Exceeds remaining allocation',
             ])

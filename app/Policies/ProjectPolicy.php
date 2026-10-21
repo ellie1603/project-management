@@ -6,6 +6,11 @@ use App\Models\Project;
 use App\Models\ProjectProgress;
 use App\Models\User;
 
+/**
+ * Feature access comes from the role's permissions (App\Services\Permissions,
+ * set on the Roles & Permissions page). Users without "See every project"
+ * still only reach projects they are assigned to.
+ */
 class ProjectPolicy
 {
     public function viewAny(User $user): bool
@@ -15,40 +20,37 @@ class ProjectPolicy
 
     public function view(User $user, Project $project): bool
     {
-        if ($user->isAdmin() || $user->isFinance()) {
-            return true;
-        }
-
-        return $project->hasPersonnel($user);
+        return $user->hasPermission('projects.view_all') || $project->hasPersonnel($user);
     }
 
     public function create(User $user): bool
     {
-        return $user->isAdmin();
+        return $user->hasPermission('projects.register');
     }
 
-    /**
-     * Editing project information and assigning personnel are Admin-only;
-     * personnel record their work through progress updates instead.
-     */
     public function update(User $user, Project $project): bool
     {
-        return $user->isAdmin();
+        return $user->hasPermission('projects.edit');
+    }
+
+    public function assignPersonnel(User $user, Project $project): bool
+    {
+        return $user->hasPermission('projects.assign');
     }
 
     public function uploadDocument(User $user, Project $project): bool
     {
-        return $user->isAdmin() || $project->hasPersonnel($user);
+        return $user->hasPermission('documents.upload') && $this->view($user, $project);
     }
 
     public function manageDesign(User $user, Project $project): bool
     {
-        return $user->isAdmin();
+        return $user->hasPermission('documents.design');
     }
 
     public function createProgress(User $user, Project $project): bool
     {
-        return $project->hasPersonnel($user);
+        return $user->hasPermission('progress.update') && $project->hasPersonnel($user);
     }
 
     /**
@@ -58,41 +60,46 @@ class ProjectPolicy
     {
         return $progress->project_id === $project->id
             && $progress->user_id === $user->id
-            && $project->hasPersonnel($user);
+            && $this->createProgress($user, $project);
     }
 
     public function createBudgetRequest(User $user, Project $project): bool
     {
-        return $project->hasPersonnel($user);
+        return $user->hasPermission('budget_requests.submit') && $project->hasPersonnel($user);
+    }
+
+    public function reviewBudgetRequest(User $user, Project $project): bool
+    {
+        return $user->hasPermission('budget_requests.review');
     }
 
     public function manageContractors(User $user, Project $project): bool
     {
-        return $user->isAdmin();
+        return $user->hasPermission('contractors.manage');
     }
 
     public function viewContractors(User $user, Project $project): bool
     {
-        return $user->isAdmin() || $user->isFinance() || $project->hasPersonnel($user);
+        return $this->view($user, $project);
     }
 
-    public function manageFinance(User $user, Project $project): bool
+    public function viewBudget(User $user, Project $project): bool
     {
-        return $user->isAdmin() || $user->isFinance();
+        return $user->hasPermission('finance.view') && $this->view($user, $project);
     }
 
     public function delete(User $user, Project $project): bool
     {
-        return $user->isAdmin();
+        return $user->hasPermission('projects.delete');
     }
 
     public function restore(User $user, Project $project): bool
     {
-        return $user->isAdmin();
+        return $user->hasPermission('projects.delete');
     }
 
     public function forceDelete(User $user, Project $project): bool
     {
-        return $user->isAdmin();
+        return $user->hasPermission('projects.delete');
     }
 }

@@ -9,6 +9,8 @@
         'Progress Photo' => ['icon' => 'image', 'chip' => 'chip-ink'],
         'Other' => ['icon' => 'file', 'chip' => 'chip-ink'],
     ];
+    $documentPhotos = $documents->getCollection()->filter(fn ($doc) => $doc->project && $doc->isInlineImage())->values();
+    $documentViewerPhotos = $documentPhotos->map(fn ($doc) => $doc->toViewerPhoto($doc->project->title.' · '.$doc->document_name))->all();
 @endphp
 
 <section class="overflow-hidden rounded-3xl bg-white shadow-soft ring-1 ring-slate-900/5">
@@ -57,6 +59,13 @@
                         <td class="px-4 py-3.5 text-sm text-slate-600">{{ $document->uploader?->name ?? 'N/A' }}</td>
                         <td class="px-4 py-3.5 text-sm text-slate-500">{{ $document->created_at->format('M d, Y') }}</td>
                         <td class="px-5 py-3.5 text-right">
+                            @php $photoIndex = $documentPhotos->search(fn ($photo) => $photo->is($document)); @endphp
+                            @if ($photoIndex !== false)
+                                <button type="button" @click="$dispatch('view-photos', { photos: @js($documentViewerPhotos), index: {{ $photoIndex }} })" class="mr-1.5 inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition-all duration-150 ease-elegant hover:-translate-y-px hover:bg-brand-600 hover:text-white">
+                                    <i data-lucide="eye" class="h-3.5 w-3.5"></i>
+                                    View
+                                </button>
+                            @endif
                             @if ($document->project)
                                 <a href="{{ route('projects.documents.download', [$document->project, $document]) }}" data-turbo="false" class="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition-all duration-150 ease-elegant hover:-translate-y-px hover:bg-brand-600 hover:text-white">
                                     <i data-lucide="download" class="h-3.5 w-3.5"></i>

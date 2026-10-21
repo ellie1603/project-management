@@ -7,6 +7,7 @@ use App\Http\Controllers\ContractorController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DesktopInstallerController;
 use App\Http\Controllers\DocumentsController;
+use App\Http\Controllers\ExpenseBatchController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProgressAssistController;
@@ -15,6 +16,8 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\SystemPermissionsController;
+use App\Http\Controllers\SystemUsageController;
 use App\Http\Controllers\UsersController;
 use Illuminate\Support\Facades\Route;
 
@@ -124,10 +127,21 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/budget', [BudgetController::class, 'overview'])->name('budget.overview');
     Route::get('/budget/expenses', [BudgetController::class, 'expensesLog'])->name('budget.expenses');
+    // Finance's quick entry: several expenses at once, each a project, date, amount, and optional reference.
+    Route::get('/budget/expenses/new', [ExpenseBatchController::class, 'create'])->name('budget.expenses.batch');
+    Route::post('/budget/expenses/batch', [ExpenseBatchController::class, 'store'])->name('budget.expenses.batch.store');
     Route::get('/budget/requests', [BudgetRequestController::class, 'index'])->name('budget.requests');
 
     Route::resource('users', UsersController::class)->except(['show', 'edit']);
     Route::patch('/users/{user}/toggle-status', [UsersController::class, 'toggleStatus'])->name('users.toggle-status');
+
+    // System Administrator (developer account) only.
+    Route::middleware('can:manage-system')->prefix('system')->name('system.')->group(function () {
+        Route::get('/permissions', [SystemPermissionsController::class, 'edit'])->name('permissions');
+        Route::put('/permissions', [SystemPermissionsController::class, 'update'])->name('permissions.update');
+        Route::get('/usage', [SystemUsageController::class, 'index'])->name('usage');
+        Route::get('/usage/{user}', [SystemUsageController::class, 'show'])->name('usage.user');
+    });
 
     Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
     Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');

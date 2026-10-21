@@ -17,32 +17,32 @@ class BudgetController extends Controller
 
     public function storeExpense(Request $request, Project $project): RedirectResponse
     {
-        $this->authorize('manageFinance', $project);
+        $this->authorize('view', $project);
+        $this->authorize('create', ProjectExpense::class);
 
         $validated = $request->validate([
-            'expense_date' => ['required', 'date'],
-            'category' => ['required', 'string', 'max:100'],
-            'description' => ['required', 'string'],
+            'expense_date' => ['required', 'date', 'before_or_equal:today'],
             'amount' => ['required', 'numeric', 'gt:0'],
             'reference_number' => ['nullable', 'string', 'max:100'],
-            'payee' => ['nullable', 'string', 'max:255'],
-            'document_path' => ['nullable', 'string', 'max:500'],
-            'remarks' => ['nullable', 'string'],
+        ], ['expense_date.before_or_equal' => 'The date cannot be in the future.']);
+
+        $expense = $project->expenses()->create([
+            ...$validated,
+            'created_by' => Auth::id(),
         ]);
 
-        $validated['created_by'] = Auth::id();
-        $expense = $project->expenses()->create($validated);
-        app(AuditLogger::class)->record($request, 'created', 'project_expenses', $expense->id, "Recorded expense for {$project->title}.", null, $expense->toArray());
+        app(AuditLogger::class)->record($request, 'created', 'project_expenses', $expense->id, 'Recorded expense of ₱'.number_format((float) $expense->amount, 2)." for {$project->title}.", null, $expense->toArray());
 
         $this->budgetService->checkThresholds($project);
 
-        return redirect()->route('projects.show', $project);
+        return redirect()->route('projects.show', $project)
+            ->with('status', 'Expense recorded.')
+            ->with('tab', 'budget');
     }
 
     public function show(Project $project): View
     {
-        $this->authorize('view', $project);
-        abort_if(Auth::user()->isProjectPersonnel(), 403);
+        $this->authorize('viewBudget', $project);
         $project->load(['expenses.creator', 'budgetRequests.requester', 'budgetRequests.reviewer']);
 
         return view('projects.budget', compact('project'));
@@ -92,6 +92,7 @@ class BudgetController extends Controller
                     $nested->where('description', 'like', "%{$search}%")
                         ->orWhere('category', 'like', "%{$search}%")
                         ->orWhere('payee', 'like', "%{$search}%")
+                        ->orWhere('reference_number', 'like', "%{$search}%")
                         ->orWhereHas('project', fn ($projectQuery) => $projectQuery->where('title', 'like', "%{$search}%")
                             ->orWhere('project_code', 'like', "%{$search}%"));
                 });
@@ -105,6 +106,6 @@ class BudgetController extends Controller
 
     private function authorizeFinanceAccess(): void
     {
-        abort_unless(Auth::user()->isAdmin() || Auth::user()->isFinance(), 403);
+        abort_unless(Auth::user()->hasPermission('finance.view'), 403);
     }
 }

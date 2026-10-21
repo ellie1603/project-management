@@ -51,11 +51,15 @@
                         </td>
                         <td class="px-5 py-3.5 text-right">
                             <div class="flex items-center justify-end gap-3">
+                                @can('update', $user)
                                 <button type="button" @click="$dispatch('open-modal', 'edit-user-{{ $user->id }}')" class="inline-flex items-center gap-1 text-sm font-medium text-slate-500 transition-colors duration-150 hover:text-brand-600">
                                     <i data-lucide="pencil" class="h-3.5 w-3.5"></i>
                                     Edit
                                 </button>
-                                @if ($user->id !== auth()->id())
+                                @else
+                                <span class="inline-flex items-center gap-1 text-xs text-slate-400"><i data-lucide="lock" class="h-3.5 w-3.5"></i> Protected</span>
+                                @endcan
+                                @if ($user->id !== auth()->id() && auth()->user()->can('delete', $user))
                                     <form method="POST" action="{{ route('users.toggle-status', $user) }}">
                                         @csrf
                                         @method('PATCH')

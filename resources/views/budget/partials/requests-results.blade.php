@@ -1,4 +1,4 @@
-@php $canReview = auth()->user()->isAdmin() || auth()->user()->isFinance(); @endphp
+@php $canReview = auth()->user()->hasPermission('budget_requests.review'); @endphp
 
 <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
     <div class="overflow-x-auto">

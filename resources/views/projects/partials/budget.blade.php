@@ -1,6 +1,7 @@
 @php
     $budget = $project->budgetSummary();
-    $canReview = auth()->user()->isAdmin() || auth()->user()->isFinance();
+    $canReview = auth()->user()->can('reviewBudgetRequest', $project);
+    $canRecordExpense = auth()->user()->can('create', App\Models\ProjectExpense::class);
 @endphp
 
 <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
@@ -116,18 +117,21 @@
     </div>
 </section>
 
-@if (auth()->user()->isFinance())
     <section class="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h3 class="text-sm font-semibold text-slate-900">Recorded Expenses</h3>
+        <div class="flex flex-wrap items-center justify-between gap-2">
+            <h3 class="text-sm font-semibold text-slate-900">Recorded Expenses</h3>
+            @if ($canRecordExpense)
+                <a href="{{ route('budget.expenses.batch', ['project' => $project->id]) }}" class="text-xs font-medium text-slate-500 underline hover:text-slate-900">Add several at once</a>
+            @endif
+        </div>
         <div x-data="pager(10)" data-pager>
         <div class="mt-3 overflow-x-auto">
             <table class="min-w-full text-left text-sm">
                 <thead class="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
                     <tr>
                         <th class="px-2 py-2">Date</th>
-                        <th class="px-2 py-2">Category</th>
                         <th class="px-2 py-2">Amount</th>
-                        <th class="px-2 py-2">Payee</th>
+                        <th class="px-2 py-2">Reference</th>
                         <th class="px-2 py-2">Recorded By</th>
                     </tr>
                 </thead>
@@ -135,14 +139,18 @@
                     @forelse ($project->expenses->sortByDesc('expense_date') as $expense)
                         <tr data-page-item>
                             <td class="px-2 py-2">{{ $expense->expense_date }}</td>
-                            <td class="px-2 py-2">{{ $expense->category }}</td>
-                            <td class="px-2 py-2">₱{{ number_format((float) $expense->amount, 2) }}</td>
-                            <td class="px-2 py-2">{{ $expense->payee ?? 'N/A' }}</td>
+                            <td class="px-2 py-2 whitespace-nowrap">₱{{ number_format((float) $expense->amount, 2) }}</td>
+                            <td class="px-2 py-2">
+                                {{ $expense->reference_number ?? '—' }}
+                                @if ($expense->description)
+                                    <p class="text-xs text-slate-400">{{ $expense->description }}</p>
+                                @endif
+                            </td>
                             <td class="px-2 py-2">{{ $expense->creator?->name ?? 'N/A' }}</td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-2 py-5 text-center text-slate-500">No expenses recorded yet.</td>
+                            <td colspan="4" class="px-2 py-5 text-center text-slate-500">No expenses recorded yet.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -151,16 +159,16 @@
         <x-pager-controls class="!px-0" />
         </div>
 
-        <form method="POST" action="{{ route('projects.expenses.store', $project) }}" class="mt-4 grid gap-3 border-t border-slate-100 pt-4 sm:grid-cols-2">
+        @if ($canRecordExpense)
+        <form method="POST" action="{{ route('projects.expenses.store', $project) }}" class="mt-4 grid gap-3 border-t border-slate-100 pt-4 sm:grid-cols-3">
             @csrf
-            <input type="date" name="expense_date" value="{{ now()->toDateString() }}" aria-label="Expense date" class="rounded-md border-slate-300 text-sm" required>
-            <input name="category" placeholder="Category" aria-label="Expense category" class="rounded-md border-slate-300 text-sm" required>
-            <input type="number" step="0.01" name="amount" placeholder="Amount" aria-label="Expense amount" class="rounded-md border-slate-300 text-sm" required>
-            <input name="reference_number" placeholder="Reference number" aria-label="Reference number" class="rounded-md border-slate-300 text-sm">
-            <input name="payee" placeholder="Payee / Supplier" aria-label="Payee or supplier" class="rounded-md border-slate-300 text-sm">
-            <input name="document_path" placeholder="Supporting document path" aria-label="Supporting document path" class="rounded-md border-slate-300 text-sm">
-            <textarea name="description" placeholder="Description" aria-label="Expense description" class="rounded-md border-slate-300 text-sm sm:col-span-2" required></textarea>
-            <button class="rounded-md bg-brand-600 px-3 py-2 text-sm font-medium text-white sm:col-span-2">Record Expense</button>
+            <input type="number" step="0.01" min="0" inputmode="decimal" name="amount" value="{{ old('amount') }}" placeholder="Total amount (₱)" aria-label="Total amount" class="rounded-md border-slate-300 text-sm" required>
+            <input type="date" name="expense_date" value="{{ old('expense_date', now()->toDateString()) }}" max="{{ now()->toDateString() }}" aria-label="Expense date" class="rounded-md border-slate-300 text-sm" required>
+            <input name="reference_number" value="{{ old('reference_number') }}" placeholder="Reference no. (optional)" aria-label="Reference number" class="rounded-md border-slate-300 text-sm">
+            @if ($errors->hasAny(['amount', 'expense_date', 'reference_number']))
+                <p class="text-xs text-red-600 sm:col-span-3">{{ $errors->first('amount') ?: ($errors->first('expense_date') ?: $errors->first('reference_number')) }}</p>
+            @endif
+            <button class="rounded-md bg-brand-600 px-3 py-2 text-sm font-medium text-white sm:col-span-3">Record Expense</button>
         </form>
+        @endif
     </section>
-@endif

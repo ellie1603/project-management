@@ -105,7 +105,7 @@ What the full build does:
 
 ## Using the app
 
-* **Default accounts** in a new offline database: `admin@bmpc.test`, `finance@bmpc.test`,
+* **Default accounts** in a new offline database: `ceo@bmpc.test`, `sysadmin@bmpc.test`, `finance@bmpc.test`,
   `juan@bmpc.test`, `maria@bmpc.test` and `pedro@bmpc.test`, all with password `password123`.
   Change these passwords right after the first sign-in.
 * **Title-bar menu:** right-click the title bar for Reload, Go to dashboard, Desktop settings,

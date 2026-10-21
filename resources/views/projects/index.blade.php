@@ -2,20 +2,22 @@
 
 @section('content')
 <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <x-flash-toast />
+
     <x-page-hero
         eyebrow="Projects"
         title="All Projects"
         subtitle="Every project you have access to — search, filter, and open any one for full budget, timeline, and progress detail."
         class="animate-rise-in"
     >
-        @if (auth()->user()->isAdmin())
+        @can('create', App\Models\Project::class)
             <x-slot name="aside">
                 <a href="{{ route('projects.create') }}" class="inline-flex items-center gap-2 rounded-xl bg-accent-500 px-4 py-2.5 text-sm font-semibold text-white shadow-glow hover:bg-accent-600 transition-transform duration-200 ease-elegant hover:-translate-y-0.5">
                     <i data-lucide="plus" class="h-4 w-4"></i>
                     Register Project
                 </a>
             </x-slot>
-        @endif
+        @endcan
 
         <x-slot name="footer">
             <div class="grid grid-cols-2 gap-6 sm:grid-cols-4">

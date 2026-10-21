@@ -84,6 +84,8 @@
             </div>
         </div>
 
+        <x-photo-viewer />
+
         <script>
             document.addEventListener('turbo:load', () => {
                 if (window.lucide) {

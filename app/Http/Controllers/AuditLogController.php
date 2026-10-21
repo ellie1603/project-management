@@ -11,7 +11,7 @@ class AuditLogController extends Controller
 {
     public function index(Request $request): View
     {
-        abort_unless(Auth::user()->isAdmin(), 403);
+        abort_unless(Auth::user()->hasPermission('audit_logs.view'), 403);
 
         $auditLogs = AuditLog::query()
             ->with('user')

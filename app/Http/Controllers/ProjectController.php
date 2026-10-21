@@ -40,9 +40,6 @@ class ProjectController extends Controller
     /** Project documents: office files, images, and design drawings — nothing a browser would execute. */
     public const DOCUMENT_FILE_TYPES = 'pdf,doc,docx,xls,xlsx,ppt,pptx,csv,txt,jpg,jpeg,png,webp,heic,heif,dwg,dxf';
 
-    /** Only raster images are safe to display inline; SVG can carry scripts. */
-    private const INLINE_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-
     private const MAX_PROGRESS_ATTACHMENTS = 2;
 
     private const MAX_PROGRESS_ATTACHMENT_KB = 5120;
@@ -171,8 +168,8 @@ class ProjectController extends Controller
             'budgetRequests.requester',
             'budgetRequests.reviewer',
         ]);
-        $projectPersonnel = Auth::user()->isAdmin() ? $this->assignablePersonnel() : collect();
-        $availableContractors = (Auth::user()->isAdmin())
+        $projectPersonnel = Auth::user()->can('assignPersonnel', $project) ? $this->assignablePersonnel() : collect();
+        $availableContractors = Auth::user()->can('manageContractors', $project)
             ? Contractor::query()->orderBy('name')->get()
             : collect();
         $activityLog = $project->activityLog();
@@ -232,18 +229,41 @@ class ProjectController extends Controller
         return redirect()->route('projects.show', $project);
     }
 
-    public function destroy(Project $project): RedirectResponse
+    /**
+     * Soft-deletes the project. The admin must retype the project code so a
+     * whole project's budget, progress, and documents are never removed by a stray click.
+     */
+    public function destroy(Request $request, Project $project): RedirectResponse
     {
         $this->authorize('delete', $project);
 
+        $request->validateWithBag('projectDeletion', [
+            'confirm_code' => ['required', 'string', Rule::in([$project->project_code])],
+        ], [
+            'confirm_code.in' => 'The project code you typed does not match.',
+        ], [
+            'confirm_code' => 'project code',
+        ]);
+
+        $oldValues = $project->toArray();
         $project->delete();
 
-        return redirect()->route('projects.index');
+        app(AuditLogger::class)->record(
+            $request,
+            'deleted',
+            'projects',
+            $project->id,
+            "Deleted project {$project->project_code} ({$project->title}).",
+            $oldValues,
+        );
+
+        return redirect()->route('projects.index')
+            ->with('status', "Project {$project->project_code} deleted.");
     }
 
     public function assignPersonnel(Request $request, Project $project): RedirectResponse
     {
-        $this->authorize('update', $project);
+        $this->authorize('assignPersonnel', $project);
 
         $validated = $request->validate([
             'user_id' => ['required', $this->assignablePersonnelRule()],
@@ -334,7 +354,7 @@ class ProjectController extends Controller
         abort_unless($document->project_id === $project->id, 404);
 
         // ?inline=1 lets progress photos render as thumbnails instead of downloading.
-        if (request()->boolean('inline') && in_array($document->file_type, self::INLINE_IMAGE_TYPES, true)) {
+        if (request()->boolean('inline') && $document->isInlineImage()) {
             return Storage::disk('local')->response($document->file_path, $document->document_name, [
                 'Content-Type' => $document->file_type,
                 'Cache-Control' => 'private, max-age=86400',

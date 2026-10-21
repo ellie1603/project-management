@@ -8,19 +8,15 @@ use App\Notifications\BudgetRequestApprovedNotification;
 use App\Notifications\BudgetRequestRejectedNotification;
 use App\Notifications\BudgetRequestSubmittedNotification;
 use App\Services\AuditLogger;
-use App\Services\BudgetService;
 use App\Services\ProjectNotifier;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class BudgetRequestController extends Controller
 {
-    public function __construct(private readonly BudgetService $budgetService) {}
-
     public function store(Request $request, Project $project): RedirectResponse
     {
         $this->authorize('createBudgetRequest', $project);
@@ -53,39 +49,28 @@ class BudgetRequestController extends Controller
         );
 
         $notifier = app(ProjectNotifier::class);
-        $notifier->notify($notifier->financeTeam(), new BudgetRequestSubmittedNotification($project, $budgetRequest), Auth::user());
+        $notifier->notify($notifier->admins(), new BudgetRequestSubmittedNotification($project, $budgetRequest), Auth::user());
 
         return redirect()->route('projects.show', $project)->with('status', 'Budget request submitted successfully.');
     }
 
     public function approve(Request $request, Project $project, BudgetRequest $budgetRequest): RedirectResponse
     {
-        $this->authorize('manageFinance', $project);
+        $this->authorize('reviewBudgetRequest', $project);
         abort_unless($budgetRequest->project_id === $project->id, 404);
         abort_unless($budgetRequest->status === 'Pending', 422, 'This budget request has already been reviewed.');
 
         $validated = $request->validate(['remarks' => ['nullable', 'string']]);
         $oldValues = $budgetRequest->toArray();
 
-        DB::transaction(function () use ($project, $budgetRequest, $validated): void {
-            $expense = $project->expenses()->create([
-                'expense_date' => now()->toDateString(),
-                'category' => 'Budget Request',
-                'description' => $budgetRequest->purpose.($budgetRequest->description ? ' — '.$budgetRequest->description : ''),
-                'amount' => $budgetRequest->amount,
-                'reference_number' => 'BR-'.str_pad((string) $budgetRequest->id, 4, '0', STR_PAD_LEFT),
-                'document_path' => $budgetRequest->document_path,
-                'created_by' => Auth::id(),
-            ]);
-
-            $budgetRequest->update([
-                'status' => 'Approved',
-                'reviewed_by' => Auth::id(),
-                'reviewed_at' => now(),
-                'remarks' => $validated['remarks'] ?? null,
-                'expense_id' => $expense->id,
-            ]);
-        });
+        // Approval only authorizes the amount; Accounting records the actual
+        // payment as an expense when it is made, so nothing is spent here.
+        $budgetRequest->update([
+            'status' => 'Approved',
+            'reviewed_by' => Auth::id(),
+            'reviewed_at' => now(),
+            'remarks' => $validated['remarks'] ?? null,
+        ]);
 
         app(AuditLogger::class)->record(
             $request, 'approved', 'budget_requests', $budgetRequest->id,
@@ -95,14 +80,13 @@ class BudgetRequestController extends Controller
 
         $notifier = app(ProjectNotifier::class);
         $notifier->notify(collect([$budgetRequest->requester]), new BudgetRequestApprovedNotification($project, $budgetRequest), Auth::user());
-        $this->budgetService->checkThresholds($project->fresh());
 
         return back()->with('status', 'Budget request approved.');
     }
 
     public function reject(Request $request, Project $project, BudgetRequest $budgetRequest): RedirectResponse
     {
-        $this->authorize('manageFinance', $project);
+        $this->authorize('reviewBudgetRequest', $project);
         abort_unless($budgetRequest->project_id === $project->id, 404);
         abort_unless($budgetRequest->status === 'Pending', 422, 'This budget request has already been reviewed.');
 
@@ -134,7 +118,7 @@ class BudgetRequestController extends Controller
      */
     public function index(Request $request): View
     {
-        abort_unless(Auth::user()->isAdmin() || Auth::user()->isFinance(), 403);
+        abort_unless(Auth::user()->hasPermission('finance.view'), 403);
 
         $status = $request->string('status', 'Pending')->toString();
 

@@ -7,7 +7,7 @@
             <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Provider</p>
             <h1 class="mt-1 text-2xl font-semibold text-slate-900">{{ $contractor->name }}</h1>
         </div>
-        @if (auth()->user()->isAdmin() && $contractor->user)
+        @if (auth()->user()->hasPermission('users.manage') && $contractor->user)
             <a href="{{ route('users.index', ['search' => $contractor->user->email, 'edit' => $contractor->user->id]) }}" class="inline-flex items-center gap-2 rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors duration-150 hover:bg-slate-50">
                 <i data-lucide="pencil" class="h-4 w-4"></i>
                 Edit via Users

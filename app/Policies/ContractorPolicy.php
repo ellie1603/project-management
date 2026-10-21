@@ -14,7 +14,7 @@ class ContractorPolicy
 
     public function view(User $user, Contractor $contractor): bool
     {
-        return $user->isAdmin() || $user->isFinance() || $contractor->projects()->whereHas('assignments', function ($query) use ($user) {
+        return $user->hasPermission('projects.view_all') || $contractor->projects()->whereHas('assignments', function ($query) use ($user) {
             $query->where('user_id', $user->id);
         })->exists();
     }

@@ -15,7 +15,7 @@
         @endforelse
     </ul>
 
-    @if (auth()->user()->isAdmin())
+    @can('assignPersonnel', $project)
         <form method="POST" action="{{ route('projects.assign', $project) }}" class="mt-4 grid gap-3 border-t border-slate-100 pt-4 sm:grid-cols-3">
             @csrf
             <select name="user_id" aria-label="Select personnel" class="rounded-md border-slate-300 text-sm" required>
@@ -33,5 +33,5 @@
             <input name="responsibility" placeholder="Responsibility" aria-label="Responsibility" class="rounded-md border-slate-300 text-sm" required>
             <button class="rounded-md bg-brand-600 px-3 py-2 text-sm font-medium text-white sm:col-span-3">Assign Personnel</button>
         </form>
-    @endif
+    @endcan
 </section>

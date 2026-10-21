@@ -1,9 +1,13 @@
 import Alpine from 'alpinejs';
 import progressUpdate from './progress-update';
+import photoViewer from './photo-viewer';
+import expenseBatch from './expense-batch';
 
 window.Alpine = Alpine;
 
 Alpine.data('progressUpdate', progressUpdate);
+Alpine.data('photoViewer', photoViewer);
+Alpine.data('expenseBatch', expenseBatch);
 
 /**
  * Client-side paging for lists already rendered on the page (project tabs,

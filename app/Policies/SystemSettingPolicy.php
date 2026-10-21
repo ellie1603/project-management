@@ -11,6 +11,6 @@ class SystemSettingPolicy
      */
     public function manage(User $user): bool
     {
-        return $user->isAdmin();
+        return $user->hasPermission('settings.manage');
     }
 }

@@ -1,5 +1,6 @@
 @php
-    $canWriteProgress = auth()->user()->isProjectPersonnel() && $project->hasPersonnel(auth()->user());
+    $documentPhotos = $project->documents->filter->isInlineImage()->values();
+    $documentViewerPhotos = $documentPhotos->map(fn ($doc) => $doc->toViewerPhoto($doc->document_type.' · '.$doc->document_name))->all();
 @endphp
 
 <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -22,7 +23,13 @@
                     </p>
                     <p class="text-xs text-slate-500">{{ $document->document_name }} · uploaded by {{ $document->uploader?->name ?? 'N/A' }}</p>
                 </div>
-                <a href="{{ route('projects.documents.download', [$project, $document]) }}" data-turbo="false" class="font-medium text-slate-700 underline">Download</a>
+                <div class="flex shrink-0 items-center gap-3">
+                    @php $photoIndex = $documentPhotos->search(fn ($photo) => $photo->is($document)); @endphp
+                    @if ($photoIndex !== false)
+                        <button type="button" @click="$dispatch('view-photos', { photos: @js($documentViewerPhotos), index: {{ $photoIndex }} })" class="font-medium text-slate-700 underline">View</button>
+                    @endif
+                    <a href="{{ route('projects.documents.download', [$project, $document]) }}" data-turbo="false" class="font-medium text-slate-700 underline">Download</a>
+                </div>
             </li>
         @empty
             <li class="py-3 text-sm text-slate-500">No documents uploaded.</li>
@@ -31,7 +38,7 @@
     <x-pager-controls class="!px-0" />
     </div>
 
-    @if (auth()->user()->isAdmin() || $canWriteProgress)
+    @can('uploadDocument', $project)
         <form method="POST" action="{{ route('projects.documents.store', $project) }}" enctype="multipart/form-data" class="mt-4 space-y-3 border-t border-slate-100 pt-4">
             @csrf
             <select name="document_type" aria-label="Document type" class="w-full rounded-md border-slate-300 text-sm" required>
@@ -44,5 +51,5 @@
             <input name="description" placeholder="Description" aria-label="Document description" class="w-full rounded-md border-slate-300 text-sm">
             <button class="rounded-md bg-brand-600 px-3 py-2 text-sm font-medium text-white">Upload Document</button>
         </form>
-    @endif
+    @endcan
 </section>

@@ -18,7 +18,7 @@ class SearchController extends Controller
 
         $projectsQuery = Project::query()->with('category');
 
-        if ($user->isProjectPersonnel()) {
+        if (! $user->hasPermission('projects.view_all')) {
             $projectsQuery->whereHas('assignments', fn ($assignmentQuery) => $assignmentQuery->where('user_id', $user->id));
         }
 
@@ -37,7 +37,7 @@ class SearchController extends Controller
                 ->limit(25)
                 ->get();
 
-            if ($user->isAdmin() || $user->isFinance()) {
+            if ($user->hasPermission('projects.view_all')) {
                 $contractors = Contractor::query()
                     ->where('name', 'like', "%{$term}%")
                     ->orderBy('name')

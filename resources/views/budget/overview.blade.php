@@ -40,7 +40,7 @@
         <x-stat-card label="Total Expenses" value="₱{{ number_format($stats['total_expenses'], 2) }}" icon="calculator" sub="Recorded to date" class="animate-rise-in" style="animation-delay: 110ms" />
         <x-stat-card label="Remaining Budget" value="₱{{ number_format($stats['remaining_budget'], 2) }}" icon="piggy-bank" sub="Available to spend" class="animate-rise-in" style="animation-delay: 160ms" />
         <x-stat-card label="Overall Utilization" value="{{ $stats['overall_utilization_percent'] }}%" icon="bar-chart-3" sub="Across all projects" class="animate-rise-in" style="animation-delay: 210ms" />
-        <x-stat-card label="Pending Requests" value="₱{{ number_format($stats['pending_requests'], 2) }}" icon="hand-coins" sub="Awaiting review" class="col-span-2 animate-rise-in md:col-span-1" style="animation-delay: 260ms" />
+        <x-stat-card label="Pending Requests" value="₱{{ number_format($stats['pending_requests'], 2) }}" icon="hand-coins" sub="Awaiting CEO approval" class="col-span-2 animate-rise-in md:col-span-1" style="animation-delay: 260ms" />
     </div>
 
     <section class="mt-6 animate-rise-in overflow-hidden rounded-3xl bg-white shadow-soft ring-1 ring-slate-900/5 transition-shadow duration-300 ease-elegant hover:shadow-elevated" style="animation-delay: 260ms">

@@ -16,8 +16,8 @@ import plugin from 'tailwindcss/plugin';
  * lets `bg-slate-900 text-white` stay a dark button in dark mode while
  * `text-slate-900` turns light.
  *
- * `.palette-fixed` pins a subtree to the light values, for surfaces that look the
- * same in both themes (the blue page hero, splash screens).
+ * `.palette-fixed` pins a subtree to the light values, for surfaces that keep their
+ * light-theme text in both themes (the page hero, splash screens).
  */
 
 const SHADES = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
@@ -38,11 +38,14 @@ const highlight = { 50: '#fefbe8', 100: '#fdf5c4', 200: '#fbeb8c', 300: '#f7dc4b
 const dark = {
     fgSlate: { 50: '#1d1d20', 100: '#26262a', 200: '#303035', 300: '#3f3f46', 400: '#7c7c85', 500: '#a1a1aa', 600: '#c4c4cc', 700: '#d9d9de', 800: '#e8e8ec', 900: '#f4f4f5', 950: '#fafafa' },
     bgSlate: { 50: '#0a0a0b', 100: '#232326', 200: '#2c2c30', 300: '#3a3a40', 400: '#52525b', 500: '#71717a', 600: '#8b8b94', 700: '#52525b', 800: '#46464e', 900: '#34343a', 950: '#1f1f23' },
-    // On dark surfaces blue text/borders lighten to pale blue for contrast, while
-    // blue backgrounds (buttons, chips, active nav) use a muted navy that sits
-    // calmly on near-black instead of a bright saturated blue.
-    fgBrand: { 50: '#141b2b', 100: '#1a2540', 200: '#23335a', 300: '#34508c', 400: '#5d82c9', 500: '#86a6de', 600: '#a9c1ea', 700: '#c8d8f3', 800: '#e1eaf9', 900: '#f1f5fd', 950: '#ffffff' },
-    bgBrand: { 50: '#10172a', 100: '#141d33', 200: '#1a2744', 300: '#223459', 400: '#2a4170', 500: '#2f4b80', 600: '#244177', 700: '#1d3665', 800: '#182d55', 900: '#132446', 950: '#0e1b36' },
+    // Dark mode drops the blue entirely: brand text/borders become light neutrals and
+    // brand backgrounds (buttons, chips, active nav) a graphite grey, so orange
+    // stays the only accent and status colours (green/amber/red) carry meaning.
+    fgBrand: { 50: '#1a1a1d', 100: '#2c2c31', 200: '#3a3a40', 300: '#71717a', 400: '#8b8b94', 500: '#a1a1aa', 600: '#e4e4e7', 700: '#f4f4f5', 800: '#fafafa', 900: '#ffffff', 950: '#ffffff' },
+    bgBrand: { 50: '#1c1c1f', 100: '#222226', 200: '#2a2a2e', 300: '#333339', 400: '#3f3f46', 500: '#4a4a52', 600: '#52525b', 700: '#5e5e67', 800: '#3f3f46', 900: '#2a2a2f', 950: '#1f1f23' },
+    // The page hero keeps light-theme text colours (it's .palette-fixed); on its
+    // graphite dark surface those resolve to plain zinc greys rather than pale blue.
+    heroFgSlate: { ...ink, 500: '#8e8e96' },
 };
 
 const toRgb = (hex) => {
@@ -181,6 +184,11 @@ export default {
                 ':root': { ...lightVars, colorScheme: 'light' },
                 '.dark': { ...darkVars, colorScheme: 'dark' },
                 '.dark .palette-fixed': { ...lightVars, colorScheme: 'light' },
+                '.dark .palette-fixed.hero-brand': {
+                    ...vars('fg-slate', dark.heroFgSlate),
+                    ...vars('fg-brand', ink),
+                    ...vars('bg-brand', dark.bgBrand),
+                },
             });
         }),
     ],

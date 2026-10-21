@@ -40,7 +40,7 @@
             </div>
         </section>
 
-        @if ($contractors->isNotEmpty() || (auth()->user()->isAdmin() || auth()->user()->isFinance()))
+        @if ($contractors->isNotEmpty() || auth()->user()->hasPermission('projects.view_all'))
             <section>
                 <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Contractors / Providers</h2>
                 <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">

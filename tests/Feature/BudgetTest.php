@@ -41,7 +41,7 @@ class BudgetTest extends TestCase
         $this->assertSame('Within Budget', $project->budgetSummary()['budget_status']);
     }
 
-    public function test_approved_budget_request_reduces_remaining_budget_and_counts_as_utilized(): void
+    public function test_approving_a_budget_request_leaves_expenses_for_accounting_to_record(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);
         $finance = User::factory()->create(['role' => 'finance_accounting']);
@@ -63,7 +63,7 @@ class BudgetTest extends TestCase
         $budgetRequest = $project->budgetRequests()->sole();
         $this->assertSame('20000.00', $project->budgetSummary()['pending_requests']);
 
-        $this->actingAs($finance)
+        $this->actingAs($admin)
             ->patch('/projects/'.$project->id.'/budget-requests/'.$budgetRequest->id.'/approve')
             ->assertRedirect();
 
@@ -72,8 +72,8 @@ class BudgetTest extends TestCase
         $this->assertSame('100000.00', $project->approved_budget);
         $this->assertSame('0.00', $budget['pending_requests']);
         $this->assertSame('20000.00', $budget['approved_requests']);
-        $this->assertSame('20000.00', $budget['total_expenses']);
-        $this->assertSame('80000.00', $budget['remaining_budget']);
+        $this->assertSame('0.00', $budget['total_expenses']);
+        $this->assertSame('100000.00', $budget['remaining_budget']);
     }
 
     public function test_project_personnel_cannot_approve_their_own_budget_request(): void

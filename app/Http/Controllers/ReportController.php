@@ -61,7 +61,7 @@ class ReportController extends Controller
      */
     public function storeFinanceReport(Request $request): RedirectResponse
     {
-        abort_unless(Auth::user()->isFinance(), 403);
+        abort_unless(Auth::user()->isFinance() && Auth::user()->hasPermission('reports.view'), 403);
 
         $validated = $request->validate([
             'project_id' => ['nullable', 'exists:projects,id'],
@@ -98,18 +98,14 @@ class ReportController extends Controller
 
     public function financeReportDownload(FinanceReport $report): StreamedResponse
     {
-        abort_unless(Auth::user()->isAdmin() || Auth::user()->isFinance(), 403);
+        abort_unless(Auth::user()->hasPermission('reports.view') && Auth::user()->hasPermission('finance.view'), 403);
 
         return Storage::disk('local')->download($report->file_path, $report->title.'.pdf');
     }
 
     public function projectStatus(Request $request): View|Response|BinaryFileResponse
     {
-        abort_unless(Auth::user()->isAdmin() || Auth::user()->isFinance() || Auth::user()->isProjectPersonnel(), 403);
-
-        if (Auth::user()->isProjectPersonnel()) {
-            abort_unless(Auth::user()->assignedProjects()->exists(), 403);
-        }
+        $this->authorizeReportAccess();
 
         $projects = Project::query()
             ->with('category')
@@ -165,12 +161,18 @@ class ReportController extends Controller
         };
     }
 
+    /**
+     * Needs the "Open reports" permission; users who only see their assigned
+     * projects also need at least one assignment to report on.
+     */
     private function authorizeReportAccess(): void
     {
-        abort_unless(Auth::user()->isAdmin() || Auth::user()->isFinance() || Auth::user()->isProjectPersonnel(), 403);
+        $user = Auth::user();
 
-        if (Auth::user()->isProjectPersonnel()) {
-            abort_unless(Auth::user()->assignedProjects()->exists(), 403);
+        abort_unless($user->hasPermission('reports.view'), 403);
+
+        if (! $user->hasPermission('projects.view_all')) {
+            abort_unless($user->assignedProjects()->exists(), 403);
         }
     }
 

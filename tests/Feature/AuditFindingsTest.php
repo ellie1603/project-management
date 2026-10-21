@@ -74,7 +74,7 @@ class AuditFindingsTest extends TestCase
 
         $this->actingAs($admin)->post('/projects', $payload);
         $first = Project::firstOrFail();
-        $this->actingAs($admin)->delete("/projects/{$first->id}");
+        $this->actingAs($admin)->delete("/projects/{$first->id}", ['confirm_code' => $first->project_code]);
 
         $this->actingAs($admin)->post('/projects', $payload)->assertSessionHasNoErrors()->assertRedirect();
 

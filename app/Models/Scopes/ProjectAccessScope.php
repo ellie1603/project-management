@@ -23,7 +23,7 @@ class ProjectAccessScope implements Scope
         // No signed-in user means the scheduler, a queue worker, or a seeder,
         // which must see every project. Every web route that reads project
         // data sits behind the auth middleware.
-        if ($user === null || $user->isAdmin() || $user->isFinance()) {
+        if ($user === null || $user->hasPermission('projects.view_all')) {
             return;
         }
 

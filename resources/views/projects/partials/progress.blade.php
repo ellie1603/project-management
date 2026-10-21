@@ -1,7 +1,7 @@
 @php
     use Illuminate\Support\Carbon;
 
-    $canWriteProgress = auth()->user()->isProjectPersonnel() && $project->hasPersonnel(auth()->user());
+    $canWriteProgress = auth()->user()->can('createProgress', $project);
     $phases = $project->phases;
     $timeline = $project->timelineSummary();
     $completion = $project->completionPercentage();
@@ -44,12 +44,12 @@
                     Update Progress
                 </button>
             @endif
-            @if (auth()->user()->isAdmin())
+            @can('update', $project)
                 <button type="button" @click="$dispatch('open-modal', 'edit-project')" class="inline-flex items-center gap-1.5 rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition-colors duration-150 hover:bg-slate-50">
                     <i data-lucide="pencil" class="h-3.5 w-3.5"></i>
                     Edit Schedule
                 </button>
-            @endif
+            @endcan
         </div>
     </div>
 
@@ -123,7 +123,7 @@
         ->values();
 @endphp
 
-<section class="mt-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5" x-data="{ photo: null }" @keydown.escape.window="photo = null">
+<section class="mt-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
     <div class="flex items-center justify-between gap-3">
         <h2 class="text-lg font-semibold text-slate-900">Progress History</h2>
         <span class="text-xs text-slate-500">{{ $history->count() }} {{ Str::plural('update', $history->count()) }}</span>
@@ -136,8 +136,9 @@
                 $previous = $previousByEntry[$entry->id];
                 $delta = $entry->progress_percentage - $previous;
                 $finishedStage = $entry->phase && $entry->progress_percentage >= (int) round($entry->phase->sequence / $phaseCount * 100);
-                $photos = $entry->projectDocuments->filter(fn ($doc) => str_starts_with((string) $doc->file_type, 'image/'));
-                $files = $entry->projectDocuments->reject(fn ($doc) => str_starts_with((string) $doc->file_type, 'image/'));
+                $photos = $entry->projectDocuments->filter->isInlineImage()->values();
+                $files = $entry->projectDocuments->reject->isInlineImage();
+                $viewerPhotos = $photos->map(fn ($doc) => $doc->toViewerPhoto('Site photo · '.$entry->progress_date->format('M d, Y')))->all();
                 $done = $lines($entry->activities_completed);
                 $next = $lines($entry->activities_remaining);
             @endphp
@@ -215,9 +216,8 @@
                 @if ($photos->isNotEmpty())
                     <div class="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-6">
                         @foreach ($photos as $doc)
-                            @php $photoUrl = route('projects.documents.download', [$project, $doc, 'inline' => 1]); @endphp
-                            <button type="button" @click="photo = @js($photoUrl)" class="aspect-square overflow-hidden rounded-lg bg-slate-100 ring-1 ring-slate-200 transition-opacity hover:opacity-90" aria-label="View site photo">
-                                <img src="{{ $photoUrl }}" alt="Site photo from {{ $entry->progress_date->format('M d, Y') }}" loading="lazy" class="h-full w-full object-cover">
+                            <button type="button" @click="$dispatch('view-photos', { photos: @js($viewerPhotos), index: {{ $loop->index }} })" class="aspect-square cursor-zoom-in overflow-hidden rounded-lg bg-slate-100 ring-1 ring-slate-200 transition-opacity hover:opacity-90" aria-label="View site photo">
+                                <img src="{{ $viewerPhotos[$loop->index]['src'] }}" alt="Site photo from {{ $entry->progress_date->format('M d, Y') }}" loading="lazy" class="h-full w-full object-cover">
                             </button>
                         @endforeach
                     </div>
@@ -249,21 +249,5 @@
         @endforelse
     </ol>
     <x-pager-controls class="mt-4 !px-0" />
-    </div>
-
-    <div
-        x-show="photo"
-        x-transition.opacity
-        @click="photo = null"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4"
-        style="display: none;"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Site photo"
-    >
-        <img :src="photo" alt="Site photo" class="max-h-full max-w-full rounded-lg object-contain shadow-2xl">
-        <button type="button" @click="photo = null" class="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white hover:bg-white/25" aria-label="Close photo">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" class="h-5 w-5" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
-        </button>
     </div>
 </section>

@@ -65,7 +65,7 @@
     /* @tailwindcss/forms paints unstyled controls pure white; in dark mode give them
        the card surface instead. Same specificity as the plugin's selectors, so any
        explicit bg-/border- utility on the element still wins. */
-    .dark :is([type='text'], [type='email'], [type='url'], [type='password'], [type='number'], [type='date'], [type='datetime-local'], [type='month'], [type='search'], [type='tel'], [type='time'], [type='week'], [multiple], textarea, select) {
+    .dark :is(input:not([type]), [type='text'], [type='email'], [type='url'], [type='password'], [type='number'], [type='date'], [type='datetime-local'], [type='month'], [type='search'], [type='tel'], [type='time'], [type='week'], [multiple], textarea, select) {
         background-color: rgb(var(--bg-white));
         border-color: rgb(var(--fg-slate-300));
         color: rgb(var(--fg-slate-900));
@@ -84,7 +84,7 @@
 
 @layer components {
     /* The single icon-chip style used across every module: brand dark blue with a
-       white glyph (slightly brighter blue in dark mode via the brand variables). */
+       white glyph (graphite in dark mode via the brand variables). */
     .chip-ink {
         background-color: rgb(var(--bg-brand-600));
         color: #ffffff;
@@ -101,10 +101,10 @@
         --fg-brand-300: 169 193 234;
     }
 
-    /* The page hero keeps light-theme colours for its text, but its navy is
-       softened in dark mode to match the muted dark brand scale. */
+    /* In dark mode the page hero drops the navy for a raised graphite surface,
+       one step above the cards, so the page carries no blue. */
     .dark .hero-brand.bg-brand-600 {
-        background-color: #172a4f;
+        background-color: #1c1c1f;
     }
 
     /* Modal / drawer backdrops stay a dark scrim in both themes. */

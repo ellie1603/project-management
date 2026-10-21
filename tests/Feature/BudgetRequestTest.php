@@ -52,6 +52,66 @@ class BudgetRequestTest extends TestCase
         $this->assertSame('Approved', $budgetRequest->fresh()->status);
     }
 
+    public function test_finance_cannot_approve_or_reject_a_budget_request(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $finance = User::factory()->create(['role' => 'finance_accounting']);
+        $personnel = User::factory()->create(['role' => 'project_personnel', 'position_type' => 'Contractor']);
+        $project = Project::factory()->create([
+            'project_code' => 'BMPC-PRJ-'.date('Y').'-0005',
+            'approved_budget' => 50000,
+            'created_by' => $admin->id,
+        ]);
+        $project->assignPersonnel($personnel, 'Contractor', 'Builder');
+        $budgetRequest = $project->budgetRequests()->create([
+            'requested_by' => $personnel->id,
+            'amount' => 10000,
+            'purpose' => 'Progress billing',
+            'status' => 'Pending',
+        ]);
+
+        $this->actingAs($finance)
+            ->patch('/projects/'.$project->id.'/budget-requests/'.$budgetRequest->id.'/approve')
+            ->assertForbidden();
+        $this->actingAs($finance)
+            ->patch('/projects/'.$project->id.'/budget-requests/'.$budgetRequest->id.'/reject', ['remarks' => 'No'])
+            ->assertForbidden();
+
+        $this->assertSame('Pending', $budgetRequest->fresh()->status);
+        $this->assertSame(0, $project->expenses()->count());
+    }
+
+    public function test_finance_sees_budget_requests_without_approval_buttons(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $finance = User::factory()->create(['role' => 'finance_accounting']);
+        $personnel = User::factory()->create(['role' => 'project_personnel', 'position_type' => 'Contractor']);
+        $project = Project::factory()->create([
+            'project_code' => 'BMPC-PRJ-'.date('Y').'-0006',
+            'created_by' => $admin->id,
+        ]);
+        $project->assignPersonnel($personnel, 'Contractor', 'Builder');
+        $budgetRequest = $project->budgetRequests()->create([
+            'requested_by' => $personnel->id,
+            'amount' => 10000,
+            'purpose' => 'Mobilization',
+            'status' => 'Pending',
+        ]);
+        $approveUrl = route('projects.budget-requests.approve', [$project, $budgetRequest]);
+
+        $this->actingAs($finance)->get(route('budget.requests'))
+            ->assertOk()
+            ->assertSee('Mobilization')
+            ->assertDontSee($approveUrl);
+        $this->actingAs($finance)->get(route('projects.show', $project))
+            ->assertOk()
+            ->assertDontSee($approveUrl);
+
+        $this->actingAs($admin)->get(route('budget.requests'))
+            ->assertOk()
+            ->assertSee($approveUrl);
+    }
+
     public function test_finance_cannot_assign_project_personnel(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);
@@ -89,11 +149,11 @@ class BudgetRequestTest extends TestCase
             'status' => 'Pending',
         ]);
 
-        $this->actingAs($finance)
+        $this->actingAs($admin)
             ->patch('/projects/'.$project->id.'/budget-requests/'.$budgetRequest->id.'/approve')
             ->assertRedirect();
 
-        $this->actingAs($finance)
+        $this->actingAs($admin)
             ->patch('/projects/'.$project->id.'/budget-requests/'.$budgetRequest->id.'/approve')
             ->assertStatus(422);
     }

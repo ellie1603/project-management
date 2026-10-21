@@ -105,8 +105,7 @@ export default (config) => {
         cameraError: '',
         cameraCount: 0,
         facingMode: 'environment',
-        shotsTaken: 0,
-        flash: false,
+        capturing: false,
 
         issueOptions: ['Rain / weather', 'Materials delayed', 'Short on workers', 'Equipment problem', 'Permit / inspection'],
         issueTags: [],
@@ -197,6 +196,16 @@ export default (config) => {
             }
 
             this.syncFiles();
+        },
+
+        // Opens the shared full-screen viewer on this photo, with the form's other photos alongside.
+        viewAttachment(key) {
+            const images = this.attachments.filter((a) => a.isImage);
+
+            this.$dispatch('view-photos', {
+                photos: images.map((a) => ({ src: a.url, caption: a.name })),
+                index: Math.max(0, images.findIndex((a) => a.key === key)),
+            });
         },
 
         removeAttachment(key) {
@@ -312,7 +321,6 @@ export default (config) => {
                 return;
             }
 
-            this.shotsTaken = 0;
             this.cameraOpen = true;
             await this.startCamera();
         },
@@ -346,33 +354,37 @@ export default (config) => {
             await this.startCamera();
         },
 
+        /**
+         * One photo per camera session: the shot is added and the camera closes
+         * right away. Taking another photo means pressing "Take photo" again.
+         */
         async capturePhoto() {
             const video = videoEl;
 
-            if (!stream || !video.videoWidth) {
+            if (this.capturing || !stream || !video.videoWidth) {
                 return;
             }
 
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            this.capturing = true;
 
-            const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.85));
-            if (!blob) {
-                this.cameraError = 'Could not capture the photo. Try again.';
-                return;
-            }
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
 
-            this.flash = true;
-            window.setTimeout(() => (this.flash = false), 150);
+                const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.85));
+                if (!blob) {
+                    this.cameraError = 'Could not capture the photo. Try again.';
+                    return;
+                }
 
-            const stamp = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14);
-            await this.addFiles([new File([blob], `site-photo-${stamp}.jpg`, { type: 'image/jpeg' })]);
-            this.shotsTaken++;
-
-            if (this.attachments.length >= MAX_ATTACHMENTS) {
                 this.closeCamera();
+
+                const stamp = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14);
+                await this.addFiles([new File([blob], `site-photo-${stamp}.jpg`, { type: 'image/jpeg' })]);
+            } finally {
+                this.capturing = false;
             }
         },
 

@@ -10,7 +10,11 @@
     <div class="mb-6">
         <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Finance</p>
         <h1 class="mt-1 text-2xl font-semibold tracking-tight text-slate-900">Budget Requests</h1>
-        <p class="mt-1 text-sm text-slate-600">Review and act on budget requests submitted by project personnel.</p>
+        <p class="mt-1 text-sm text-slate-600">
+            {{ auth()->user()->hasPermission('budget_requests.review')
+                ? 'Review and act on budget requests submitted by project personnel.'
+                : 'Budget requests from project personnel and the Admin/CEO decision on each.' }}
+        </p>
     </div>
 
     <div class="mb-4 flex flex-wrap items-center justify-between gap-3">

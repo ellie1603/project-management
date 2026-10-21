@@ -62,7 +62,7 @@
         <x-stat-card label="Ongoing" :value="$stats['ongoing']" icon="loader" :sub="$stats['on_hold'].' on hold'" class="animate-rise-in" style="animation-delay: 110ms" />
         <x-stat-card label="Completed" :value="$stats['completed']" icon="circle-check-big" sub="Delivered in full" class="animate-rise-in" style="animation-delay: 160ms" />
         <x-stat-card label="Delayed" :value="$stats['delayed']" icon="triangle-alert" :sub="$stats['over_budget'].' over budget'" class="animate-rise-in" style="animation-delay: 210ms" />
-        <x-stat-card label="Pending Requests" value="₱{{ number_format($stats['pending_budget_requests_total'], 2) }}" icon="hand-coins" :sub="$stats['pending_budget_requests'].' awaiting Finance'" class="col-span-2 animate-rise-in md:col-span-1" style="animation-delay: 260ms" />
+        <x-stat-card label="Pending Requests" value="₱{{ number_format($stats['pending_budget_requests_total'], 2) }}" icon="hand-coins" :sub="$stats['pending_budget_requests'].' awaiting your approval'" class="col-span-2 animate-rise-in md:col-span-1" style="animation-delay: 260ms" />
     </div>
 
     <div class="mt-6 grid items-start gap-4 xl:grid-cols-3">
@@ -95,7 +95,7 @@
                     @php
                         $statusDots = [
                             'Registered' => 'bg-slate-500',
-                            'Ongoing' => 'bg-brand-600',
+                            'Ongoing' => 'bg-brand-600 dark:bg-[#d4d4d8]',
                             'On Hold' => 'bg-amber-500',
                             'Completed' => 'bg-emerald-500',
                             'Cancelled' => 'bg-red-500',

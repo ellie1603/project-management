@@ -11,7 +11,7 @@ class UserPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin();
+        return $user->hasPermission('users.manage');
     }
 
     /**
@@ -19,7 +19,7 @@ class UserPolicy
      */
     public function view(User $user, User $model): bool
     {
-        return $user->isAdmin();
+        return $user->hasPermission('users.manage');
     }
 
     /**
@@ -27,7 +27,7 @@ class UserPolicy
      */
     public function create(User $user): bool
     {
-        return $user->isAdmin();
+        return $user->hasPermission('users.manage');
     }
 
     /**
@@ -35,7 +35,7 @@ class UserPolicy
      */
     public function update(User $user, User $model): bool
     {
-        return $user->isAdmin();
+        return $user->hasPermission('users.manage') && $this->mayChange($user, $model);
     }
 
     /**
@@ -43,7 +43,7 @@ class UserPolicy
      */
     public function toggleStatus(User $user, User $model): bool
     {
-        return $user->isAdmin() && $user->isNot($model);
+        return $user->hasPermission('users.manage') && $user->isNot($model) && $this->mayChange($user, $model);
     }
 
     /**
@@ -51,6 +51,15 @@ class UserPolicy
      */
     public function delete(User $user, User $model): bool
     {
-        return $user->isAdmin() && $user->isNot($model);
+        return $user->hasPermission('users.manage') && $user->isNot($model) && $this->mayChange($user, $model);
+    }
+
+    /**
+     * The System Administrator (developer) account can only be changed by a
+     * System Administrator, so no one else can lock the maintainer out.
+     */
+    private function mayChange(User $user, User $model): bool
+    {
+        return ! $model->isSystemAdmin() || $user->isSystemAdmin();
     }
 }

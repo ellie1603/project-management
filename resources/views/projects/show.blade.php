@@ -5,24 +5,23 @@
     $budget = $project->budgetSummary();
     $timeline = $project->timelineSummary();
 
-    $isPersonnel = auth()->user()->isProjectPersonnel();
+    $viewer = auth()->user();
+    $isPersonnel = $viewer->isProjectPersonnel();
+    $canEditProject = $viewer->can('update', $project);
+    $canDeleteProject = $viewer->can('delete', $project);
 
-    $tabs = $isPersonnel
-        ? [
-            ['id' => 'overview', 'label' => 'Overview', 'icon' => 'file-text'],
-            ['id' => 'progress', 'label' => 'Project Progress', 'icon' => 'bar-chart-3'],
-            ['id' => 'budget-request', 'label' => 'Budget Request', 'icon' => 'hand-coins'],
-            ['id' => 'documents', 'label' => 'Documents', 'icon' => 'file-text'],
-        ]
-        : [
-            ['id' => 'overview', 'label' => 'Overview', 'icon' => 'file-text'],
-            ['id' => 'progress', 'label' => 'Project Progress', 'icon' => 'bar-chart-3'],
-            ['id' => 'budget', 'label' => 'Budget', 'icon' => 'wallet'],
-            ['id' => 'personnel', 'label' => 'Personnel', 'icon' => 'users'],
-            ['id' => 'contractors', 'label' => 'Contractor', 'icon' => 'building'],
-            ['id' => 'documents', 'label' => 'Documents', 'icon' => 'file-text'],
-            ['id' => 'activity', 'label' => 'Activity Log', 'icon' => 'clock'],
-        ];
+    // Tabs follow the viewer's permissions (Roles & Permissions page).
+    $tabs = array_values(array_filter([
+        ['id' => 'overview', 'label' => 'Overview', 'icon' => 'file-text'],
+        ['id' => 'progress', 'label' => 'Project Progress', 'icon' => 'bar-chart-3'],
+        $viewer->can('viewBudget', $project) ? ['id' => 'budget', 'label' => 'Budget', 'icon' => 'wallet'] : null,
+        $viewer->can('createBudgetRequest', $project) ? ['id' => 'budget-request', 'label' => 'Budget Request', 'icon' => 'hand-coins'] : null,
+        $isPersonnel ? null : ['id' => 'personnel', 'label' => 'Personnel', 'icon' => 'users'],
+        $isPersonnel ? null : ['id' => 'contractors', 'label' => 'Contractor', 'icon' => 'building'],
+        ['id' => 'documents', 'label' => 'Documents', 'icon' => 'file-text'],
+        $isPersonnel ? null : ['id' => 'activity', 'label' => 'Activity Log', 'icon' => 'clock'],
+    ]));
+    $tabIds = array_column($tabs, 'id');
 @endphp
 
 <div class="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8" x-data="tabSlide(@js(session('tab', old('_form') ? 'progress' : 'overview')), @js(array_column($tabs, 'id')))">
@@ -39,12 +38,22 @@
         :title="$project->title"
         :subtitle="$project->project_code.' · '.($project->location ?? 'Location not provided')"
     >
-        @if (auth()->user()->isAdmin())
+        @if ($canEditProject || $canDeleteProject)
             <x-slot name="aside">
-                <button type="button" @click="$dispatch('open-modal', 'edit-project')" class="inline-flex items-center gap-2 rounded-xl bg-accent-500 px-4 py-2.5 text-sm font-semibold text-white shadow-glow hover:bg-accent-600 transition-transform duration-200 ease-elegant hover:-translate-y-0.5">
-                    <i data-lucide="pencil" class="h-4 w-4"></i>
-                    Edit Project
-                </button>
+                <div class="flex flex-wrap items-center gap-3">
+                    @if ($canEditProject)
+                    <button type="button" @click="$dispatch('open-modal', 'edit-project')" class="inline-flex items-center gap-2 rounded-xl bg-accent-500 px-4 py-2.5 text-sm font-semibold text-white shadow-glow hover:bg-accent-600 transition-transform duration-200 ease-elegant hover:-translate-y-0.5">
+                        <i data-lucide="pencil" class="h-4 w-4"></i>
+                        Edit Project
+                    </button>
+                    @endif
+                    @if ($canDeleteProject)
+                    <button type="button" @click="$dispatch('open-modal', 'delete-project')" class="inline-flex items-center gap-2 rounded-xl border border-red-400/40 bg-red-500/10 px-4 py-2.5 text-sm font-semibold text-red-300 transition-colors duration-150 hover:bg-red-600 hover:text-white">
+                        <i data-lucide="trash-2" class="h-4 w-4"></i>
+                        Delete Project
+                    </button>
+                    @endif
+                </div>
             </x-slot>
         @endif
     </x-page-hero>
@@ -127,24 +136,27 @@
     <div class="tab-stage" :data-dir="direction">
         <div x-show="tab === 'overview'" {!! $paneTransition !!}>@include('projects.partials.overview')</div>
         <div x-show="tab === 'progress'" {!! $paneTransition !!} style="display: none;">@include('projects.partials.progress')</div>
-        @unless ($isPersonnel)
+        @if (in_array('budget', $tabIds, true))
             <div x-show="tab === 'budget'" {!! $paneTransition !!} style="display: none;">@include('projects.partials.budget')</div>
-        @endunless
-        @if ($isPersonnel)
+        @endif
+        @if (in_array('budget-request', $tabIds, true))
             <div x-show="tab === 'budget-request'" {!! $paneTransition !!} style="display: none;">@include('projects.partials.budget-request')</div>
         @endif
-        @unless ($isPersonnel)
+        @if (in_array('personnel', $tabIds, true))
             <div x-show="tab === 'personnel'" {!! $paneTransition !!} style="display: none;">@include('projects.partials.personnel')</div>
             <div x-show="tab === 'contractors'" {!! $paneTransition !!} style="display: none;">@include('projects.partials.contractors')</div>
-        @endunless
+        @endif
         <div x-show="tab === 'documents'" {!! $paneTransition !!} style="display: none;">@include('projects.partials.documents')</div>
-        @unless ($isPersonnel)
+        @if (in_array('activity', $tabIds, true))
             <div x-show="tab === 'activity'" {!! $paneTransition !!} style="display: none;">@include('projects.partials.activity')</div>
-        @endunless
+        @endif
     </div>
 
-    @if (auth()->user()->isAdmin())
+    @if ($canEditProject)
         @include('projects.partials.edit-modal')
+    @endif
+    @if ($canDeleteProject)
+        @include('projects.partials.delete-modal')
     @endif
 
     @include('projects.partials.progress-modals')

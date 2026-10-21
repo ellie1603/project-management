@@ -1,5 +1,5 @@
 @php
-    $canWriteProgress = auth()->user()->isProjectPersonnel() && $project->hasPersonnel(auth()->user());
+    $canWriteProgress = auth()->user()->can('createProgress', $project);
     $phases = $project->phases;
     $completion = $project->completionPercentage();
     $manageableProgress = $project->progress->filter(fn ($entry) => auth()->user()->can('manageProgress', [$project, $entry]));
@@ -171,19 +171,17 @@
                         >
                             <div class="relative min-h-0 flex-1">
                                 <video x-init="registerVideo($el)" playsinline muted autoplay class="h-full w-full object-contain" :class="facingMode === 'user' ? '-scale-x-100' : ''"></video>
-                                <div x-show="flash" class="pointer-events-none absolute inset-0 bg-white/70"></div>
                                 <div x-show="cameraError" class="absolute inset-0 flex items-center justify-center p-6" style="display: none;">
                                     <div class="max-w-sm rounded-2xl bg-white/10 p-5 text-center text-sm text-white backdrop-blur">
                                         <p x-text="cameraError"></p>
                                         <button type="button" @click="startCamera()" class="mt-4 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900">Try again</button>
                                     </div>
                                 </div>
-                                <p x-show="shotsTaken > 0" class="absolute left-4 top-4 rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-white" x-text="shotsTaken + (shotsTaken === 1 ? ' photo added' : ' photos added')" style="display: none;"></p>
                             </div>
 
                             <div class="grid grid-cols-3 items-center bg-black px-6 py-5">
-                                <button type="button" @click="closeCamera()" class="justify-self-start rounded-lg px-3 py-2 text-sm font-semibold text-white hover:bg-white/10" x-text="shotsTaken > 0 ? 'Done' : 'Cancel'"></button>
-                                <button type="button" @click="capturePhoto()" :disabled="cameraError !== ''" class="justify-self-center flex h-16 w-16 items-center justify-center rounded-full border-4 border-white/40 bg-white transition-transform active:scale-95 disabled:opacity-40" aria-label="Capture photo">
+                                <button type="button" @click="closeCamera()" class="justify-self-start rounded-lg px-3 py-2 text-sm font-semibold text-white hover:bg-white/10">Cancel</button>
+                                <button type="button" @click="capturePhoto()" :disabled="cameraError !== '' || capturing" class="justify-self-center flex h-16 w-16 items-center justify-center rounded-full border-4 border-white/40 bg-white transition-transform active:scale-95 disabled:opacity-40" aria-label="Capture photo">
                                     <span class="h-12 w-12 rounded-full border-2 border-black/10 bg-white"></span>
                                 </button>
                                 <button type="button" x-show="cameraCount > 1" @click="switchCamera()" class="justify-self-end flex h-11 w-11 items-center justify-center rounded-full text-white hover:bg-white/10" aria-label="Switch camera" style="display: none;">
@@ -197,13 +195,15 @@
                         <template x-for="attachment in attachments" :key="attachment.key">
                             <div class="relative aspect-square overflow-hidden rounded-lg bg-slate-100 ring-1 ring-slate-200">
                                 <template x-if="attachment.isImage">
-                                    <img :src="attachment.url" :alt="attachment.name" class="h-full w-full object-cover" x-on:error="$el.remove()">
+                                    <button type="button" @click="viewAttachment(attachment.key)" class="block h-full w-full cursor-zoom-in" :aria-label="'View ' + attachment.name">
+                                        <img :src="attachment.url" :alt="attachment.name" class="h-full w-full object-cover" x-on:error="$el.remove()">
+                                    </button>
                                 </template>
                                 <div class="flex h-full w-full flex-col items-center justify-center gap-1 p-2 text-center" x-show="! attachment.isImage">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-slate-500" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
                                     <span class="line-clamp-2 break-all text-[10px] font-medium text-slate-600" x-text="attachment.name"></span>
                                 </div>
-                                <span class="absolute bottom-1 left-1 rounded bg-black/60 px-1 text-[10px] font-medium text-white" x-text="attachment.size"></span>
+                                <span class="pointer-events-none absolute bottom-1 left-1 rounded bg-black/60 px-1 text-[10px] font-medium text-white" x-text="attachment.size"></span>
                                 <button type="button" @click="removeAttachment(attachment.key)" class="absolute right-1 top-1 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80" :aria-label="'Remove ' + attachment.name">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" class="h-3.5 w-3.5" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
                                 </button>
@@ -321,6 +321,8 @@
         $isEditError = old('_form') === $formKey;
         $value = fn (string $field, $default) => $isEditError ? old($field, $default) : $default;
         $existingDocs = $entry->projectDocuments;
+        $existingPhotos = $existingDocs->filter->isInlineImage()->values();
+        $existingViewerPhotos = $existingPhotos->map(fn ($doc) => $doc->toViewerPhoto($doc->document_name))->all();
     @endphp
 
     <x-modal :name="$formKey" :show="$isEditError && $errors->any()" max-width="2xl">
@@ -415,19 +417,24 @@
                     @if ($existingDocs->isNotEmpty())
                         <div class="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
                             @foreach ($existingDocs as $doc)
-                                @php $isPhoto = str_starts_with((string) $doc->file_type, 'image/'); @endphp
-                                <label class="group relative block aspect-square cursor-pointer overflow-hidden rounded-lg bg-slate-100 ring-1 ring-slate-200" :class="removed.includes('{{ $doc->id }}') ? 'opacity-40 ring-red-300' : ''">
-                                    <input type="checkbox" name="remove_documents[]" value="{{ $doc->id }}" x-model="removed" class="sr-only">
-                                    @if ($isPhoto)
-                                        <img src="{{ route('projects.documents.download', [$project, $doc, 'inline' => 1]) }}" alt="Attached photo" loading="lazy" class="h-full w-full object-cover">
+                                @php $photoIndex = $existingPhotos->search(fn ($photo) => $photo->is($doc)); @endphp
+                                {{-- Tapping the photo opens it; the strip along the bottom toggles removal. --}}
+                                <div class="group relative block aspect-square overflow-hidden rounded-lg bg-slate-100 ring-1 ring-slate-200" :class="removed.includes('{{ $doc->id }}') ? 'opacity-40 ring-red-300' : ''">
+                                    @if ($photoIndex !== false)
+                                        <button type="button" @click="$dispatch('view-photos', { photos: @js($existingViewerPhotos), index: {{ $photoIndex }} })" class="block h-full w-full cursor-zoom-in" aria-label="View attached photo">
+                                            <img src="{{ $existingViewerPhotos[$photoIndex]['src'] }}" alt="Attached photo" loading="lazy" class="h-full w-full object-cover">
+                                        </button>
                                     @else
                                         <span class="flex h-full w-full flex-col items-center justify-center gap-1 p-2 text-center">
                                             <i data-lucide="file-text" class="h-6 w-6 text-slate-500"></i>
                                             <span class="line-clamp-2 break-all text-[10px] font-medium text-slate-600">{{ $doc->document_name }}</span>
                                         </span>
                                     @endif
-                                    <span class="absolute inset-x-1 bottom-1 rounded bg-black/65 px-1.5 py-0.5 text-center text-[10px] font-semibold text-white" x-text="removed.includes('{{ $doc->id }}') ? 'Will be removed · undo' : 'Tap to remove'"></span>
-                                </label>
+                                    <label class="absolute inset-x-1 bottom-1 cursor-pointer rounded bg-black/65 px-1.5 py-1 text-center text-[10px] font-semibold text-white hover:bg-black/80">
+                                        <input type="checkbox" name="remove_documents[]" value="{{ $doc->id }}" x-model="removed" class="sr-only">
+                                        <span x-text="removed.includes('{{ $doc->id }}') ? 'Will be removed · undo' : 'Remove'"></span>
+                                    </label>
+                                </div>
                             @endforeach
                         </div>
                     @endif

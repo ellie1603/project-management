@@ -24,7 +24,7 @@ class ContractorController extends Controller
     {
         $this->authorize('viewContractors', $project);
         $project->load(['contractors', 'quotations.contractor']);
-        $availableContractors = Auth::user()->isAdmin()
+        $availableContractors = Auth::user()->can('manageContractors', $project)
             ? Contractor::query()->orderBy('name')->get()
             : collect();
 

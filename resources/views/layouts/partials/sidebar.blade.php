@@ -13,6 +13,9 @@
         ];
     };
 
+    // Items appear only when the user's role has the matching permission (Roles & Permissions page).
+    $allowed = fn (string $permission) => $user->hasPermission($permission);
+
     if ($user->isAdmin()) {
         $sections = [
             [
@@ -23,17 +26,17 @@
             [
                 'items' => [
                     $navLink('projects.index', 'Projects', 'folder'),
-                    $navLink('budget.overview', 'Budget & Finance', 'wallet', 'budget.*'),
-                    $navLink('documents.index', 'Documents', 'file-text'),
-                    $navLink('reports.index', 'Reports', 'file-text', 'reports.*'),
+                    $allowed('finance.view') ? $navLink('budget.overview', 'Budget & Finance', 'wallet', 'budget.*') : null,
+                    $allowed('documents.library') ? $navLink('documents.index', 'Documents', 'file-text') : null,
+                    $allowed('reports.view') ? $navLink('reports.index', 'Reports', 'file-text', 'reports.*') : null,
                 ],
             ],
             [
                 'title' => 'Administration',
                 'items' => [
-                    $navLink('users.index', 'Users', 'users'),
-                    $navLink('audit-logs.index', 'Audit Logs', 'clock'),
-                    $navLink('settings.edit', 'Settings', 'settings'),
+                    $allowed('users.manage') ? $navLink('users.index', 'Users', 'users') : null,
+                    $allowed('audit_logs.view') ? $navLink('audit-logs.index', 'Audit Logs', 'clock') : null,
+                    $allowed('settings.manage') ? $navLink('settings.edit', 'Settings', 'settings') : null,
                 ],
             ],
         ];
@@ -47,15 +50,17 @@
             ],
             [
                 'title' => 'Finance',
-                'items' => [
+                'items' => $allowed('finance.view') ? [
                     $navLink('budget.overview', 'Budget Monitoring', 'wallet'),
                     $navLink('budget.requests', 'Budget Requests', 'hand-coins'),
                     $navLink('budget.expenses', 'Expenses', 'calculator'),
-                ],
+                ] : [],
             ],
             [
                 'items' => [
-                    $navLink('reports.index', 'Reports', 'file-text', 'reports.*'),
+                    $allowed('documents.library') ? $navLink('documents.index', 'Documents', 'file-text') : null,
+                    $allowed('reports.view') ? $navLink('reports.index', 'Reports', 'file-text', 'reports.*') : null,
+                    $allowed('audit_logs.view') ? $navLink('audit-logs.index', 'Audit Logs', 'clock') : null,
                 ],
             ],
         ];
@@ -65,10 +70,27 @@
                 'items' => [
                     $navLink('dashboard', 'Dashboard', 'layout-dashboard'),
                     $navLink('projects.index', 'My Projects', 'folder'),
+                    $allowed('reports.view') ? $navLink('reports.index', 'Reports', 'file-text', 'reports.*') : null,
                 ],
             ],
         ];
     }
+
+    if ($user->isSystemAdmin()) {
+        $sections[] = [
+            'title' => 'System',
+            'items' => [
+                $navLink('system.permissions', 'Roles & Permissions', 'shield-check', 'system.permissions*'),
+                $navLink('system.usage', 'System Usage', 'activity', 'system.usage*'),
+            ],
+        ];
+    }
+
+    $sections = collect($sections)
+        ->map(fn (array $section) => [...$section, 'items' => array_values(array_filter($section['items']))])
+        ->filter(fn (array $section) => $section['items'] !== [])
+        ->values()
+        ->all();
 @endphp
 
 <div class="flex h-full flex-col bg-white">
@@ -107,7 +129,7 @@
             </div>
             <div class="min-w-0 flex-1">
                 <p class="truncate text-sm font-medium text-slate-900">{{ $user->name }}</p>
-                <p class="truncate text-xs text-slate-500">{{ ucwords(str_replace('_', ' ', $user->role)) }}</p>
+                <p class="truncate text-xs text-slate-500">{{ $user->roleLabel() }}</p>
             </div>
         </div>
         <form id="logout-form-sidebar" method="POST" action="{{ route('logout') }}" data-turbo="false" class="mt-2">

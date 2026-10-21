@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Services\Permissions;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 #[Fillable(['name', 'email', 'password', 'role', 'position_type', 'is_active', 'contractor_id'])]
 #[Hidden(['password', 'remember_token'])]
@@ -45,6 +47,34 @@ class User extends Authenticatable
     public function isFinance(): bool
     {
         return $this->role === 'finance_accounting';
+    }
+
+    /**
+     * The developer account that maintains the system: an Admin/CEO-role user
+     * flagged as System Administrator. It always has every permission and is
+     * the only account that manages roles & permissions and views system usage.
+     */
+    public function isSystemAdmin(): bool
+    {
+        return $this->isAdmin() && (bool) $this->is_system_admin;
+    }
+
+    /**
+     * Whether this user's role has the given permission (see App\Services\Permissions).
+     */
+    public function hasPermission(string $permission): bool
+    {
+        return $this->isSystemAdmin() || Permissions::roleHas($this->role, $permission);
+    }
+
+    public function roleLabel(): string
+    {
+        return $this->isSystemAdmin() ? 'System Administrator' : (Permissions::ROLES[$this->role] ?? Str::headline((string) $this->role));
+    }
+
+    public function signIns(): HasMany
+    {
+        return $this->hasMany(UserSignIn::class);
     }
 
     public function projectsCreated(): HasMany
@@ -125,6 +155,8 @@ class User extends Authenticatable
             'role' => 'string',
             'position_type' => 'string',
             'is_active' => 'boolean',
+            'is_system_admin' => 'boolean',
+            'last_active_at' => 'datetime',
         ];
     }
 }

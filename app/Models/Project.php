@@ -214,11 +214,12 @@ class Project extends Model
 
     /**
      * Restrict the query to projects the given user is allowed to browse:
-     * everything for Admin/Finance, only assigned projects for Personnel.
+     * everything with the "See every project" permission, otherwise only
+     * assigned projects.
      */
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
-        if ($user->isAdmin() || $user->isFinance()) {
+        if ($user->hasPermission('projects.view_all')) {
             return $query;
         }
 

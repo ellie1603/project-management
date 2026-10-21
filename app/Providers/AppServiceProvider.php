@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\User;
+use App\Services\Permissions;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -17,13 +19,16 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        Gate::before(function ($user, $ability) {
-            if ($user && $user->isAdmin()) {
-                return true;
-            }
+        // The System Administrator (developer) account can do everything. Every
+        // other user, the Admin/CEO included, gets exactly what their role's
+        // permissions allow (App\Services\Permissions).
+        Gate::before(fn ($user) => $user?->isSystemAdmin() ? true : null);
 
-            return null;
-        });
+        foreach (array_keys(Permissions::all()) as $permission) {
+            Gate::define($permission, fn (User $user): bool => $user->hasPermission($permission));
+        }
+
+        Gate::define('manage-system', fn (User $user): bool => $user->isSystemAdmin());
 
         $this->configureRateLimiting();
     }

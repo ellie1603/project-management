@@ -117,7 +117,7 @@
                     </div>
                     <div class="hidden text-left leading-tight md:block">
                         <p class="max-w-[8rem] truncate text-xs font-semibold text-slate-800">{{ Auth::user()->name }}</p>
-                        <p class="text-[11px] text-slate-400">{{ Str::headline(Auth::user()->role) }}</p>
+                        <p class="text-[11px] text-slate-400">{{ Auth::user()->roleLabel() }}</p>
                     </div>
                     <i data-lucide="chevron-down" class="hidden h-3.5 w-3.5 shrink-0 text-slate-400 md:block"></i>
                 </button>
