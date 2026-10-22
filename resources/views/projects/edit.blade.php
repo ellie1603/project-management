@@ -3,11 +3,8 @@
 @section('content')
 <div class="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
     <div class="mb-6">
-        <a href="{{ route('projects.show', $project) }}" class="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition-colors duration-150 hover:text-slate-900">
-            <i data-lucide="arrow-left" class="h-4 w-4"></i>
-            Back to Project
-        </a>
-        <p class="mt-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Project Update</p>
+        <x-breadcrumbs />
+        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Project Update</p>
         <h1 class="mt-2 text-2xl font-semibold tracking-tight text-slate-900">Edit Project</h1>
     </div>
 

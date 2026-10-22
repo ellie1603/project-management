@@ -11,10 +11,11 @@
             <div>
                 <h2 class="font-display text-lg font-semibold text-slate-900">Delete this project?</h2>
                 <p class="mt-1 text-sm text-slate-500">
-                    <span class="font-medium text-slate-700">{{ $project->title }}</span> will be removed from every list, dashboard, and report.
-                    Assigned personnel will lose access, and its budget, expenses, progress updates, and documents will no longer be shown.
+                    <span class="font-medium text-slate-700">{{ $project->title }}</span> and everything in it will be permanently deleted:
+                    progress updates, photos, documents, expenses, budget requests, assignments, and saved reports.
                 </p>
-                <p class="mt-2 text-sm text-slate-500">The deletion is recorded in the audit log under your name.</p>
+                <p class="mt-2 text-sm font-medium text-red-600">This cannot be undone.</p>
+                <p class="mt-1 text-sm text-slate-500">Only a record of the deletion is kept in the audit log, under your name.</p>
             </div>
         </div>
 

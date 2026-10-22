@@ -9,6 +9,7 @@ use App\Models\ProjectCategory;
 use App\Models\ProjectDocument;
 use App\Models\ProjectPhase;
 use App\Models\ProjectProgress;
+use App\Models\SystemSetting;
 use App\Models\User;
 use App\Notifications\NewDocumentUploadedNotification;
 use App\Notifications\ProjectAssignmentNotification;
@@ -17,6 +18,7 @@ use App\Notifications\ProjectProgressUpdatedNotification;
 use App\Services\AuditLogger;
 use App\Services\ImageCompressor;
 use App\Services\ProgressReportAssistant;
+use App\Services\ProjectDeletion;
 use App\Services\ProjectNotifier;
 use App\Services\ProjectPhaseService;
 use Illuminate\Http\RedirectResponse;
@@ -230,8 +232,8 @@ class ProjectController extends Controller
     }
 
     /**
-     * Soft-deletes the project. The admin must retype the project code so a
-     * whole project's budget, progress, and documents are never removed by a stray click.
+     * Permanently deletes the project and everything in it (see ProjectDeletion).
+     * The admin must retype the project code so a stray click never does this.
      */
     public function destroy(Request $request, Project $project): RedirectResponse
     {
@@ -245,20 +247,10 @@ class ProjectController extends Controller
             'confirm_code' => 'project code',
         ]);
 
-        $oldValues = $project->toArray();
-        $project->delete();
-
-        app(AuditLogger::class)->record(
-            $request,
-            'deleted',
-            'projects',
-            $project->id,
-            "Deleted project {$project->project_code} ({$project->title}).",
-            $oldValues,
-        );
+        app(ProjectDeletion::class)->delete($project, $request);
 
         return redirect()->route('projects.index')
-            ->with('status', "Project {$project->project_code} deleted.");
+            ->with('status', "Project {$project->project_code} and everything in it was deleted.");
     }
 
     public function assignPersonnel(Request $request, Project $project): RedirectResponse
@@ -678,12 +670,15 @@ class ProjectController extends Controller
     {
         $year = now()->year;
         $prefix = "BMPC-PRJ-{$year}-";
-        // Archived projects keep their codes, so they must count too.
         $latestCode = Project::withTrashed()
             ->where('project_code', 'like', $prefix.'%')
             ->lockForUpdate()
             ->max('project_code');
-        $latestSequence = $latestCode === null ? 0 : (int) substr($latestCode, -4);
+        // Deleted projects are gone from the table, so the highest number ever issued is remembered too.
+        $latestSequence = max(
+            $latestCode === null ? 0 : (int) substr($latestCode, -4),
+            (int) SystemSetting::resolve("project_code_last_{$year}", 0),
+        );
 
         return $prefix.str_pad((string) ($latestSequence + 1), 4, '0', STR_PAD_LEFT);
     }

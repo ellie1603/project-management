@@ -61,7 +61,7 @@ class Permissions
                 ],
                 'projects.delete' => [
                     'label' => 'Delete projects',
-                    'description' => 'Remove a project from every list (kept in the database).',
+                    'description' => 'Permanently delete a project and everything in it.',
                     'roles' => [self::ADMIN],
                     'default' => [self::ADMIN],
                 ],

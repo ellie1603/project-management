@@ -10,10 +10,7 @@
 @endphp
 
 <div class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-    <a href="{{ route('system.usage', ['from' => $from->toDateString(), 'to' => $to->toDateString()]) }}" class="mb-5 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition-colors duration-150 hover:text-slate-900">
-        <i data-lucide="arrow-left" class="h-4 w-4"></i>
-        Back to System Usage
-    </a>
+    <x-breadcrumbs />
 
     <div class="mb-6">
         <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">{{ $user->roleLabel() }}{{ $user->position_type ? ' · '.$user->position_type : '' }}</p>

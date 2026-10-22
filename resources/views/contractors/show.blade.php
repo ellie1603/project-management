@@ -2,6 +2,8 @@
 
 @section('content')
 <div class="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+    <x-breadcrumbs />
+
     <div class="flex items-center justify-between">
         <div>
             <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Provider</p>
