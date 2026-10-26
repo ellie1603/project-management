@@ -10,17 +10,17 @@
     />
 
     <div class="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <x-stat-card label="Assigned" :value="$stats['assigned']" icon="folder" sub="Total projects" class="animate-rise-in" style="animation-delay: 60ms" />
-        <x-stat-card label="Ongoing" :value="$stats['ongoing']" icon="loader" :sub="$stats['completed'].' completed'" class="animate-rise-in" style="animation-delay: 110ms" />
-        <x-stat-card label="Delayed" :value="$stats['delayed']" icon="triangle-alert" sub="Needs an update" class="animate-rise-in" style="animation-delay: 160ms" />
-        <x-stat-card label="Upcoming Deadlines" :value="$stats['upcoming_deadlines']" icon="calendar-clock" sub="Approaching target date" class="animate-rise-in" style="animation-delay: 210ms" />
+        <x-stat-card label="Assigned" :value="$stats['assigned']" icon="folder" sub="Total projects" class="animate-rise-in" style="animation-delay: 30ms" />
+        <x-stat-card label="Ongoing" :value="$stats['ongoing']" icon="loader" :sub="$stats['completed'].' completed'" class="animate-rise-in" style="animation-delay: 55ms" />
+        <x-stat-card label="Delayed" :value="$stats['delayed']" icon="triangle-alert" sub="Needs an update" class="animate-rise-in" style="animation-delay: 80ms" />
+        <x-stat-card label="Upcoming Deadlines" :value="$stats['upcoming_deadlines']" icon="calendar-clock" sub="Approaching target date" class="animate-rise-in" style="animation-delay: 105ms" />
     </div>
 
-    <div class="mt-6 animate-rise-in" style="animation-delay: 240ms">
+    <div class="mt-6 animate-rise-in" style="animation-delay: 120ms">
         @include('dashboard.partials.timeline', ['timelineTasks' => $timelineTasks])
     </div>
 
-    <div class="mt-6 animate-rise-in rounded-2xl border border-slate-200/80 bg-white shadow-soft" style="animation-delay: 280ms">
+    <div class="mt-6 animate-rise-in rounded-2xl border border-slate-200/80 bg-white shadow-soft" style="animation-delay: 140ms">
         <div class="border-b border-slate-100 px-5 py-4">
             <h3 class="font-display text-lg font-semibold text-slate-900">Assigned Projects</h3>
         </div>

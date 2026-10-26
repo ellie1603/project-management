@@ -42,10 +42,7 @@ class DatabaseSeeder extends Seeder
             // Both use the admin role: the CEO runs the cooperative's projects; the
             // System Administrator is the developer who maintains the system.
             ['ceo@bmpc.test', 'CEO', 'admin', null],
-            ['sysadmin@bmpc.test', 'System Administrator', 'admin', null],
-            ['juan@bmpc.test', 'Juan Dela Cruz', 'project_personnel', 'Contractor'],
-            ['maria@bmpc.test', 'Maria Santos', 'project_personnel', 'Foreman'],
-            ['pedro@bmpc.test', 'Pedro Reyes', 'project_personnel', 'Branch Manager'],
+            ['admin@bmpc.test', 'System Administrator', 'admin', null],
             ['finance@bmpc.test', 'Finance Officer', 'finance_accounting', null],
         ];
 
@@ -64,6 +61,6 @@ class DatabaseSeeder extends Seeder
         }
 
         // The developer account always has full access and manages roles & permissions.
-        User::query()->where('email', 'sysadmin@bmpc.test')->update(['is_system_admin' => true]);
+        User::query()->where('email', 'admin@bmpc.test')->update(['is_system_admin' => true]);
     }
 }

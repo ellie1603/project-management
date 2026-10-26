@@ -39,7 +39,9 @@ class UsersController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return $this->respond($request, 'users.index', 'users.partials.results', compact('users'));
+        $recordedWorkByUser = User::recordedWorkFor($users->pluck('id')->all());
+
+        return $this->respond($request, 'users.index', 'users.partials.results', compact('users', 'recordedWorkByUser'));
     }
 
     public function create(): View

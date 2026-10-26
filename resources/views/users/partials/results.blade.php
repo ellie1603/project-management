@@ -134,7 +134,7 @@
 
     @if ($user->id !== auth()->id())
         @php
-            $recordedWork = $user->recordedWork();
+            $recordedWork = isset($recordedWorkByUser) ? ($recordedWorkByUser[$user->id] ?? []) : $user->recordedWork();
             $needsForce = $recordedWork !== [];
             $isDeleteError = (string) old('_deleting_user_id') === (string) $user->id;
         @endphp

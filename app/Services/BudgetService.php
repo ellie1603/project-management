@@ -12,19 +12,27 @@ class BudgetService
     /**
      * @return array<string, string|float>
      */
+    private ?float $warningThreshold = null;
+
+    /**
+     * Uses the totals preloaded by Project::scopeWithBudgetTotals() when
+     * present, so list pages don't run three queries per project.
+     *
+     * @return array<string, string|float>
+     */
     public function summarize(Project $project): array
     {
         $approvedBudget = (float) $project->approved_budget;
-        $totalExpenses = (float) $project->expenses()->sum('amount');
-        $pendingRequests = (float) $project->budgetRequests()->where('status', 'Pending')->sum('amount');
-        $approvedRequests = (float) $project->budgetRequests()->where('status', 'Approved')->sum('amount');
+        $totalExpenses = $this->total($project, 'expenses_total', fn () => $project->expenses()->sum('amount'));
+        $pendingRequests = $this->total($project, 'pending_requests_total', fn () => $project->budgetRequests()->where('status', 'Pending')->sum('amount'));
+        $approvedRequests = $this->total($project, 'approved_requests_total', fn () => $project->budgetRequests()->where('status', 'Approved')->sum('amount'));
         $remainingBudget = $approvedBudget - $totalExpenses;
         $utilizationPercent = $approvedBudget > 0
             ? ($totalExpenses / $approvedBudget) * 100
             : 0;
-        $warningThreshold = (float) DB::table('system_settings')
+        $warningThreshold = $this->warningThreshold ??= (float) (DB::table('system_settings')
             ->where('key', 'budget_warning_threshold_percent')
-            ->value('value', 80);
+            ->value('value') ?? 80);
 
         $budgetStatus = match (true) {
             $utilizationPercent >= 100 => 'Budget Exceeded',
@@ -43,6 +51,13 @@ class BudgetService
             'budget_warning_threshold_percent' => $warningThreshold,
             'budget_status' => $budgetStatus,
         ];
+    }
+
+    private function total(Project $project, string $preloaded, callable $query): float
+    {
+        return array_key_exists($preloaded, $project->getAttributes())
+            ? (float) $project->getAttribute($preloaded)
+            : (float) $query();
     }
 
     /**

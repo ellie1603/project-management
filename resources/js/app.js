@@ -106,7 +106,7 @@ Alpine.data('tabSlide', (initial = 'overview', order = []) => ({
             { left: `${from.left}px`, width: `${from.width}px` },
             { left: `${spanLeft}px`, width: `${spanRight - spanLeft}px`, offset: 0.45 },
             { left: `${to.left}px`, width: `${to.width}px` },
-        ], { duration: 520, easing: 'cubic-bezier(0.65, 0, 0.35, 1)' });
+        ], { duration: 320, easing: 'cubic-bezier(0.65, 0, 0.35, 1)' });
     },
 }));
 
@@ -215,7 +215,7 @@ window.markNotificationRead = function markNotificationRead(id, button) {
         const prefix = original.slice(0, match.index);
         const suffix = original.slice(match.index + numeric.length);
         const decimals = numeric.includes('.') ? numeric.split('.')[1].length : 0;
-        const duration = 900;
+        const duration = 500;
         const start = performance.now();
 
         const frame = (now) => {
@@ -323,39 +323,36 @@ const navProgress = (function navProgress() {
 })();
 
 /**
- * Prefetch same-origin pages on hover/focus so the browser has a head
- * start by the time the user actually clicks — makes navigation feel
- * instant without changing how the app renders pages.
+ * Double-submission guard: while a form is being sent, every submit button in
+ * it is disabled, so a second click (or Enter) can't record the same thing
+ * twice. Turbo sends every POST form in the app, so its events mark the start
+ * and end of a submission; the buttons come back if the server returns the
+ * form with errors.
  */
-(function hoverPrefetch() {
-    const prefetched = new Set();
+(function preventDoubleSubmit() {
+    const buttons = (form) => form.querySelectorAll('button[type="submit"], button:not([type]), input[type="submit"]');
 
-    const prefetch = (link) => {
-        if (!(link instanceof HTMLAnchorElement) || !link.href) {
-            return;
-        }
+    document.addEventListener('turbo:submit-start', (event) => {
+        const form = event.detail.formSubmission.formElement;
 
-        const url = new URL(link.href, window.location.href);
+        buttons(form).forEach((button) => {
+            if (!button.disabled) {
+                button.disabled = true;
+                button.dataset.submitLock = 'true';
+                button.setAttribute('aria-busy', 'true');
+            }
+        });
+    });
 
-        if (
-            url.origin !== window.location.origin ||
-            prefetched.has(url.href) ||
-            link.hasAttribute('download') ||
-            link.target === '_blank'
-        ) {
-            return;
-        }
-
-        prefetched.add(url.href);
-
-        const hint = document.createElement('link');
-        hint.rel = 'prefetch';
-        hint.href = url.href;
-        document.head.appendChild(hint);
-    };
-
-    document.addEventListener('mouseover', (event) => prefetch(event.target.closest('a[href]')), { passive: true });
-    document.addEventListener('focusin', (event) => prefetch(event.target.closest('a[href]')));
+    document.addEventListener('turbo:submit-end', (event) => {
+        buttons(event.detail.formSubmission.formElement).forEach((button) => {
+            if (button.dataset.submitLock) {
+                button.disabled = false;
+                delete button.dataset.submitLock;
+                button.removeAttribute('aria-busy');
+            }
+        });
+    });
 })();
 
 /**

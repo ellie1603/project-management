@@ -27,17 +27,17 @@
                 <x-application-logo class="splash-fade-in relative h-24 w-24 rounded-full bg-white p-3.5 shadow-glow" />
             </div>
 
-            <p class="splash-fade-in mt-9 text-xs font-semibold uppercase tracking-[0.35em] text-brand-300" style="animation-delay: 260ms">
+            <p class="splash-fade-in mt-9 text-xs font-semibold uppercase tracking-[0.35em] text-brand-300" style="animation-delay: 130ms">
                 {{ config('app.name', 'Project Management') }}
             </p>
-            <p class="splash-fade-in mt-3 font-display text-2xl font-semibold tracking-tight text-white" style="animation-delay: 380ms">
+            <p class="splash-fade-in mt-3 font-display text-2xl font-semibold tracking-tight text-white" style="animation-delay: 190ms">
                 Welcome back, {{ explode(' ', auth()->user()->name)[0] }}
             </p>
-            <p class="splash-fade-in mt-2 text-base text-slate-400" style="animation-delay: 480ms">
+            <p class="splash-fade-in mt-2 text-base text-slate-400" style="animation-delay: 240ms">
                 Preparing your workspace&hellip;
             </p>
 
-            <div class="splash-fade-in relative mt-9 h-[4px] w-56 overflow-hidden rounded-full bg-white/10" style="animation-delay: 600ms">
+            <div class="splash-fade-in relative mt-9 h-[4px] w-56 overflow-hidden rounded-full bg-white/10" style="animation-delay: 300ms">
                 <span class="splash-sweep absolute inset-y-0 w-1/3 rounded-full bg-brand-300/40"></span>
             </div>
         </div>

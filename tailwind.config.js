@@ -166,7 +166,7 @@ export default {
             },
             animation: {
                 'fade-in': 'fadeIn 200ms ease-out',
-                'rise-in': 'riseIn 500ms cubic-bezier(0.16, 1, 0.3, 1) both',
+                'rise-in': 'riseIn 250ms cubic-bezier(0.16, 1, 0.3, 1) both',
                 'scale-in': 'scaleIn 300ms cubic-bezier(0.16, 1, 0.3, 1) both',
                 shimmer: 'shimmer 1.8s ease-in-out infinite',
                 'soft-pulse': 'softPulse 2.2s ease-in-out infinite',

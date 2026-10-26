@@ -52,6 +52,31 @@ class BudgetRequestTest extends TestCase
         $this->assertSame('Approved', $budgetRequest->fresh()->status);
     }
 
+    public function test_only_contractor_personnel_submit_budget_requests(): void
+    {
+        $project = Project::factory()->create(['project_code' => 'BMPC-PRJ-'.date('Y').'-0010']);
+        $contractor = User::factory()->create(['role' => 'project_personnel', 'position_type' => 'Contractor']);
+        $project->assignPersonnel($contractor, 'Contractor', 'Builder');
+
+        $this->actingAs($contractor)->get(route('projects.show', $project))->assertOk()->assertSee('data-tab="budget-request"', false);
+        $this->actingAs($contractor)
+            ->post(route('projects.budget-requests.store', $project), ['amount' => 50000, 'purpose' => '30% progress billing'])
+            ->assertRedirect();
+
+        // In-house (by administration) personnel have no budget requests; Finance records their expenses.
+        foreach (['OIC', 'Staff', 'Branch Manager', 'Foreman'] as $position) {
+            $inHouse = User::factory()->create(['role' => 'project_personnel', 'position_type' => $position]);
+            $project->assignPersonnel($inHouse, $position, 'Site work');
+
+            $this->actingAs($inHouse)->get(route('projects.show', $project))->assertOk()->assertDontSee('data-tab="budget-request"', false);
+            $this->actingAs($inHouse)
+                ->post(route('projects.budget-requests.store', $project), ['amount' => 5000, 'purpose' => 'Tools'])
+                ->assertForbidden();
+        }
+
+        $this->assertSame(1, $project->budgetRequests()->count());
+    }
+
     public function test_finance_cannot_approve_or_reject_a_budget_request(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);

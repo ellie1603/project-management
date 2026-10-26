@@ -4,12 +4,13 @@ namespace App\Notifications;
 
 use App\Models\BudgetRequest;
 use App\Models\Project;
+use App\Notifications\Concerns\RespectsNotificationPreferences;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
 class BudgetRequestSubmittedNotification extends Notification
 {
-    use Queueable;
+    use Queueable, RespectsNotificationPreferences;
 
     public function __construct(public Project $project, public BudgetRequest $budgetRequest) {}
 
@@ -28,7 +29,7 @@ class BudgetRequestSubmittedNotification extends Notification
     {
         return [
             'title' => 'Budget request submitted',
-            'message' => "A budget request of ₱".number_format((float) $this->budgetRequest->amount, 2)." was submitted for {$this->project->title}.",
+            'message' => 'A budget request of ₱'.number_format((float) $this->budgetRequest->amount, 2)." was submitted for {$this->project->title}.",
             'project_id' => $this->project->id,
             'project_code' => $this->project->project_code,
         ];

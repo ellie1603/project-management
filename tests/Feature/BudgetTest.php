@@ -45,13 +45,13 @@ class BudgetTest extends TestCase
     {
         $admin = User::factory()->create(['role' => 'admin']);
         $finance = User::factory()->create(['role' => 'finance_accounting']);
-        $personnel = User::factory()->create(['role' => 'project_personnel', 'position_type' => 'Foreman']);
+        $personnel = User::factory()->create(['role' => 'project_personnel', 'position_type' => 'Contractor']);
         $project = Project::factory()->create([
             'project_code' => 'BMPC-PRJ-'.date('Y').'-0006',
             'approved_budget' => 100000,
             'created_by' => $admin->id,
         ]);
-        $project->assignPersonnel($personnel, 'Foreman', 'Site lead');
+        $project->assignPersonnel($personnel, 'Contractor', 'Builder');
 
         $this->actingAs($personnel)
             ->post('/projects/'.$project->id.'/budget-requests', [

@@ -51,6 +51,7 @@ class ProjectController extends Controller
         $this->authorize('viewAny', Project::class);
 
         $projects = Project::query()
+            ->withBudgetTotals()
             ->with(['category', 'assignments.user', 'contractors', 'phases'])
             ->visibleTo(Auth::user())
             ->filter($request)
@@ -61,7 +62,6 @@ class ProjectController extends Controller
         $projects->getCollection()->transform(function (Project $project): Project {
             $project->setAttribute('budget', $project->budgetSummary());
             $project->setAttribute('timeline', $project->timelineSummary());
-            $project->setAttribute('latestProgress', $project->progress()->latest('progress_date')->first());
 
             return $project;
         });
@@ -167,6 +167,8 @@ class ProjectController extends Controller
             'contractors',
             'quotations.contractor',
             'expenses.creator',
+            'expenses.reversal:id,reverses_expense_id',
+            'expenses.reverses:id,reference_number',
             'budgetRequests.requester',
             'budgetRequests.reviewer',
         ]);

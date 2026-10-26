@@ -29,29 +29,29 @@
             <div class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
                 <div
                     class="h-full origin-left animate-grow-x rounded-full {{ $stats['overall_utilization_percent'] >= 100 ? 'bg-red-500' : ($stats['overall_utilization_percent'] >= 80 ? 'bg-amber-400' : 'bg-white') }}"
-                    style="width: {{ min(100, (float) $stats['overall_utilization_percent']) }}%; animation-delay: 250ms"
+                    style="width: {{ min(100, (float) $stats['overall_utilization_percent']) }}%; animation-delay: 125ms"
                 ></div>
             </div>
         </x-slot>
     </x-page-hero>
 
     <div class="mt-6 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-5">
-        <x-stat-card label="Approved Budget" value="₱{{ number_format($stats['total_approved_budget'], 2) }}" icon="wallet" sub="Baseline allocation" class="animate-rise-in" style="animation-delay: 60ms" />
-        <x-stat-card label="Total Expenses" value="₱{{ number_format($stats['total_expenses'], 2) }}" icon="calculator" sub="Recorded to date" class="animate-rise-in" style="animation-delay: 110ms" />
-        <x-stat-card label="Remaining Budget" value="₱{{ number_format($stats['remaining_budget'], 2) }}" icon="piggy-bank" sub="Available to spend" class="animate-rise-in" style="animation-delay: 160ms" />
-        <x-stat-card label="Over Budget" :value="$stats['over_budget']" icon="triangle-alert" :sub="$stats['near_budget_limit'].' near limit'" class="animate-rise-in" style="animation-delay: 210ms" />
-        <x-stat-card label="Pending Requests" value="₱{{ number_format($stats['pending_budget_requests_total'], 2) }}" icon="hand-coins" :sub="$stats['pending_budget_requests'].' awaiting CEO approval'" class="col-span-2 animate-rise-in md:col-span-1" style="animation-delay: 260ms" />
+        <x-stat-card label="Approved Budget" value="₱{{ number_format($stats['total_approved_budget'], 2) }}" icon="wallet" sub="Baseline allocation" class="animate-rise-in" style="animation-delay: 30ms" />
+        <x-stat-card label="Total Expenses" value="₱{{ number_format($stats['total_expenses'], 2) }}" icon="calculator" sub="Recorded to date" class="animate-rise-in" style="animation-delay: 55ms" />
+        <x-stat-card label="Remaining Budget" value="₱{{ number_format($stats['remaining_budget'], 2) }}" icon="piggy-bank" sub="Available to spend" class="animate-rise-in" style="animation-delay: 80ms" />
+        <x-stat-card label="Over Budget" :value="$stats['over_budget']" icon="triangle-alert" :sub="$stats['near_budget_limit'].' near limit'" class="animate-rise-in" style="animation-delay: 105ms" />
+        <x-stat-card label="Pending Requests" value="₱{{ number_format($stats['pending_budget_requests_total'], 2) }}" icon="hand-coins" :sub="$stats['pending_budget_requests'].' awaiting CEO approval'" class="col-span-2 animate-rise-in md:col-span-1" style="animation-delay: 130ms" />
     </div>
 
     <div class="mt-6 grid gap-4 lg:grid-cols-3">
-        <div class="animate-rise-in rounded-2xl border border-slate-200/80 bg-white p-5 shadow-soft transition-shadow duration-300 ease-elegant hover:shadow-elevated lg:col-span-1" style="animation-delay: 200ms">
+        <div class="animate-rise-in rounded-2xl border border-slate-200/80 bg-white p-5 shadow-soft transition-shadow duration-300 ease-elegant hover:shadow-elevated lg:col-span-1" style="animation-delay: 100ms">
             <h3 class="font-display text-sm font-semibold text-slate-900">Budget Status Breakdown</h3>
             <div class="mt-3 h-56">
                 <canvas id="chart-budget-status"></canvas>
             </div>
         </div>
 
-        <div class="animate-rise-in rounded-2xl border border-slate-200/80 bg-white shadow-soft transition-shadow duration-300 ease-elegant hover:shadow-elevated lg:col-span-1" style="animation-delay: 240ms">
+        <div class="animate-rise-in rounded-2xl border border-slate-200/80 bg-white shadow-soft transition-shadow duration-300 ease-elegant hover:shadow-elevated lg:col-span-1" style="animation-delay: 120ms">
             <div class="border-b border-slate-100 px-5 py-4">
                 <h3 class="font-display text-sm font-semibold text-slate-900">Projects Needing Attention</h3>
                 <p class="text-xs text-slate-500">Approaching limit or over budget.</p>
@@ -71,7 +71,7 @@
             </div>
         </div>
 
-        <div class="animate-rise-in rounded-2xl border border-slate-200/80 bg-white shadow-soft transition-shadow duration-300 ease-elegant hover:shadow-elevated lg:col-span-1" style="animation-delay: 280ms">
+        <div class="animate-rise-in rounded-2xl border border-slate-200/80 bg-white shadow-soft transition-shadow duration-300 ease-elegant hover:shadow-elevated lg:col-span-1" style="animation-delay: 140ms">
             <div class="border-b border-slate-100 px-5 py-4">
                 <h3 class="font-display text-sm font-semibold text-slate-900">Recent Budget Activity</h3>
                 <p class="text-xs text-slate-500">Latest recorded expenses.</p>

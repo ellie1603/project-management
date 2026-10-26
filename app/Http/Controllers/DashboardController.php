@@ -39,7 +39,7 @@ class DashboardController extends Controller
 
     private function adminDashboard(): View
     {
-        $projects = Project::query()->with('category')->get();
+        $projects = Project::query()->withBudgetTotals()->with(['category', 'phases', 'latestProgress'])->withExists(['documents as has_approved_design' => fn ($query) => $query->where('document_type', 'Approved Design')])->get();
         $summaries = $this->summarizeAll($projects);
 
         $stats = [
@@ -71,7 +71,7 @@ class DashboardController extends Controller
 
     private function financeDashboard(): View
     {
-        $projects = Project::query()->with('category')->get();
+        $projects = Project::query()->withBudgetTotals()->with('category')->get();
         $summaries = $this->summarizeAll($projects);
 
         $stats = [
@@ -111,7 +111,7 @@ class DashboardController extends Controller
     private function personnelDashboard(): View
     {
         $user = Auth::user();
-        $projects = $user->assignedProjects()->with('category')->get();
+        $projects = $user->assignedProjects()->withBudgetTotals()->with(['category', 'phases', 'latestProgress'])->withExists(['documents as has_approved_design' => fn ($query) => $query->where('document_type', 'Approved Design')])->get();
         $summaries = $this->summarizeAll($projects);
 
         $stats = [
@@ -123,7 +123,7 @@ class DashboardController extends Controller
         ];
 
         $projectRows = $projects->values()->map(function (Project $project, int $key) use ($summaries): array {
-            $latestUpdate = $project->progress()->latest('progress_date')->first();
+            $latestUpdate = $project->latestProgress;
 
             return [
                 'project' => $project,
@@ -183,7 +183,7 @@ class DashboardController extends Controller
                     ? (int) round(min(100, max(0, $timeline['days_elapsed'] / $duration * 100)))
                     : ($timelineStatus === 'Not Started' ? 0 : 100);
 
-                $progress = (int) ($project->progress()->latest('progress_date')->value('progress_percentage') ?? 0);
+                $progress = (int) ($project->latestProgress?->progress_percentage ?? 0);
                 $behindPace = $statusKey !== 'completed' && $statusKey !== 'registered' && ($elapsedPercent - $progress) >= 20;
 
                 $daysRegistered = (int) $project->created_at->diffInDays(now());
@@ -273,13 +273,13 @@ class DashboardController extends Controller
             }
 
             if (in_array($project->status, ['Registered', 'Ongoing'], true)) {
-                $latestProgress = $project->progress()->latest('progress_date')->first();
+                $latestProgress = $project->latestProgress;
 
                 if ($latestProgress === null || $latestProgress->progress_date->lt(now()->subDays(14))) {
                     $items->push(['project' => $project, 'reason' => 'No recent progress update']);
                 }
 
-                if (! $project->documents()->where('document_type', 'Approved Design')->exists()) {
+                if (! $project->has_approved_design) {
                     $items->push(['project' => $project, 'reason' => 'Missing required document']);
                 }
             }

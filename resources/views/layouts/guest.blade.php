@@ -32,7 +32,7 @@
                     <span class="font-display text-xl font-semibold tracking-tight text-white">{{ config('app.name', 'Project Management') }}</span>
                 </a>
 
-                <div class="relative z-10 max-w-md animate-rise-in" style="animation-delay: 80ms">
+                <div class="relative z-10 max-w-md animate-rise-in" style="animation-delay: 40ms">
                     <h1 class="font-display text-[2rem] font-semibold leading-[1.15] tracking-tight text-white">
                         Every approved project,<br>tracked with clarity.
                     </h1>
@@ -46,7 +46,7 @@
                             ['icon' => 'calendar-clock', 'text' => 'Automatic timeline and delay tracking'],
                             ['icon' => 'shield-check', 'text' => 'Role-based access with a full audit trail'],
                         ] as $i => $feature)
-                            <li class="flex items-center gap-3 animate-rise-in" style="animation-delay: {{ 120 + $i * 60 }}ms">
+                            <li class="flex items-center gap-3 animate-rise-in" style="animation-delay: {{ intdiv(120 + $i * 60, 2) }}ms">
                                 <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/10 text-highlight-400 ring-1 ring-white/10">
                                     <i data-lucide="{{ $feature['icon'] }}" class="h-4 w-4"></i>
                                 </span>
@@ -56,7 +56,7 @@
                     </ul>
                 </div>
 
-                <p class="relative z-10 animate-rise-in text-xs text-slate-500" style="animation-delay: 300ms">
+                <p class="relative z-10 animate-rise-in text-xs text-slate-500" style="animation-delay: 150ms">
                     &copy; {{ now()->year }} {{ config('app.name', 'Project Management') }}. All rights reserved.
                 </p>
             </div>
@@ -71,11 +71,11 @@
                         <p class="font-display text-base font-semibold tracking-tight text-slate-900">{{ config('app.name', 'Project Management') }}</p>
                     </div>
 
-                    <div class="animate-rise-in" style="animation-delay: 60ms">
+                    <div class="animate-rise-in" style="animation-delay: 30ms">
                         {{ $slot }}
                     </div>
 
-                    <p class="mt-10 animate-rise-in text-center text-xs text-slate-400 lg:hidden" style="animation-delay: 140ms">
+                    <p class="mt-10 animate-rise-in text-center text-xs text-slate-400 lg:hidden" style="animation-delay: 70ms">
                         &copy; {{ now()->year }} {{ config('app.name', 'Project Management') }}. All rights reserved.
                     </p>
                 </div>

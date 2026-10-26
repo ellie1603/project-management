@@ -35,7 +35,12 @@
                                 <p class="mt-0.5 text-xs text-red-600">{{ $budgetRequest->remarks }}</p>
                             @endif
                         </td>
-                        <td class="px-4 py-3 text-sm font-medium text-slate-900">₱{{ number_format((float) $budgetRequest->amount, 2) }}</td>
+                        <td class="px-4 py-3 text-sm font-medium text-slate-900">
+                            ₱{{ number_format((float) $budgetRequest->amount, 2) }}
+                            @if ($canReview && $budgetRequest->project)
+                                <x-budget-fit :request="$budgetRequest" :remaining="$budgetRequest->project->budgetSummary()['remaining_budget']" />
+                            @endif
+                        </td>
                         <td class="px-4 py-3 text-sm"><x-status-badge :status="$budgetRequest->status" /></td>
                         @if ($canReview)
                             <td class="px-4 py-3 text-sm">

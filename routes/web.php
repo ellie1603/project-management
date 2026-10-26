@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Route;
 
 // Record ids in URLs are always numeric; anything else is a 404 before the database is asked.
 Route::patterns(array_fill_keys(
-    ['project', 'document', 'progress', 'budgetRequest', 'contractor', 'user', 'category', 'report'],
+    ['project', 'document', 'progress', 'budgetRequest', 'contractor', 'user', 'category', 'report', 'expense'],
     '[0-9]+',
 ));
 
@@ -51,6 +51,7 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::patch('/profile/notifications', [ProfileController::class, 'updateNotifications'])->name('profile.notifications');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/search', [SearchController::class, 'index'])
@@ -130,6 +131,7 @@ Route::middleware('auth')->group(function () {
     // Finance's quick entry: several expenses at once, each a project, date, amount, and optional reference.
     Route::get('/budget/expenses/new', [ExpenseBatchController::class, 'create'])->name('budget.expenses.batch');
     Route::post('/budget/expenses/batch', [ExpenseBatchController::class, 'store'])->name('budget.expenses.batch.store');
+    Route::post('/expenses/{expense}/reverse', [BudgetController::class, 'reverseExpense'])->name('expenses.reverse');
     Route::get('/budget/requests', [BudgetRequestController::class, 'index'])->name('budget.requests');
 
     Route::resource('users', UsersController::class)->except(['show', 'edit']);

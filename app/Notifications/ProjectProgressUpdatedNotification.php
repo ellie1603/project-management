@@ -4,12 +4,13 @@ namespace App\Notifications;
 
 use App\Models\Project;
 use App\Models\ProjectProgress;
+use App\Notifications\Concerns\RespectsNotificationPreferences;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
 class ProjectProgressUpdatedNotification extends Notification
 {
-    use Queueable;
+    use Queueable, RespectsNotificationPreferences;
 
     public function __construct(public Project $project, public ProjectProgress $progress) {}
 

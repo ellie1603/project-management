@@ -30,5 +30,7 @@
             @endforelse
         </tbody>
     </table>
+
+    @include('reports.partials.signatures')
 </body>
 </html>

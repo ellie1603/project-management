@@ -29,21 +29,21 @@
             <div class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
                 <div
                     class="h-full origin-left animate-grow-x rounded-full {{ $stats['overall_utilization_percent'] >= 100 ? 'bg-red-500' : ($stats['overall_utilization_percent'] >= 80 ? 'bg-amber-400' : 'bg-white') }}"
-                    style="width: {{ min(100, (float) $stats['overall_utilization_percent']) }}%; animation-delay: 250ms"
+                    style="width: {{ min(100, (float) $stats['overall_utilization_percent']) }}%; animation-delay: 125ms"
                 ></div>
             </div>
         </x-slot>
     </x-page-hero>
 
     <div class="mt-6 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-5">
-        <x-stat-card label="Approved Budget" value="₱{{ number_format($stats['total_approved_budget'], 2) }}" icon="wallet" sub="Baseline allocation" class="animate-rise-in" style="animation-delay: 60ms" />
-        <x-stat-card label="Total Expenses" value="₱{{ number_format($stats['total_expenses'], 2) }}" icon="calculator" sub="Recorded to date" class="animate-rise-in" style="animation-delay: 110ms" />
-        <x-stat-card label="Remaining Budget" value="₱{{ number_format($stats['remaining_budget'], 2) }}" icon="piggy-bank" sub="Available to spend" class="animate-rise-in" style="animation-delay: 160ms" />
-        <x-stat-card label="Overall Utilization" value="{{ $stats['overall_utilization_percent'] }}%" icon="bar-chart-3" sub="Across all projects" class="animate-rise-in" style="animation-delay: 210ms" />
-        <x-stat-card label="Pending Requests" value="₱{{ number_format($stats['pending_requests'], 2) }}" icon="hand-coins" sub="Awaiting CEO approval" class="col-span-2 animate-rise-in md:col-span-1" style="animation-delay: 260ms" />
+        <x-stat-card label="Approved Budget" value="₱{{ number_format($stats['total_approved_budget'], 2) }}" icon="wallet" sub="Baseline allocation" class="animate-rise-in" style="animation-delay: 30ms" />
+        <x-stat-card label="Total Expenses" value="₱{{ number_format($stats['total_expenses'], 2) }}" icon="calculator" sub="Recorded to date" class="animate-rise-in" style="animation-delay: 55ms" />
+        <x-stat-card label="Remaining Budget" value="₱{{ number_format($stats['remaining_budget'], 2) }}" icon="piggy-bank" sub="Available to spend" class="animate-rise-in" style="animation-delay: 80ms" />
+        <x-stat-card label="Overall Utilization" value="{{ $stats['overall_utilization_percent'] }}%" icon="bar-chart-3" sub="Across all projects" class="animate-rise-in" style="animation-delay: 105ms" />
+        <x-stat-card label="Pending Requests" value="₱{{ number_format($stats['pending_requests'], 2) }}" icon="hand-coins" sub="Awaiting CEO approval" class="col-span-2 animate-rise-in md:col-span-1" style="animation-delay: 130ms" />
     </div>
 
-    <section class="mt-6 animate-rise-in overflow-hidden rounded-3xl bg-white shadow-soft ring-1 ring-slate-900/5 transition-shadow duration-300 ease-elegant hover:shadow-elevated" style="animation-delay: 260ms">
+    <section class="mt-6 animate-rise-in overflow-hidden rounded-3xl bg-white shadow-soft ring-1 ring-slate-900/5 transition-shadow duration-300 ease-elegant hover:shadow-elevated" style="animation-delay: 130ms">
         <div class="flex items-center gap-3 border-b border-slate-100 px-5 py-4">
             <span class="flex h-9 w-9 items-center justify-center rounded-xl chip-ink text-white shadow-sm">
                 <i data-lucide="table-2" class="h-4 w-4"></i>

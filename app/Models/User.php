@@ -50,6 +50,15 @@ class User extends Authenticatable
     }
 
     /**
+     * Contractor / 3rd-party project personnel, as opposed to in-house
+     * personnel working "by administration" (OIC, Staff, Branch Manager, Foreman).
+     */
+    public function isContractor(): bool
+    {
+        return $this->isProjectPersonnel() && $this->position_type === 'Contractor';
+    }
+
+    /**
      * The developer account that maintains the system: an Admin/CEO-role user
      * flagged as System Administrator. It always has every permission and is
      * the only account that manages roles & permissions and views system usage.
@@ -100,16 +109,40 @@ class User extends Authenticatable
      */
     public function recordedWork(): array
     {
+        return self::recordedWorkFor([$this->id])[$this->id] ?? [];
+    }
+
+    /**
+     * recordedWork() for many users at once: six queries in total instead of
+     * six per user, for the Users list.
+     *
+     * @param  array<int, int>  $userIds
+     * @return array<int, array<int, string>> user id => kinds of recorded work
+     */
+    public static function recordedWorkFor(array $userIds): array
+    {
         $checks = [
-            'registered projects' => DB::table('projects')->where('created_by', $this->id),
-            'progress updates' => DB::table('project_progress')->where('user_id', $this->id),
-            'uploaded documents' => DB::table('project_documents')->where('uploaded_by', $this->id),
-            'project expenses' => DB::table('project_expenses')->where('created_by', $this->id),
-            'budget requests' => DB::table('budget_requests')->where('requested_by', $this->id),
-            'finance reports' => DB::table('finance_reports')->where('generated_by', $this->id),
+            'registered projects' => ['projects', 'created_by'],
+            'progress updates' => ['project_progress', 'user_id'],
+            'uploaded documents' => ['project_documents', 'uploaded_by'],
+            'project expenses' => ['project_expenses', 'created_by'],
+            'budget requests' => ['budget_requests', 'requested_by'],
+            'finance reports' => ['finance_reports', 'generated_by'],
         ];
 
-        return array_keys(array_filter($checks, fn ($query): bool => $query->exists()));
+        $work = [];
+
+        if ($userIds === []) {
+            return $work;
+        }
+
+        foreach ($checks as $label => [$table, $column]) {
+            foreach (DB::table($table)->whereIn($column, $userIds)->distinct()->pluck($column) as $userId) {
+                $work[$userId][] = $label;
+            }
+        }
+
+        return $work;
     }
 
     /**
@@ -157,6 +190,7 @@ class User extends Authenticatable
             'is_active' => 'boolean',
             'is_system_admin' => 'boolean',
             'last_active_at' => 'datetime',
+            'notification_preferences' => 'array',
         ];
     }
 }

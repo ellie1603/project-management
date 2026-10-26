@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -207,9 +208,38 @@ class Project extends Model
         return $this->belongsToMany(User::class, 'project_assignments');
     }
 
+    /** @var array<int, bool> per-user answers, since a page asks several times */
+    private array $personnelChecks = [];
+
     public function hasPersonnel(User $user): bool
     {
-        return $this->assignments()->where('user_id', $user->getKey())->exists();
+        $userId = (int) $user->getKey();
+
+        if ($this->relationLoaded('assignments')) {
+            return $this->assignments->contains('user_id', $userId);
+        }
+
+        return $this->personnelChecks[$userId] ??= $this->assignments()->where('user_id', $userId)->exists();
+    }
+
+    /**
+     * Preloads the budget totals budgetSummary() needs, in the same query as
+     * the projects, for pages that summarize many projects at once.
+     */
+    public function scopeWithBudgetTotals(Builder $query): Builder
+    {
+        return $query
+            ->withSum('expenses as expenses_total', 'amount')
+            ->withSum(['budgetRequests as pending_requests_total' => fn (Builder $requests) => $requests->where('status', 'Pending')], 'amount')
+            ->withSum(['budgetRequests as approved_requests_total' => fn (Builder $requests) => $requests->where('status', 'Approved')], 'amount');
+    }
+
+    /**
+     * The most recent progress update, for eager loading on list pages.
+     */
+    public function latestProgress(): HasOne
+    {
+        return $this->hasOne(ProjectProgress::class)->ofMany(['progress_date' => 'max', 'id' => 'max']);
     }
 
     /**
@@ -260,6 +290,9 @@ class Project extends Model
 
     public function assignPersonnel(User $user, string $positionType, ?string $responsibility = null): ProjectAssignment
     {
+        unset($this->personnelChecks[(int) $user->getKey()]);
+        $this->unsetRelation('assignments');
+
         return $this->assignments()->firstOrCreate([
             'user_id' => $user->getKey(),
         ], [

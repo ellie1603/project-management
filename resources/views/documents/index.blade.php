@@ -29,7 +29,7 @@
                     ['label' => 'Storage Used', 'value' => $formatBytes($summaryStats['storage_bytes']), 'tone' => 'text-emerald-300'],
                     ['label' => 'Uploaded This Week', 'value' => number_format($summaryStats['uploaded_this_week']), 'tone' => 'text-amber-300'],
                 ] as $i => $figure)
-                    <div class="animate-rise-in" style="animation-delay: {{ 120 + $i * 60 }}ms">
+                    <div class="animate-rise-in" style="animation-delay: {{ intdiv(120 + $i * 60, 2) }}ms">
                         <p class="text-[11px] font-medium uppercase tracking-wider text-slate-500">{{ $figure['label'] }}</p>
                         <p class="mt-1.5 font-display text-xl font-semibold tabular-nums tracking-tight {{ $figure['tone'] }}">{{ $figure['value'] }}</p>
                     </div>

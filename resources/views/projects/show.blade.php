@@ -15,7 +15,7 @@
         ['id' => 'overview', 'label' => 'Overview', 'icon' => 'file-text'],
         ['id' => 'progress', 'label' => 'Project Progress', 'icon' => 'bar-chart-3'],
         $viewer->can('viewBudget', $project) ? ['id' => 'budget', 'label' => 'Budget', 'icon' => 'wallet'] : null,
-        $viewer->can('createBudgetRequest', $project) ? ['id' => 'budget-request', 'label' => 'Budget Request', 'icon' => 'hand-coins'] : null,
+        $isPersonnel && $viewer->can('createBudgetRequest', $project) ? ['id' => 'budget-request', 'label' => 'Budget Request', 'icon' => 'hand-coins'] : null,
         $isPersonnel ? null : ['id' => 'personnel', 'label' => 'Personnel', 'icon' => 'users'],
         $isPersonnel ? null : ['id' => 'contractors', 'label' => 'Contractor', 'icon' => 'building'],
         ['id' => 'documents', 'label' => 'Documents', 'icon' => 'file-text'],
@@ -110,7 +110,7 @@
     </div>
 
     <div class="sticky top-16 z-10 -mx-4 bg-slate-50/95 px-4 py-2 backdrop-blur sm:mx-0 sm:px-0 sm:py-0 sm:bg-transparent sm:backdrop-blur-0">
-        <nav x-ref="tabNav" class="relative flex gap-1 overflow-x-auto rounded-2xl bg-white p-1.5 shadow-soft ring-1 ring-slate-900/5 sm:inline-flex">
+        <nav x-ref="tabNav" class="relative flex max-w-full gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden rounded-2xl bg-white p-1.5 shadow-soft ring-1 ring-slate-900/5 sm:inline-flex">
             <span x-ref="tabPill" aria-hidden="true" class="pointer-events-none absolute bottom-1.5 top-1.5 rounded-xl bg-brand-600 opacity-0 shadow-sm" style="left: 0; width: 0;"></span>
             @foreach ($tabs as $tabItem)
                 <button

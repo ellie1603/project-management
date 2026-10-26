@@ -119,7 +119,7 @@ class Permissions
                 ],
                 'budget_requests.submit' => [
                     'label' => 'Submit budget requests',
-                    'description' => 'Ask the Admin/CEO for budget on an assigned project.',
+                    'description' => 'Contractor (3rd-party) personnel ask the Admin/CEO for budget. In-house personnel never do; Finance records their expenses.',
                     'roles' => [self::PERSONNEL],
                     'default' => [self::PERSONNEL],
                 ],
@@ -220,7 +220,12 @@ class Permissions
      */
     public static function grantedMap(): array
     {
-        return Cache::rememberForever(self::CACHE_KEY, function (): array {
+        // Checked dozens of times per page, so keep it for the rest of the request.
+        if (app()->bound(self::CACHE_KEY)) {
+            return app(self::CACHE_KEY);
+        }
+
+        $map = Cache::rememberForever(self::CACHE_KEY, function (): array {
             $map = array_fill_keys(array_keys(self::ROLES), []);
 
             DB::table('role_permissions')->orderBy('permission')->get(['role', 'permission'])
@@ -232,6 +237,10 @@ class Permissions
 
             return $map;
         });
+
+        app()->instance(self::CACHE_KEY, $map);
+
+        return $map;
     }
 
     /**
@@ -282,5 +291,6 @@ class Permissions
     public static function forget(): void
     {
         Cache::forget(self::CACHE_KEY);
+        app()->forgetInstance(self::CACHE_KEY);
     }
 }

@@ -14,7 +14,7 @@
         <a
             href="{{ route('projects.show', $project) }}"
             class="group relative flex animate-rise-in flex-col overflow-hidden rounded-3xl bg-white p-5 shadow-soft ring-1 ring-slate-900/5 transition-all duration-300 ease-elegant hover:-translate-y-0.5 hover:shadow-elevated"
-            style="animation-delay: {{ min($loop->index, 8) * 50 }}ms"
+            style="animation-delay: {{ intdiv(min($loop->index, 8) * 50, 2) }}ms"
         >
             <span class="absolute inset-x-0 top-0 h-1 {{ $meta['accent'] }}"></span>
 

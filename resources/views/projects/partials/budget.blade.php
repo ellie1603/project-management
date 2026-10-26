@@ -12,26 +12,27 @@
     <x-status-badge :status="$budget['budget_status']" />
 </div>
 
-<div class="grid gap-4 md:grid-cols-5">
-    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+{{-- Cards wrap onto more rows as space runs out, so long peso amounts always fit. --}}
+<div class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,12rem),1fr))] gap-4">
+    <div class="min-w-0 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <p class="text-xs uppercase tracking-wide text-slate-500">Approved Budget</p>
-        <p class="mt-2 text-xl font-semibold text-slate-900">₱{{ number_format((float) $budget['approved_budget'], 2) }}</p>
+        <p class="mt-2 text-lg font-semibold tabular-nums [overflow-wrap:anywhere] sm:text-xl text-slate-900">₱{{ number_format((float) $budget['approved_budget'], 2) }}</p>
     </div>
-    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div class="min-w-0 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <p class="text-xs uppercase tracking-wide text-slate-500">Pending Requests</p>
-        <p class="mt-2 text-xl font-semibold text-amber-600">₱{{ number_format((float) $budget['pending_requests'], 2) }}</p>
+        <p class="mt-2 text-lg font-semibold tabular-nums [overflow-wrap:anywhere] sm:text-xl text-amber-600">₱{{ number_format((float) $budget['pending_requests'], 2) }}</p>
     </div>
-    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div class="min-w-0 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <p class="text-xs uppercase tracking-wide text-slate-500">Approved Requests</p>
-        <p class="mt-2 text-xl font-semibold text-slate-900">₱{{ number_format((float) $budget['approved_requests'], 2) }}</p>
+        <p class="mt-2 text-lg font-semibold tabular-nums [overflow-wrap:anywhere] sm:text-xl text-slate-900">₱{{ number_format((float) $budget['approved_requests'], 2) }}</p>
     </div>
-    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div class="min-w-0 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <p class="text-xs uppercase tracking-wide text-slate-500">Utilized</p>
-        <p class="mt-2 text-xl font-semibold text-slate-900">₱{{ number_format((float) $budget['total_expenses'], 2) }}</p>
+        <p class="mt-2 text-lg font-semibold tabular-nums [overflow-wrap:anywhere] sm:text-xl text-slate-900">₱{{ number_format((float) $budget['total_expenses'], 2) }}</p>
     </div>
-    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div class="min-w-0 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <p class="text-xs uppercase tracking-wide text-slate-500">Remaining Budget</p>
-        <p class="mt-2 text-xl font-semibold text-slate-900">₱{{ number_format((float) $budget['remaining_budget'], 2) }}</p>
+        <p class="mt-2 text-lg font-semibold tabular-nums [overflow-wrap:anywhere] sm:text-xl text-slate-900">₱{{ number_format((float) $budget['remaining_budget'], 2) }}</p>
     </div>
 </div>
 
@@ -73,7 +74,12 @@
                                 <p class="mt-0.5 text-xs text-red-600">{{ $budgetRequest->remarks }}</p>
                             @endif
                         </td>
-                        <td class="px-2 py-2">₱{{ number_format((float) $budgetRequest->amount, 2) }}</td>
+                        <td class="px-2 py-2">
+                            ₱{{ number_format((float) $budgetRequest->amount, 2) }}
+                            @if ($canReview)
+                                <x-budget-fit :request="$budgetRequest" :remaining="$budget['remaining_budget']" />
+                            @endif
+                        </td>
                         <td class="px-2 py-2"><x-status-badge :status="$budgetRequest->status" /></td>
                         @if ($canReview)
                             <td class="px-2 py-2">
@@ -133,24 +139,21 @@
                         <th class="px-2 py-2">Amount</th>
                         <th class="px-2 py-2">Reference</th>
                         <th class="px-2 py-2">Recorded By</th>
+                        <th class="px-2 py-2"><span class="sr-only">Actions</span></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse ($project->expenses->sortByDesc('expense_date') as $expense)
                         <tr data-page-item>
                             <td class="px-2 py-2">{{ $expense->expense_date }}</td>
-                            <td class="px-2 py-2 whitespace-nowrap">₱{{ number_format((float) $expense->amount, 2) }}</td>
-                            <td class="px-2 py-2">
-                                {{ $expense->reference_number ?? '—' }}
-                                @if ($expense->description)
-                                    <p class="text-xs text-slate-400">{{ $expense->description }}</p>
-                                @endif
-                            </td>
+                            <td class="px-2 py-2"><x-expense-entry :expense="$expense" part="amount" /></td>
+                            <td class="px-2 py-2"><x-expense-entry :expense="$expense" part="reference" /></td>
                             <td class="px-2 py-2">{{ $expense->creator?->name ?? 'N/A' }}</td>
+                            <td class="px-2 py-2 text-right"><x-expense-entry :expense="$expense" part="action" /></td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-2 py-5 text-center text-slate-500">No expenses recorded yet.</td>
+                            <td colspan="5" class="px-2 py-5 text-center text-slate-500">No expenses recorded yet.</td>
                         </tr>
                     @endforelse
                 </tbody>

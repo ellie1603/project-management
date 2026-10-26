@@ -3,12 +3,13 @@
 namespace App\Notifications;
 
 use App\Models\Project;
+use App\Notifications\Concerns\RespectsNotificationPreferences;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
 class ProjectDelayedNotification extends Notification
 {
-    use Queueable;
+    use Queueable, RespectsNotificationPreferences;
 
     public function __construct(public Project $project, public int $delayDays) {}
 

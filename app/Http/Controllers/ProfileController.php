@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Services\NotificationPreferences;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
@@ -35,6 +37,21 @@ class ProfileController extends Controller
         $request->user()->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
+    }
+
+    /**
+     * Save which in-system notifications the user wants.
+     */
+    public function updateNotifications(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'enabled' => ['nullable', 'array'],
+            'enabled.*' => ['string', Rule::in(array_keys(NotificationPreferences::types()))],
+        ]);
+
+        NotificationPreferences::save($request->user(), $validated['enabled'] ?? []);
+
+        return Redirect::route('profile.edit')->with('status', 'notifications-updated');
     }
 
     /**

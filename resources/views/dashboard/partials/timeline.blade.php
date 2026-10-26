@@ -150,7 +150,7 @@
                 <a
                     href="{{ $row['url'] }}"
                     class="group relative block animate-rise-in px-5 py-4 pl-6 transition-colors duration-200 ease-smooth hover:bg-slate-50/70"
-                    style="animation-delay: {{ ($loop->index % $perPage) * 40 }}ms; {{ $loop->iteration > $perPage ? 'display: none;' : '' }}"
+                    style="animation-delay: {{ intdiv(($loop->index % $perPage) * 40, 2) }}ms; {{ $loop->iteration > $perPage ? 'display: none;' : '' }}"
                     x-show="Math.ceil({{ $loop->iteration }} / perPage) === page"
                 >
                     <span class="absolute inset-y-0 left-0 w-[3px] {{ $meta['accent'] }} opacity-70 transition-opacity duration-200 group-hover:opacity-100"></span>
@@ -218,7 +218,7 @@
                             <div class="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-slate-100">
                                 <div
                                     class="h-full origin-left animate-grow-x rounded-full {{ $workTone }}"
-                                    style="width: {{ $row['progress'] }}%; animation-delay: {{ min($loop->index, 10) * 40 + 100 }}ms"
+                                    style="width: {{ $row['progress'] }}%; animation-delay: {{ intdiv(min($loop->index, 10) * 40 + 100, 2) }}ms"
                                 ></div>
                             </div>
                             <div
@@ -244,7 +244,7 @@
                             <div class="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-slate-100">
                                 <div
                                     class="h-full origin-left animate-grow-x rounded-full {{ $timeTone }}"
-                                    style="width: {{ $row['elapsed_percent'] }}%; animation-delay: {{ min($loop->index, 10) * 40 + 160 }}ms"
+                                    style="width: {{ $row['elapsed_percent'] }}%; animation-delay: {{ intdiv(min($loop->index, 10) * 40 + 160, 2) }}ms"
                                 ></div>
                             </div>
                             <div

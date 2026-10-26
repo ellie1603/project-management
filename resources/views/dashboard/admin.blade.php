@@ -33,7 +33,7 @@
                     ['label' => 'Total Expenses', 'value' => $stats['total_expenses'], 'tone' => 'text-brand-300'],
                     ['label' => 'Remaining', 'value' => $stats['remaining_budget'], 'tone' => 'text-emerald-300'],
                 ] as $i => $figure)
-                    <div class="min-w-0 animate-rise-in {{ $loop->first ? 'col-span-2 sm:col-span-1' : '' }}" style="animation-delay: {{ 120 + $i * 70 }}ms">
+                    <div class="min-w-0 animate-rise-in {{ $loop->first ? 'col-span-2 sm:col-span-1' : '' }}" style="animation-delay: {{ intdiv(120 + $i * 70, 2) }}ms">
                         <p class="truncate text-[11px] font-medium uppercase tracking-wider text-slate-500">{{ $figure['label'] }}</p>
                         <p class="mt-1.5 truncate font-display text-lg font-semibold tabular-nums tracking-tight sm:text-xl {{ $figure['tone'] }}">
                             ₱{{ number_format($figure['value'], 2) }}
@@ -50,7 +50,7 @@
                 <div class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
                     <div
                         class="h-full origin-left animate-grow-x rounded-full {{ $utilization >= 100 ? 'bg-red-500' : ($utilization >= 80 ? 'bg-amber-400' : 'bg-white') }}"
-                        style="width: {{ min(100, $utilization) }}%; animation-delay: 300ms"
+                        style="width: {{ min(100, $utilization) }}%; animation-delay: 150ms"
                     ></div>
                 </div>
             </div>
@@ -58,21 +58,21 @@
     </x-page-hero>
 
     <div class="mt-6 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-5">
-        <x-stat-card label="Total Projects" :value="$stats['total_projects']" icon="folder" :sub="$stats['registered'].' registered'" class="animate-rise-in" style="animation-delay: 60ms" />
-        <x-stat-card label="Ongoing" :value="$stats['ongoing']" icon="loader" :sub="$stats['on_hold'].' on hold'" class="animate-rise-in" style="animation-delay: 110ms" />
-        <x-stat-card label="Completed" :value="$stats['completed']" icon="circle-check-big" sub="Delivered in full" class="animate-rise-in" style="animation-delay: 160ms" />
-        <x-stat-card label="Delayed" :value="$stats['delayed']" icon="triangle-alert" :sub="$stats['over_budget'].' over budget'" class="animate-rise-in" style="animation-delay: 210ms" />
-        <x-stat-card label="Pending Requests" value="₱{{ number_format($stats['pending_budget_requests_total'], 2) }}" icon="hand-coins" :sub="$stats['pending_budget_requests'].' awaiting your approval'" class="col-span-2 animate-rise-in md:col-span-1" style="animation-delay: 260ms" />
+        <x-stat-card label="Total Projects" :value="$stats['total_projects']" icon="folder" :sub="$stats['registered'].' registered'" class="animate-rise-in" style="animation-delay: 30ms" />
+        <x-stat-card label="Ongoing" :value="$stats['ongoing']" icon="loader" :sub="$stats['on_hold'].' on hold'" class="animate-rise-in" style="animation-delay: 55ms" />
+        <x-stat-card label="Completed" :value="$stats['completed']" icon="circle-check-big" sub="Delivered in full" class="animate-rise-in" style="animation-delay: 80ms" />
+        <x-stat-card label="Delayed" :value="$stats['delayed']" icon="triangle-alert" :sub="$stats['over_budget'].' over budget'" class="animate-rise-in" style="animation-delay: 105ms" />
+        <x-stat-card label="Pending Requests" value="₱{{ number_format($stats['pending_budget_requests_total'], 2) }}" icon="hand-coins" :sub="$stats['pending_budget_requests'].' awaiting your approval'" class="col-span-2 animate-rise-in md:col-span-1" style="animation-delay: 130ms" />
     </div>
 
     <div class="mt-6 grid items-start gap-4 xl:grid-cols-3">
-        <div class="min-w-0 animate-rise-in xl:col-span-2" style="animation-delay: 260ms">
+        <div class="min-w-0 animate-rise-in xl:col-span-2" style="animation-delay: 130ms">
             @include('dashboard.partials.timeline', ['timelineTasks' => $timelineTasks])
         </div>
 
         {{-- Side column: sits beside the monitoring list on wide screens, pairs up on laptops, stacks on phones. --}}
         <div class="grid min-w-0 gap-4 lg:grid-cols-2 xl:grid-cols-1">
-            <section class="min-w-0 animate-rise-in overflow-hidden rounded-3xl bg-white shadow-soft ring-1 ring-slate-900/5 transition-shadow duration-300 ease-elegant hover:shadow-elevated" style="animation-delay: 310ms">
+            <section class="min-w-0 animate-rise-in overflow-hidden rounded-3xl bg-white shadow-soft ring-1 ring-slate-900/5 transition-shadow duration-300 ease-elegant hover:shadow-elevated" style="animation-delay: 155ms">
                 <div class="flex items-center gap-3 border-b border-slate-100 px-5 py-4">
                     <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl chip-ink text-white shadow-sm">
                         <i data-lucide="chart-pie" class="h-4 w-4"></i>
@@ -113,7 +113,7 @@
                 </div>
             </section>
 
-            <section class="min-w-0 animate-rise-in overflow-hidden rounded-3xl bg-white shadow-soft ring-1 ring-slate-900/5 transition-shadow duration-300 ease-elegant hover:shadow-elevated" style="animation-delay: 360ms">
+            <section class="min-w-0 animate-rise-in overflow-hidden rounded-3xl bg-white shadow-soft ring-1 ring-slate-900/5 transition-shadow duration-300 ease-elegant hover:shadow-elevated" style="animation-delay: 180ms">
                 <div class="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
                     <div class="flex min-w-0 items-center gap-3">
                         <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl chip-ink text-white shadow-sm">

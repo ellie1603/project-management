@@ -63,9 +63,16 @@ class ProjectPolicy
             && $this->createProgress($user, $project);
     }
 
+    /**
+     * Only contractor (3rd-party) personnel request budget from the CEO.
+     * In-house personnel (by administration) never do: Finance records
+     * their project's expenses directly.
+     */
     public function createBudgetRequest(User $user, Project $project): bool
     {
-        return $user->hasPermission('budget_requests.submit') && $project->hasPersonnel($user);
+        return $user->isContractor()
+            && $user->hasPermission('budget_requests.submit')
+            && $project->hasPersonnel($user);
     }
 
     public function reviewBudgetRequest(User $user, Project $project): bool

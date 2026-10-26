@@ -32,13 +32,13 @@
             </span>
         </div>
 
-        <p class="logout-fade-in mt-8 text-[11px] font-semibold uppercase tracking-[0.35em] text-slate-400" style="animation-delay: 150ms">
+        <p class="logout-fade-in mt-8 text-[11px] font-semibold uppercase tracking-[0.35em] text-slate-400" style="animation-delay: 75ms">
             {{ config('app.name', 'Project Management') }}
         </p>
-        <p class="logout-fade-in mt-2 font-display text-xl font-semibold tracking-tight text-white" style="animation-delay: 260ms">
+        <p class="logout-fade-in mt-2 font-display text-xl font-semibold tracking-tight text-white" style="animation-delay: 130ms">
             Signing out&hellip;
         </p>
-        <p class="logout-fade-in mt-1.5 text-sm text-slate-400" style="animation-delay: 360ms">
+        <p class="logout-fade-in mt-1.5 text-sm text-slate-400" style="animation-delay: 180ms">
             See you again soon.
         </p>
     </div>
