@@ -76,6 +76,9 @@
         ];
     }
 
+    // Every role edits its own name, email, password, and notifications here.
+    $sections[] = ['items' => [$navLink('profile.edit', 'My Account', 'user-round')]];
+
     if ($user->isSystemAdmin()) {
         $sections[] = [
             'title' => 'System',
@@ -123,7 +126,7 @@
     </nav>
 
     <div class="border-t border-slate-100 p-4">
-        <div class="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/70 p-2.5">
+        <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/70 p-2.5 transition-colors duration-150 hover:bg-slate-100" title="My Account">
             <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full chip-ink text-sm font-semibold text-white shadow-soft">
                 {{ strtoupper(substr($user->name, 0, 1)) }}
             </div>
@@ -131,7 +134,7 @@
                 <p class="truncate text-sm font-medium text-slate-900">{{ $user->name }}</p>
                 <p class="truncate text-xs text-slate-500">{{ $user->roleLabel() }}</p>
             </div>
-        </div>
+        </a>
         <form id="logout-form-sidebar" method="POST" action="{{ route('logout') }}" data-turbo="false" class="mt-2">
             @csrf
             <button

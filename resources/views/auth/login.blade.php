@@ -22,6 +22,7 @@
             <div class="mt-1.5">
                 <x-password-input id="password" name="password" required autocomplete="current-password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" />
             </div>
+            <p class="mt-1.5 text-xs text-slate-500">Got a reset code from your administrator? Type it here as your password.</p>
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
             <div class="mt-2 flex justify-end">
@@ -43,6 +44,11 @@
             <i data-lucide="arrow-right" class="h-4 w-4"></i>
         </x-primary-button>
     </form>
+
+    <a href="{{ route('app.install') }}" class="mt-6 flex items-center justify-center gap-2 text-sm font-medium text-slate-500 transition-colors duration-150 hover:text-brand-600">
+        <i data-lucide="smartphone" class="h-4 w-4"></i>
+        Get the app for your phone or computer
+    </a>
 
     <x-desktop-install-prompt />
 </x-guest-layout>

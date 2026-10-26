@@ -2,6 +2,24 @@
 
 Notable changes to the BMPC Project Management System. Newest first.
 
+## 2026-10-26
+
+### Added
+- **Installable app** on phones and computers, from one link for every device: `/install` (also linked on the sign-in page). Android and desktop Chrome/Edge get an Install button, iPhone and iPad get Add to Home Screen steps, and Windows keeps its installer download. It's the same system in its own window, and using it in the browser still works. Losing the connection shows a clear offline page; no project data is stored on the device.
+- **My Account** for every user (sidebar item, the account card at the bottom of the sidebar, and the top-right menu): edit name and email, change password, and choose notifications.
+- **Admin password reset** on Users: the admin gets a one-time code (valid 24 hours) to give the person, who signs in with their email and the code, then must set a new password before doing anything else. The old password and open sessions stop working immediately; the code is never stored or logged in readable form.
+
+### Changed (My Account)
+- **My Account** redesigned to match the rest of the system: an account summary (role, position, company, member since, previous sign-in) beside cards for account details, password, and notifications, with the usual success messages.
+- Users can no longer delete their own account; removing accounts is done by the administrator on Users, since accounts carry project history.
+
+### Fixed
+- Dashboard figures could freeze at a half-counted amount right after signing in (for example ₱279,855.23 instead of ₱2,500,000.00), because the count-up animation could start twice. Each figure now animates once and always ends on the real amount.
+
+### Changed
+- The expense reference can be a reference number or a reference person. Numbers (anything with a digit) are still recorded only once per project; names can repeat.
+- **Add Expenses opens as a dialog** on the Expenses page and on a project's Budget tab (with that project already chosen), instead of a separate page. After saving, you stay on the same page. The old Add Expenses address now opens the dialog.
+
 ## 2026-10-25
 
 ### Added

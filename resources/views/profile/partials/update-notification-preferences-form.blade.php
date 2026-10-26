@@ -1,12 +1,15 @@
 @php $types = \App\Services\NotificationPreferences::forUser($user); @endphp
 
-<section>
-    <header>
-        <h2 class="text-lg font-medium text-gray-900">Notifications</h2>
-        <p class="mt-1 text-sm text-gray-600">Choose which notifications appear under the bell. Required ones can't be turned off.</p>
+<div>
+    <header class="flex items-start gap-3">
+        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl chip-ink"><i data-lucide="bell" class="h-4 w-4"></i></span>
+        <div>
+            <h2 class="font-display text-base font-semibold text-slate-900">Notifications</h2>
+            <p class="mt-0.5 text-sm text-slate-500">Choose which notifications appear under the bell. Required ones can't be turned off.</p>
+        </div>
     </header>
 
-    <form method="post" action="{{ route('profile.notifications') }}" class="mt-6 space-y-4">
+    <form method="post" action="{{ route('profile.notifications') }}" class="mt-5 space-y-4">
         @csrf
         @method('patch')
 
@@ -34,12 +37,6 @@
             @endforeach
         </div>
 
-        <div class="flex items-center gap-4">
-            <x-primary-button>Save</x-primary-button>
-
-            @if (session('status') === 'notifications-updated')
-                <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 3000)" class="text-sm text-gray-600">Saved.</p>
-            @endif
-        </div>
+        <x-primary-button>Save Notifications</x-primary-button>
     </form>
-</section>
+</div>

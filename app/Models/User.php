@@ -189,6 +189,8 @@ class User extends Authenticatable
             'position_type' => 'string',
             'is_active' => 'boolean',
             'is_system_admin' => 'boolean',
+            'must_change_password' => 'boolean',
+            'password_reset_expires_at' => 'datetime',
             'last_active_at' => 'datetime',
             'notification_preferences' => 'array',
         ];

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsurePasswordIsSet;
 use App\Http\Middleware\EnsureScalarQueryString;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\TrackLastActive;
@@ -22,7 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Baseline request ceiling for every page; heavier routes add their
         // own stricter limiter in routes/web.php and routes/auth.php.
-        $middleware->web(append: ['throttle:global', EnsureScalarQueryString::class, EnsureUserIsActive::class, TrackLastActive::class]);
+        $middleware->web(append: ['throttle:global', EnsureScalarQueryString::class, EnsureUserIsActive::class, EnsurePasswordIsSet::class, TrackLastActive::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

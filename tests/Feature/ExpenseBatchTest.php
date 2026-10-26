@@ -28,13 +28,28 @@ class ExpenseBatchTest extends TestCase
         $this->office = Project::factory()->create(['project_code' => 'BMPC-PRJ-2026-0102', 'title' => 'Branch Office', 'approved_budget' => 50000]);
     }
 
-    public function test_finance_opens_the_entry_screen_with_the_projects(): void
+    public function test_finance_adds_expenses_in_a_dialog_on_the_expenses_page(): void
     {
-        $this->actingAs($this->finance)->get(route('budget.expenses.batch', ['project' => $this->office->id]))
+        $this->actingAs($this->finance)->get(route('budget.expenses'))
             ->assertOk()
+            ->assertSee("\$dispatch('open-modal', 'add-expenses')", false)
             ->assertSee('BMPC-PRJ-2026-0101')
             ->assertSee('Branch Office')
             ->assertSee('Total Amount');
+    }
+
+    public function test_the_old_add_expenses_address_opens_the_dialog(): void
+    {
+        $this->actingAs($this->finance)->get(route('budget.expenses.batch', ['project' => $this->office->id]))
+            ->assertRedirect(route('budget.expenses', ['add' => 1, 'project' => $this->office->id]));
+    }
+
+    public function test_the_dialog_is_also_on_a_project_budget_tab_with_that_project_preselected(): void
+    {
+        $this->actingAs($this->finance)->get(route('projects.show', $this->office))
+            ->assertOk()
+            ->assertSee('Add several at once')
+            ->assertSee('\u0022defaultProjectId\u0022:'.$this->office->id, false);
     }
 
     public function test_finance_saves_several_expenses_with_just_amount_date_and_reference(): void
@@ -97,6 +112,38 @@ class ExpenseBatchTest extends TestCase
         $this->assertSame(1, ProjectExpense::count());
     }
 
+    public function test_a_reference_person_can_repeat_but_a_reference_number_cannot(): void
+    {
+        $this->road->expenses()->create([
+            'expense_date' => now()->subDays(3)->toDateString(),
+            'amount' => 1000,
+            'reference_number' => 'Juan Dela Cruz',
+            'created_by' => $this->finance->id,
+        ]);
+
+        // The same person on several expenses is normal.
+        $this->actingAs($this->finance)->postJson(route('budget.expenses.batch.store'), ['rows' => [
+            $this->row(['reference_number' => 'Juan Dela Cruz']),
+            $this->row(['reference_number' => 'juan dela cruz']),
+        ]])->assertOk();
+
+        // A receipt or voucher number is still recorded only once.
+        $this->actingAs($this->finance)->postJson(route('budget.expenses.batch.store'), ['rows' => [
+            $this->row(['reference_number' => 'CV-2026-014']),
+            $this->row(['reference_number' => 'CV-2026-014']),
+        ]])->assertJsonValidationErrors(['rows.1.reference_number' => 'CV-2026-014 is used twice in this batch.']);
+
+        $this->assertSame(3, ProjectExpense::count());
+    }
+
+    public function test_the_entry_form_says_a_reference_can_be_a_number_or_a_person(): void
+    {
+        $this->actingAs($this->finance)->get(route('budget.expenses'))
+            ->assertOk()
+            ->assertSee('Reference No. or Person')
+            ->assertSee('OR / voucher no. or name');
+    }
+
     public function test_the_single_expense_form_needs_only_amount_and_date(): void
     {
         $this->actingAs($this->finance)->post(route('projects.expenses.store', $this->road), [
@@ -124,12 +171,12 @@ class ExpenseBatchTest extends TestCase
     {
         $this->actingAs($this->finance)->get(route('budget.expenses'))
             ->assertOk()
-            ->assertSee(route('budget.expenses.batch'));
+            ->assertSee('Add Expenses');
 
         $admin = User::factory()->create(['role' => 'admin']);
         $this->actingAs($admin)->get(route('budget.expenses'))
             ->assertOk()
-            ->assertDontSee(route('budget.expenses.batch'));
+            ->assertDontSee('Add Expenses');
     }
 
     public function test_admin_sees_the_recorded_expenses_on_a_project(): void

@@ -56,6 +56,26 @@
                                     <i data-lucide="pencil" class="h-3.5 w-3.5"></i>
                                     Edit
                                 </button>
+                                @if ($user->id !== auth()->id())
+                                    <button type="button" @click="$dispatch('open-modal', 'reset-password-{{ $user->id }}')" class="inline-flex items-center gap-1 whitespace-nowrap text-sm font-medium text-slate-500 transition-colors duration-150 hover:text-amber-600">
+                                        <i data-lucide="key-round" class="h-3.5 w-3.5"></i>
+                                        Reset password
+                                    </button>
+                                    <x-modal :name="'reset-password-'.$user->id" max-width="md">
+                                        <form method="POST" action="{{ route('users.reset-password', $user) }}" class="px-6 pb-6 pt-7 text-left">
+                                            @csrf
+                                            <h2 class="font-display text-lg font-semibold text-slate-900">Reset {{ $user->name }}'s password?</h2>
+                                            <p class="mt-1 text-sm text-slate-500">
+                                                Their current password stops working and they're signed out everywhere. You'll get a one-time code to give them;
+                                                they sign in with it and then choose a new password.
+                                            </p>
+                                            <div class="mt-6 flex justify-end gap-3">
+                                                <button type="button" x-on:click="$dispatch('close')" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">Cancel</button>
+                                                <button type="submit" class="rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-amber-600">Reset Password</button>
+                                            </div>
+                                        </form>
+                                    </x-modal>
+                                @endif
                                 @else
                                 <span class="inline-flex items-center gap-1 text-xs text-slate-400"><i data-lucide="lock" class="h-3.5 w-3.5"></i> Protected</span>
                                 @endcan

@@ -37,6 +37,8 @@ The **System Administrator** is an Admin/CEO account flagged `is_system_admin` (
 
 Re-running the seeder never resets an existing password. **Change every password before real users get access.**
 
+**Forgotten passwords:** an admin opens **Users → Reset password** on that person's row and gives them the one-time code shown (valid 24 hours). They sign in with their email and the code, then set a new password. Everyone changes their own details and password in **My Account**.
+
 ## Local setup (Laragon on Windows)
 
 ```bash
@@ -47,6 +49,22 @@ php artisan db:seed     # accounts and project categories (no sample projects)
 Then open `http://project-management.test` (Laragon's virtual host). It is faster than `php artisan serve`, which answers one request at a time.
 
 For live CSS/JS changes run `npm run dev`; after changing assets for others, run `npm run build`.
+
+## Installing the app (phones and computers)
+
+Everyone uses one link: `https://<your-server>/install` (also linked from the sign-in page). It shows the steps for the device it's opened on first:
+
+- **Android**: an Install app button in Chrome, or the ⋮ menu → Install app.
+- **iPhone / iPad**: Safari → Share → Add to Home Screen.
+- **Computer**: Download for Windows (when the desktop installer is on the server), or install from Chrome/Edge.
+
+The installed app is the same website in its own window, with the same data, and the browser keeps working as before. The service worker (`public/sw.js`) caches only the offline page and icon; no project or personal data is stored on the device. Browsers offer installing only over **https** (or `localhost`).
+
+### Testing on your phone
+
+1. **Same Wi-Fi, browser only** (plain http, so not installable): run `php artisan serve --host=0.0.0.0 --port=8010`, allow PHP through Windows Firewall, and open `http://<PC's LAN IP>:8010` on the phone (`ipconfig` shows the IP).
+2. **Android over USB, installable**: run `php artisan serve --port=8010`, turn on USB debugging on the phone, open `chrome://inspect` on the PC → Port forwarding → `8010` to `localhost:8010`, then open `http://localhost:8010/install` in Chrome on the phone.
+3. **Any phone, including iPhone (https)**: `winget install Cloudflare.cloudflared`, then `cloudflared tunnel --url http://localhost:8010` and open the printed `https://….trycloudflare.com/install` address on the phone. This puts your local copy on the internet while it runs: change the development passwords first and stop the tunnel (Ctrl+C) when done.
 
 ## Everyday commands
 

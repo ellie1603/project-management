@@ -48,7 +48,6 @@ class Breadcrumbs
     {
         $projects = ['label' => $user?->isProjectPersonnel() ? 'My Projects' : 'Projects', 'url' => route('projects.index')];
         $projectCrumb = $project ? ['label' => Str::limit($project->title, 40), 'url' => route('projects.show', $project)] : null;
-        $expenses = ['label' => 'Expenses', 'url' => route('budget.expenses')];
         // Finance opens Expenses and Budget Requests from the sidebar; for others they sit under Budget & Finance.
         $finance = $user?->isFinance() ? null : ['label' => 'Budget & Finance', 'url' => route('budget.overview')];
 
@@ -63,7 +62,6 @@ class Breadcrumbs
                 $this->page($this->contractorName($request)),
             ],
             'budget.expenses' => [$finance, $this->page('Expenses')],
-            'budget.expenses.batch' => [$expenses, $this->page('Add Expenses')],
             'budget.requests' => [$finance, $this->page('Budget Requests')],
             'users.create' => [['label' => 'Users', 'url' => route('users.index')], $this->page('New User')],
             'system.usage.user' => [

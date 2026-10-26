@@ -113,6 +113,35 @@
             </div>
         </x-modal>
     @endif
+
+    {{-- Shown once, right after an admin reset. The code is not stored in readable form anywhere. --}}
+    @if ($passwordReset = session('password_reset'))
+        <x-modal name="password-reset-code" :show="true" max-width="md">
+            <div class="px-6 pb-6 pt-7 text-center" x-data="{ copied: false }">
+                <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-50 text-amber-600 ring-8 ring-amber-50/50">
+                    <i data-lucide="key-round" class="h-7 w-7"></i>
+                </span>
+                <h2 class="mt-4 font-display text-lg font-semibold text-slate-900">Password reset for {{ $passwordReset['name'] }}</h2>
+                <p class="mt-1 text-sm text-slate-500">
+                    Give them this one-time code in person or by message. They sign in with
+                    <span class="font-medium text-slate-700">{{ $passwordReset['email'] }}</span> and this code as the password, then choose a new password.
+                </p>
+
+                <p class="mt-5 select-all rounded-2xl bg-slate-50 px-4 py-4 font-mono text-3xl font-semibold tracking-[0.2em] text-slate-900 ring-1 ring-slate-900/5" data-reset-code>{{ $passwordReset['code'] }}</p>
+                <p class="mt-2 text-xs text-slate-500">Works once, until {{ $passwordReset['expires'] }}. It won't be shown again; reset again if it's lost.</p>
+
+                <div class="mt-6 flex gap-3">
+                    <button
+                        type="button"
+                        @click="navigator.clipboard?.writeText($root.querySelector('[data-reset-code]').innerText.trim()); copied = true"
+                        class="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                        x-text="copied ? 'Copied' : 'Copy code'"
+                    ></button>
+                    <button type="button" x-on:click="$dispatch('close')" class="inline-flex flex-1 items-center justify-center rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700">Done</button>
+                </div>
+            </div>
+        </x-modal>
+    @endif
 </div>
 
 @push('scripts')

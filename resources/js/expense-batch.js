@@ -1,5 +1,5 @@
 /**
- * Alpine component behind Finance's "Add Expenses" screen.
+ * Alpine component behind Finance's "Add Expenses" dialog (components/add-expenses-modal).
  *
  * Each expense is just a project, a date, the total amount, and an optional
  * reference number. New rows copy the project and date of the row above, and
@@ -144,7 +144,9 @@ export default (config) => ({
 
             if (response.ok) {
                 this.clearDraft();
-                window.Turbo ? window.Turbo.visit(data.redirect) : (window.location.href = data.redirect);
+                // Back to the page the dialog was opened on, which shows the saved message.
+                const next = config.returnUrl || data.redirect;
+                window.Turbo ? window.Turbo.visit(next, { action: 'replace' }) : (window.location.href = next);
                 return;
             }
 

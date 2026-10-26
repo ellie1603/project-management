@@ -61,39 +61,38 @@ class ProfileTest extends TestCase
         $this->assertNotNull($user->refresh()->email_verified_at);
     }
 
-    public function test_user_can_delete_their_account(): void
+    public function test_my_account_shows_the_account_summary(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['name' => 'Ana Reyes', 'role' => 'project_personnel', 'position_type' => 'Foreman']);
 
-        $response = $this
-            ->actingAs($user)
-            ->delete('/profile', [
-                'password' => 'password',
-            ]);
-
-        $response
-            ->assertSessionHasNoErrors()
-            ->assertRedirect('/');
-
-        $this->assertGuest();
-        $this->assertNull($user->fresh());
+        $this->actingAs($user)->get('/profile')
+            ->assertOk()
+            ->assertSee('My Account')
+            ->assertSee('Ana Reyes')
+            ->assertSee('Project Personnel')
+            ->assertSee('Foreman')
+            ->assertSee('Change Password')
+            ->assertDontSee('Delete Account');
     }
 
-    public function test_correct_password_must_be_provided_to_delete_account(): void
+    public function test_saving_shows_a_confirmation(): void
     {
         $user = User::factory()->create();
 
-        $response = $this
-            ->actingAs($user)
-            ->from('/profile')
-            ->delete('/profile', [
-                'password' => 'wrong-password',
-            ]);
+        $this->actingAs($user)
+            ->followingRedirects()
+            ->patch('/profile', ['name' => 'New Name', 'email' => $user->email])
+            ->assertSee('Your account details were saved.');
+    }
 
-        $response
-            ->assertSessionHasErrorsIn('userDeletion', 'password')
-            ->assertRedirect('/profile');
+    public function test_users_cannot_delete_their_own_account(): void
+    {
+        $user = User::factory()->create();
+
+        // Removing accounts is the administrator's job (Users page), since accounts carry project history.
+        $this->actingAs($user)->delete('/profile', ['password' => 'password'])->assertStatus(405);
 
         $this->assertNotNull($user->fresh());
+        $this->assertAuthenticatedAs($user);
     }
 }

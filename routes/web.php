@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DesktopInstallerController;
 use App\Http\Controllers\DocumentsController;
 use App\Http\Controllers\ExpenseBatchController;
+use App\Http\Controllers\InstallAppController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProgressAssistController;
@@ -39,6 +40,10 @@ Route::get('/branding/logo', function () {
     return response()->file($path);
 })->name('branding.logo');
 
+// Installable app: one link for every device, plus the manifest browsers read.
+Route::get('/install', [InstallAppController::class, 'show'])->name('app.install');
+Route::get('/manifest.webmanifest', [InstallAppController::class, 'manifest'])->name('app.manifest');
+
 // One-click Windows installer for the desktop app, offered on the login page.
 Route::get('/desktop-app/download', DesktopInstallerController::class)
     ->middleware('throttle:10,1')
@@ -52,7 +57,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::patch('/profile/notifications', [ProfileController::class, 'updateNotifications'])->name('profile.notifications');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/search', [SearchController::class, 'index'])
         ->middleware('throttle:search')
@@ -136,6 +140,7 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('users', UsersController::class)->except(['show', 'edit']);
     Route::patch('/users/{user}/toggle-status', [UsersController::class, 'toggleStatus'])->name('users.toggle-status');
+    Route::post('/users/{user}/reset-password', [UsersController::class, 'resetPassword'])->name('users.reset-password');
 
     // System Administrator (developer account) only.
     Route::middleware('can:manage-system')->prefix('system')->name('system.')->group(function () {

@@ -15,10 +15,10 @@
         </div>
 
         @if (auth()->user()->can('create', App\Models\ProjectExpense::class))
-            <a href="{{ route('budget.expenses.batch') }}" class="inline-flex items-center gap-2 rounded-xl bg-accent-500 px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition-transform duration-200 ease-elegant hover:-translate-y-0.5 hover:bg-accent-600">
+            <button type="button" @click="$dispatch('open-modal', 'add-expenses')" class="inline-flex items-center gap-2 rounded-xl bg-accent-500 px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition-transform duration-200 ease-elegant hover:-translate-y-0.5 hover:bg-accent-600">
                 <i data-lucide="plus" class="h-4 w-4"></i>
                 Add Expenses
-            </a>
+            </button>
         @endif
     </div>
 
@@ -34,5 +34,8 @@
         @include('budget.partials.expenses-results')
     </div>
 </div>
+
+{{-- ?add=1 (the old Add Expenses address) opens the dialog straight away. --}}
+<x-add-expenses-modal :open="request()->boolean('add')" />
 
 @endsection

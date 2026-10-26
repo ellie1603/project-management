@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Contractor;
 use App\Models\ProjectAssignment;
 use App\Models\User;
+use App\Services\AdminPasswordReset;
 use App\Services\AuditLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -127,7 +128,6 @@ class UsersController extends Controller
         return redirect()->route('users.index')->with('status', "User account for {$name} was force deleted. Their project records were kept.");
     }
 
-
     public function update(Request $request, User $user): RedirectResponse
     {
         $this->authorize('update', $user);
@@ -187,6 +187,34 @@ class UsersController extends Controller
         );
 
         return redirect()->route('users.index')->with('status', 'User status updated successfully.');
+    }
+
+    /**
+     * For someone who forgot their password: replaces it with a one-time
+     * code that the admin passes on in person. The code is shown once here
+     * and never stored or logged in readable form.
+     */
+    public function resetPassword(Request $request, User $user, AdminPasswordReset $reset): RedirectResponse
+    {
+        $this->authorize('update', $user);
+        abort_if($user->is($request->user()), 403, 'Change your own password in My Account.');
+
+        $code = $reset->issue($user);
+
+        app(AuditLogger::class)->record(
+            $request,
+            'password_reset',
+            'users',
+            $user->id,
+            "Reset the password for {$user->name}; they must set a new one at their next sign-in.",
+        );
+
+        return redirect()->route('users.index')->with('password_reset', [
+            'name' => $user->name,
+            'email' => $user->email,
+            'code' => $code,
+            'expires' => $user->password_reset_expires_at->format('M j, g:i A'),
+        ]);
     }
 
     /**

@@ -8,39 +8,32 @@ use App\Models\ProjectExpense;
 use App\Services\AuditLogger;
 use App\Services\BudgetService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Illuminate\View\View;
 
 /**
- * Finance's quick entry screen: several expenses in one list, each just a
- * project, date, total amount, and optional reference, saved together.
+ * Finance's quick entry: several expenses at once, each just a project,
+ * date, total amount, and optional reference, saved together from the
+ * Add Expenses dialog.
  */
 class ExpenseBatchController extends Controller
 {
     public function __construct(private readonly BudgetService $budgetService) {}
 
-    public function create(Request $request): View
+    /**
+     * Adding expenses happens in a dialog (components/add-expenses-modal). The
+     * old page address now opens the Expenses page with that dialog showing.
+     */
+    public function create(Request $request): RedirectResponse
     {
         $this->authorize('create', ProjectExpense::class);
 
-        $projects = Project::query()
-            ->where('status', '!=', 'Cancelled')
-            ->orderBy('project_code')
-            ->get()
-            ->map(fn (Project $project): array => [
-                'id' => $project->id,
-                'code' => $project->project_code,
-                'title' => $project->title,
-                'remaining' => (float) $project->budgetSummary()['remaining_budget'],
-            ]);
-
-        return view('budget.expense-batch', [
-            'projects' => $projects,
-            'defaultProjectId' => $projects->firstWhere('id', $request->integer('project'))['id'] ?? null,
-            'maxRows' => StoreExpenseBatchRequest::MAX_ROWS,
-        ]);
+        return redirect()->route('budget.expenses', array_filter([
+            'add' => 1,
+            'project' => $request->integer('project') ?: null,
+        ]));
     }
 
     public function store(StoreExpenseBatchRequest $request): JsonResponse

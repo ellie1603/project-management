@@ -2,10 +2,13 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Models\User;
+use App\Services\AdminPasswordReset;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -43,6 +46,19 @@ class LoginRequest extends FormRequest
         $this->ensureIsNotRateLimited();
 
         $credentials = [...$this->only('email', 'password'), 'is_active' => true];
+
+        // Someone whose password the admin reset signs in with the one-time
+        // code, which matches however it's typed (case, dash, spaces).
+        $resetUser = User::query()->where('email', $this->string('email')->toString())->where('must_change_password', true)->first();
+        if ($resetUser !== null) {
+            $credentials['password'] = AdminPasswordReset::normalize((string) $credentials['password']);
+
+            if (AdminPasswordReset::isExpired($resetUser) && Hash::check($credentials['password'], $resetUser->password)) {
+                throw ValidationException::withMessages([
+                    'email' => 'This reset code has expired. Ask your administrator to reset your password again.',
+                ]);
+            }
+        }
 
         if (! Auth::attempt($credentials, $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());

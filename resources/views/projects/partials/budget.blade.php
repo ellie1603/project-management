@@ -127,7 +127,7 @@
         <div class="flex flex-wrap items-center justify-between gap-2">
             <h3 class="text-sm font-semibold text-slate-900">Recorded Expenses</h3>
             @if ($canRecordExpense)
-                <a href="{{ route('budget.expenses.batch', ['project' => $project->id]) }}" class="text-xs font-medium text-slate-500 underline hover:text-slate-900">Add several at once</a>
+                <button type="button" @click="$dispatch('open-modal', 'add-expenses')" class="text-xs font-medium text-slate-500 underline hover:text-slate-900">Add several at once</button>
             @endif
         </div>
         <div x-data="pager(10)" data-pager>
@@ -167,7 +167,7 @@
             @csrf
             <input type="number" step="0.01" min="0" inputmode="decimal" name="amount" value="{{ old('amount') }}" placeholder="Total amount (₱)" aria-label="Total amount" class="rounded-md border-slate-300 text-sm" required>
             <input type="date" name="expense_date" value="{{ old('expense_date', now()->toDateString()) }}" max="{{ now()->toDateString() }}" aria-label="Expense date" class="rounded-md border-slate-300 text-sm" required>
-            <input name="reference_number" value="{{ old('reference_number') }}" placeholder="Reference no. (optional)" aria-label="Reference number" class="rounded-md border-slate-300 text-sm">
+            <input name="reference_number" value="{{ old('reference_number') }}" placeholder="Reference no. or person (optional)" aria-label="Reference number or person" class="rounded-md border-slate-300 text-sm">
             @if ($errors->hasAny(['amount', 'expense_date', 'reference_number']))
                 <p class="text-xs text-red-600 sm:col-span-3">{{ $errors->first('amount') ?: ($errors->first('expense_date') ?: $errors->first('reference_number')) }}</p>
             @endif
@@ -175,3 +175,5 @@
         </form>
         @endif
     </section>
+
+<x-add-expenses-modal :project="$project" />

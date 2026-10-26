@@ -52,13 +52,15 @@ class StoreExpenseBatchRequest extends FormRequest
             'rows.*.project_id' => 'project',
             'rows.*.expense_date' => 'date',
             'rows.*.amount' => 'amount',
-            'rows.*.reference_number' => 'reference number',
+            'rows.*.reference_number' => 'reference',
         ];
     }
 
     /**
-     * A reference number may be recorded only once per project, so the same
-     * payment is never counted twice.
+     * The reference is either a document number (OR, voucher) or a reference
+     * person. A document number may be recorded only once per project, so the
+     * same payment is never counted twice; a person's name may repeat. Any
+     * reference containing a digit is treated as a document number.
      *
      * @return array<int, Closure>
      */
@@ -66,7 +68,7 @@ class StoreExpenseBatchRequest extends FormRequest
     {
         return [function (Validator $validator): void {
             $rows = collect($this->input('rows', []))
-                ->filter(fn ($row): bool => is_array($row) && is_numeric($row['project_id'] ?? null) && trim((string) ($row['reference_number'] ?? '')) !== '');
+                ->filter(fn ($row): bool => is_array($row) && is_numeric($row['project_id'] ?? null) && self::isDocumentNumber((string) ($row['reference_number'] ?? '')));
 
             if ($rows->isEmpty()) {
                 return;
@@ -94,5 +96,10 @@ class StoreExpenseBatchRequest extends FormRequest
                 $seen[$rowKey] = true;
             }
         }];
+    }
+
+    public static function isDocumentNumber(string $reference): bool
+    {
+        return preg_match('/\d/', $reference) === 1;
     }
 }

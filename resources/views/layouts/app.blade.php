@@ -18,7 +18,7 @@
         </script>
 
         <link rel="icon" type="image/png" href="{{ route('branding.logo') }}">
-        <link rel="apple-touch-icon" href="{{ route('branding.logo') }}">
+        @include('layouts.partials.pwa-head')
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">

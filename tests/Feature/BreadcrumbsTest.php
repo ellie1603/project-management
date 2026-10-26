@@ -46,7 +46,6 @@ class BreadcrumbsTest extends TestCase
         // Finance opens Expenses from its own sidebar, the Admin/CEO from Budget & Finance.
         $this->assertSame([], $this->crumbsFor($finance, 'budget.expenses'));
         $this->assertSame(['Budget & Finance', 'Expenses'], array_column($this->crumbsFor($admin, 'budget.expenses'), 'label'));
-        $this->assertSame(['Expenses', 'Add Expenses'], array_column($this->crumbsFor($finance, 'budget.expenses.batch'), 'label'));
     }
 
     public function test_personnel_trail_starts_at_my_projects(): void

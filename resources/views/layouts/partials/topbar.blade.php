@@ -124,7 +124,7 @@
             </x-slot>
 
             <x-slot name="content">
-                <x-dropdown-link :href="route('profile.edit')">Profile</x-dropdown-link>
+                <x-dropdown-link :href="route('profile.edit')">My Account</x-dropdown-link>
                 <form id="logout-form-topbar" method="POST" action="{{ route('logout') }}" data-turbo="false">
                     @csrf
                     <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); window.dispatchEvent(new CustomEvent('bmpc-logout', { detail: { formId: 'logout-form-topbar' } }));">

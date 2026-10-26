@@ -2,12 +2,16 @@ import Alpine from 'alpinejs';
 import progressUpdate from './progress-update';
 import photoViewer from './photo-viewer';
 import expenseBatch from './expense-batch';
+import { installApp, registerInstallSupport } from './install-app';
 
 window.Alpine = Alpine;
+
+registerInstallSupport();
 
 Alpine.data('progressUpdate', progressUpdate);
 Alpine.data('photoViewer', photoViewer);
 Alpine.data('expenseBatch', expenseBatch);
+Alpine.data('installApp', installApp);
 
 /**
  * Client-side paging for lists already rendered on the page (project tabs,
@@ -198,6 +202,14 @@ window.markNotificationRead = function markNotificationRead(id, button) {
     const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
 
     const animate = (el) => {
+        // Each figure animates once. A second start (the browser's and Turbo's
+        // load events can both trigger one) would read the half-counted number
+        // as the real value and stop there, showing wrong totals.
+        if (el.dataset.counted) {
+            return;
+        }
+        el.dataset.counted = 'true';
+
         const original = el.textContent.trim();
         const match = original.match(numberPattern);
 
