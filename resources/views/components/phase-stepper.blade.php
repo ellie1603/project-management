@@ -1,19 +1,20 @@
-@props(['phases'])
+@props(['phases', 'shares' => []])
 
 @php
     $phases = collect($phases)->values();
 @endphp
 
 <div class="overflow-x-auto pb-1">
-    <div class="flex min-w-[520px] items-center sm:min-w-0">
+    <div class="flex min-w-[520px] items-start sm:min-w-0">
         @foreach ($phases as $phase)
             @php
-                $isCompleted = $phase->status === 'Completed';
-                $isCurrent = $phase->status === 'In Progress';
+                $done = $phase->currentProgress();
+                $isCompleted = $done >= 100;
+                $isCurrent = ! $isCompleted && ($done > 0 || $phase->status === 'In Progress');
             @endphp
 
             @if (! $loop->first)
-                <div class="h-0.5 flex-1 {{ $phases[$loop->index - 1]->status === 'Completed' ? 'bg-slate-900' : 'bg-slate-200' }}"></div>
+                <div class="mt-4 h-0.5 flex-1 {{ $phases[$loop->index - 1]->currentProgress() >= 100 ? 'bg-slate-900' : 'bg-slate-200' }}"></div>
             @endif
 
             <div class="flex shrink-0 flex-col items-center gap-1.5">
@@ -23,7 +24,7 @@
                         $isCurrent => 'border-brand-600 bg-brand-50 text-brand-700',
                         default => 'border-slate-200 bg-white text-slate-400',
                     } }}"
-                    title="{{ $phase->name }} — {{ $phase->status }}"
+                    title="{{ $phase->name }}: {{ $done }}% done"
                 >
                     @if ($isCompleted)
                         <i data-lucide="check" class="h-4 w-4"></i>
@@ -33,6 +34,12 @@
                 </div>
                 <span class="w-20 text-center text-[11px] font-medium leading-tight {{ $isCompleted || $isCurrent ? 'text-slate-900' : 'text-slate-400' }}">
                     {{ $phase->name }}
+                </span>
+                <span class="w-20 text-center text-[11px] tabular-nums leading-tight {{ $isCurrent ? 'font-semibold text-brand-700' : 'text-slate-500' }}">
+                    {{ $done }}% done
+                    @isset($shares[$phase->id])
+                        <span class="block font-normal text-slate-400">{{ $shares[$phase->id] }}% of project</span>
+                    @endisset
                 </span>
             </div>
         @endforeach

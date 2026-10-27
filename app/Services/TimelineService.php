@@ -23,6 +23,7 @@ class TimelineService
                 'days_elapsed' => 0,
                 'days_remaining' => null,
                 'delay_days' => 0,
+                'planned_percentage' => null,
                 'timeline_status' => 'Not Started',
             ];
         }
@@ -36,6 +37,15 @@ class TimelineService
         $delayDays = $today->greaterThan($target) && ! $closed
             ? (int) $target->diffInDays($today)
             : 0;
+
+        // Where completion should be today if work runs evenly from the planned
+        // start to the target date. Stage shares follow the same split, so this
+        // is also where the stage plan says the project should be.
+        $plannedPercentage = match (true) {
+            $today->lessThan($start) => 0,
+            $today->greaterThanOrEqualTo($target) => 100,
+            default => (int) round($start->diffInDays($today) / max(1, $duration) * 100),
+        };
 
         // A missed deadline counts as Delayed even if work never started.
         $status = match (true) {
@@ -52,6 +62,7 @@ class TimelineService
             'days_elapsed' => $daysElapsed,
             'days_remaining' => $daysRemaining,
             'delay_days' => $delayDays,
+            'planned_percentage' => $plannedPercentage,
             'timeline_status' => $status,
         ];
     }

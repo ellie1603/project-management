@@ -125,6 +125,7 @@ class ProjectController extends Controller
                 $project->phases()->create([
                     'name' => $name,
                     'sequence' => $index + 1,
+                    'weight' => Project::DEFAULT_PHASE_WEIGHTS[$index] ?? null,
                     'status' => 'Not Started',
                 ]);
             }
@@ -368,7 +369,10 @@ class ProjectController extends Controller
 
         $validated = $request->validate([
             'phase_id' => ['required', Rule::exists('project_phases', 'id')->where('project_id', $project->id)],
-            'phase_status' => ['required', Rule::in(['In Progress', 'Completed'])],
+            // How far along the chosen stage is now. Older clients send only
+            // phase_status ("still working" or "finished") instead.
+            'stage_progress' => ['nullable', 'integer', 'between:0,100'],
+            'phase_status' => ['required_without:stage_progress', 'nullable', Rule::in(['In Progress', 'Completed'])],
             'progress_date' => ['required', 'date', 'before_or_equal:today'],
             'accomplishments' => ['required', 'string', 'max:5000'],
             'activities_completed' => ['nullable', 'string', 'max:5000'],
@@ -386,8 +390,18 @@ class ProjectController extends Controller
         }
 
         $phase = ProjectPhase::findOrFail($validated['phase_id']);
+        $stageBefore = $phase->currentProgress();
+        $stageProgress = $validated['stage_progress'] ?? (($validated['phase_status'] ?? null) === 'Completed' ? 100 : $stageBefore);
+
+        if ($stageProgress < $stageBefore) {
+            throw ValidationException::withMessages([
+                'stage_progress' => "{$phase->name} is already {$stageBefore}% done. To correct an earlier update, delete that update first.",
+            ]);
+        }
+
+        $phaseStatus = $stageProgress >= 100 ? 'Completed' : 'In Progress';
         $previousPercentage = $project->completionPercentage();
-        $percentage = app(ProjectPhaseService::class)->applyUpdate($project, $phase, $validated['phase_status'], $validated['progress_date']);
+        $percentage = app(ProjectPhaseService::class)->applyUpdate($project, $phase, $stageProgress, $validated['progress_date']);
 
         // The system determines project status from completion automatically:
         // 0% = Not Started, 1-99% = In Progress (Ongoing), 100% = Completed.
@@ -416,7 +430,8 @@ class ProjectController extends Controller
         $progress = $project->progress()->create([
             'project_id' => $project->id,
             'phase_id' => $phase->id,
-            'phase_status' => $validated['phase_status'],
+            'phase_status' => $phaseStatus,
+            'stage_progress' => $stageProgress,
             'user_id' => Auth::id(),
             'progress_date' => $validated['progress_date'],
             'progress_percentage' => $percentage,
@@ -430,7 +445,7 @@ class ProjectController extends Controller
 
         $this->storeProgressAttachments($project, $progress, $attachments);
 
-        $stageChange = $validated['phase_status'] === 'Completed' ? "finished {$phase->name}" : "working on {$phase->name}";
+        $stageChange = $phaseStatus === 'Completed' ? "finished {$phase->name}" : "{$phase->name} {$stageBefore}% to {$stageProgress}%";
 
         app(AuditLogger::class)->record(
             $request,

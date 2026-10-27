@@ -18,6 +18,7 @@ class ProjectProgress extends Model
         'project_id',
         'phase_id',
         'phase_status',
+        'stage_progress',
         'user_id',
         'progress_date',
         'progress_percentage',
@@ -63,6 +64,7 @@ class ProjectProgress extends Model
         return [
             'progress_date' => 'date',
             'progress_percentage' => 'integer',
+            'stage_progress' => 'integer',
             'ai_assisted' => 'boolean',
         ];
     }

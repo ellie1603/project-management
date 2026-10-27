@@ -28,7 +28,9 @@ class ProjectPhase extends Model
         'project_id',
         'name',
         'sequence',
+        'weight',
         'status',
+        'progress',
         'started_at',
         'completed_at',
     ];
@@ -36,6 +38,15 @@ class ProjectPhase extends Model
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
+    }
+
+    /**
+     * How far along the stage is, 0-100. Stages finished before progress was
+     * recorded per stage only have their status, so Completed counts as 100.
+     */
+    public function currentProgress(): int
+    {
+        return $this->status === 'Completed' ? 100 : (int) $this->progress;
     }
 
     public function progressUpdates(): HasMany
@@ -47,6 +58,8 @@ class ProjectPhase extends Model
     {
         return [
             'sequence' => 'integer',
+            'weight' => 'integer',
+            'progress' => 'integer',
             'started_at' => 'date',
             'completed_at' => 'date',
         ];

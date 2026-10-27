@@ -14,6 +14,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProgressAssistController;
 use App\Http\Controllers\ProjectCategoryController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectStageController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SettingsController;
@@ -112,6 +113,8 @@ Route::middleware('auth')->group(function () {
         ->name('projects.progress.update');
     Route::delete('/projects/{project}/progress/{progress}', [ProjectController::class, 'destroyProgress'])
         ->name('projects.progress.destroy');
+    Route::put('/projects/{project}/stages', [ProjectStageController::class, 'update'])
+        ->name('projects.stages.update');
     // Up to 10 AI drafts per user per minute keeps a stuck retry loop from running up API costs.
     Route::post('/projects/{project}/progress/assist', ProgressAssistController::class)
         ->middleware('throttle:10,1')

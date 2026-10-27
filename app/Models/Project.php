@@ -54,7 +54,7 @@ class Project extends Model
     /**
      * The default construction stage template applied to every
      * newly-registered project. Completion percentage is derived from how
-     * many of these are marked Completed — see completionPercentage().
+     * far along each stage is, weighted by its share — see completionPercentage().
      *
      * @var array<int, string>
      */
@@ -65,6 +65,20 @@ class Project extends Model
         'Installation & Finishing',
         'Inspection & Completion',
     ];
+
+    /**
+     * Each default stage's share of the whole project, in the same order as
+     * DEFAULT_PHASES (adds up to 100). The admin can change them per project.
+     *
+     * @var array<int, int>
+     */
+    public const DEFAULT_PHASE_WEIGHTS = [5, 25, 35, 25, 10];
+
+    /**
+     * How many percentage points actual completion may trail the planned
+     * completion for today before the project is flagged as behind plan.
+     */
+    public const BEHIND_PLAN_POINTS = 10;
 
     /**
      * Expected type of each query-string filter accepted by scopeFilter().
@@ -133,21 +147,42 @@ class Project extends Model
     }
 
     /**
-     * Project completion is derived from how many phases are Completed, not
-     * a manually-entered number (spec: personnel select a phase/status,
-     * the system computes the percentage).
+     * Each stage's share of the project, keyed by stage id. Uses the stored
+     * weights when every stage has one, otherwise equal shares.
+     *
+     * @return array<int, int>
+     */
+    public function stageWeights(): array
+    {
+        $phases = $this->phases;
+
+        if ($phases->isNotEmpty() && $phases->every(fn (ProjectPhase $phase): bool => $phase->weight !== null) && $phases->sum('weight') > 0) {
+            return $phases->pluck('weight', 'id')->map(fn ($weight): int => (int) $weight)->all();
+        }
+
+        return $phases->mapWithKeys(fn (ProjectPhase $phase): array => [$phase->id => 1])->all();
+    }
+
+    /**
+     * Project completion is computed, never typed in: each stage's progress
+     * (0-100%) times its share of the project. It only reaches 100% when
+     * every stage is finished, and shows at least 1% once any work is recorded.
      */
     public function completionPercentage(): int
     {
-        $total = $this->phases->count();
-
-        if ($total === 0) {
+        if ($this->phases->isEmpty()) {
             return 0;
         }
 
-        $completed = $this->phases->where('status', 'Completed')->count();
+        $weights = $this->stageWeights();
+        $weighted = $this->phases->sum(fn (ProjectPhase $phase): float => $weights[$phase->id] * $phase->currentProgress());
+        $percentage = $weighted / array_sum($weights);
 
-        return (int) round($completed / $total * 100);
+        if ($this->phases->every(fn (ProjectPhase $phase): bool => $phase->currentProgress() >= 100)) {
+            return 100;
+        }
+
+        return $percentage > 0 ? (int) min(99, max(1, round($percentage))) : 0;
     }
 
     /**
@@ -194,6 +229,31 @@ class Project extends Model
     public function timelineSummary(): array
     {
         return app(TimelineService::class)->summarize($this);
+    }
+
+    /**
+     * Percentage points actual completion is ahead of (positive) or behind
+     * (negative) the planned completion for today. Null when the project has
+     * no planned dates or is already closed.
+     *
+     * @param  array<string, mixed>|null  $timeline  a timelineSummary() already computed by the caller
+     */
+    public function progressVariance(?array $timeline = null): ?int
+    {
+        $planned = ($timeline ?? $this->timelineSummary())['planned_percentage'] ?? null;
+
+        if ($planned === null || in_array($this->status, ['Completed', 'Cancelled'], true)) {
+            return null;
+        }
+
+        return $this->completionPercentage() - (int) $planned;
+    }
+
+    public function isBehindPlan(?array $timeline = null): bool
+    {
+        $variance = $this->progressVariance($timeline);
+
+        return $variance !== null && $variance <= -self::BEHIND_PLAN_POINTS;
     }
 
     protected function casts(): array

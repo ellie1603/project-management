@@ -127,11 +127,11 @@ class DashboardController extends Controller
 
             return [
                 'project' => $project,
-                'completion_percentage' => $latestUpdate?->progress_percentage ?? 0,
+                'completion_percentage' => $project->completionPercentage(),
                 'timeline_status' => $summaries[$key]['timeline']['timeline_status'],
                 'budget_status' => $summaries[$key]['budget']['budget_status'],
                 'latest_update' => $latestUpdate,
-                'required_action' => $this->requiredAction($summaries[$key]),
+                'required_action' => $this->requiredAction($summaries[$key], $project),
             ];
         });
 
@@ -183,8 +183,8 @@ class DashboardController extends Controller
                     ? (int) round(min(100, max(0, $timeline['days_elapsed'] / $duration * 100)))
                     : ($timelineStatus === 'Not Started' ? 0 : 100);
 
-                $progress = (int) ($project->latestProgress?->progress_percentage ?? 0);
-                $behindPace = $statusKey !== 'completed' && $statusKey !== 'registered' && ($elapsedPercent - $progress) >= 20;
+                $progress = $project->completionPercentage();
+                $behindPace = $statusKey !== 'completed' && $statusKey !== 'registered' && $project->isBehindPlan($timeline);
 
                 $daysRegistered = (int) $project->created_at->diffInDays(now());
                 $stalled = $statusKey === 'registered' && $daysRegistered >= self::STALLED_REGISTRATION_DAYS;
@@ -207,6 +207,7 @@ class DashboardController extends Controller
                     'title' => $project->title,
                     'progress' => $progress,
                     'elapsed_percent' => $elapsedPercent,
+                    'planned_percent' => (int) ($timeline['planned_percentage'] ?? 0),
                     'behind_pace' => $behindPace,
                     'status_key' => $statusKey,
                     'status_label' => $statusLabel,
@@ -279,6 +280,10 @@ class DashboardController extends Controller
                     $items->push(['project' => $project, 'reason' => 'No recent progress update']);
                 }
 
+                if ($project->isBehindPlan($summary['timeline'])) {
+                    $items->push(['project' => $project, 'reason' => 'Behind planned progress']);
+                }
+
                 if (! $project->has_approved_design) {
                     $items->push(['project' => $project, 'reason' => 'Missing required document']);
                 }
@@ -291,12 +296,13 @@ class DashboardController extends Controller
     /**
      * @param  array{budget: array<string, mixed>, timeline: array<string, mixed>}  $summary
      */
-    private function requiredAction(array $summary): ?string
+    private function requiredAction(array $summary, Project $project): ?string
     {
         return match (true) {
             $summary['timeline']['timeline_status'] === 'Delayed' => 'Submit an updated timeline and explain the delay.',
             $summary['timeline']['timeline_status'] === 'Approaching Deadline' => 'Prioritize remaining activities before the deadline.',
             $summary['budget']['budget_status'] === 'Budget Exceeded' => 'Coordinate with Finance regarding the budget overrun.',
+            $project->isBehindPlan($summary['timeline']) => 'Behind the planned progress. Post an update and note what is holding the work back.',
             default => null,
         };
     }

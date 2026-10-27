@@ -137,6 +137,7 @@
                             'Budget exceeded' => 'wallet',
                             'No recent progress update' => 'clipboard-x',
                             'Missing required document' => 'file-warning',
+                            'Behind planned progress' => 'trending-down',
                         ];
                     @endphp
                     @forelse ($attention as $item)

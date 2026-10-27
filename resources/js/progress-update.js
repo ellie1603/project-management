@@ -82,7 +82,7 @@ export default (config) => {
     return {
         phases: config.phases,
         phaseId: config.phaseId,
-        phaseStatus: config.phaseStatus,
+        stageProgress: 0,
         currentCompletion: config.currentCompletion,
         changingStage: false,
 
@@ -119,13 +119,50 @@ export default (config) => {
             return this.phases.find((p) => p.id === this.phaseId) ?? null;
         },
 
+        /**
+         * Same rule as Project::completionPercentage(): each stage's progress
+         * times its share, 100% only when every stage is done. Finishing a
+         * stage also finishes the earlier ones.
+         */
         get newCompletion() {
-            if (!this.phase) {
+            if (!this.phase || this.phases.length === 0) {
                 return this.currentCompletion;
             }
-            const completed = this.phaseStatus === 'Completed' ? this.phase.sequence : this.phase.sequence - 1;
-            // Completion never goes backwards from a routine "still working" update.
-            return Math.max(this.currentCompletion, Math.round((Math.max(0, completed) / this.phases.length) * 100));
+            const selected = this.phase;
+            const progressOf = (stage) => {
+                if (stage.id === selected.id) {
+                    return Math.max(stage.progress, this.stageProgress);
+                }
+                return this.stageProgress >= 100 && stage.sequence < selected.sequence ? 100 : stage.progress;
+            };
+            const totalWeight = this.phases.reduce((sum, stage) => sum + stage.weight, 0) || 1;
+            const raw = this.phases.reduce((sum, stage) => sum + stage.weight * progressOf(stage), 0) / totalWeight;
+
+            if (this.phases.every((stage) => progressOf(stage) >= 100)) {
+                return 100;
+            }
+
+            return raw > 0 ? Math.min(99, Math.max(1, Math.round(raw))) : 0;
+        },
+
+        // A stage can't be set below what's already recorded for it.
+        keepStageProgressForward() {
+            const floor = this.phase ? this.phase.progress : 0;
+            if (this.stageProgress < floor) {
+                this.stageProgress = floor;
+            }
+        },
+
+        addStageProgress(step) {
+            this.stageProgress = Math.min(100, this.stageProgress + step);
+        },
+
+        init() {
+            // Start from what's recorded for the stage (or the value sent back after a validation error).
+            this.stageProgress = config.stageProgress ?? this.phase?.progress ?? 0;
+            this.$watch('phaseId', () => {
+                this.stageProgress = this.phase?.progress ?? 0;
+            });
         },
 
         get dateLabel() {
@@ -237,7 +274,7 @@ export default (config) => {
 
             const body = new FormData();
             body.append('phase_id', this.phaseId);
-            body.append('phase_status', this.phaseStatus);
+            body.append('stage_progress', this.stageProgress);
             body.append('notes', this.notes.trim());
             this.attachments
                 .filter((a) => /^image\/(jpeg|png|webp|gif)$/.test(a.file.type) && a.file.size <= MAX_AI_PHOTO_BYTES)

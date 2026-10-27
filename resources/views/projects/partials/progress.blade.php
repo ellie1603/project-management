@@ -5,24 +5,27 @@
     $phases = $project->phases;
     $timeline = $project->timelineSummary();
     $completion = $project->completionPercentage();
+    $planned = $timeline['planned_percentage'];
+    $variance = $project->progressVariance($timeline);
+    $behindPlan = $project->isBehindPlan($timeline);
+    $stageWeights = $project->stageWeights();
+    $stageWeightTotal = max(1, array_sum($stageWeights));
+    $stageShare = fn ($phase) => $stageWeights[$phase->id] / $stageWeightTotal * 100;
 
+    // Each stage gets a slice of the planned schedule matching its share of the project.
     $segments = collect();
     if ($project->planned_start_date && $project->target_completion_date) {
         $start = Carbon::parse($project->planned_start_date);
         $end = Carbon::parse($project->target_completion_date);
         $totalDays = max(1, $start->diffInDays($end));
-        $count = max(1, $phases->count());
-        $segmentDays = $totalDays / $count;
+        $offset = 0;
 
-        $segments = $phases->values()->map(function ($phase, $index) use ($segmentDays, $totalDays) {
-            $segStart = (int) round($index * $segmentDays);
-            $segEnd = (int) round(($index + 1) * $segmentDays);
+        $segments = $phases->values()->map(function ($phase) use ($stageShare, &$offset) {
+            $width = $stageShare($phase);
+            $segment = ['phase' => $phase, 'left' => $offset, 'width' => max(1, $width)];
+            $offset += $width;
 
-            return [
-                'phase' => $phase,
-                'left' => $totalDays > 0 ? ($segStart / $totalDays) * 100 : 0,
-                'width' => $totalDays > 0 ? max(1, (($segEnd - $segStart) / $totalDays) * 100) : 100,
-            ];
+            return $segment;
         });
 
         $today = Carbon::today();
@@ -57,13 +60,49 @@
         <p class="text-sm font-medium text-slate-700">Overall Infrastructure Completion</p>
         <p class="text-2xl font-semibold tabular-nums text-slate-900">{{ $completion }}%</p>
     </div>
-    <x-progress-bar :percent="$completion" class="mt-2 h-2.5" :tone="match(true) {
-        $completion >= 100 => 'emerald',
-        default => 'brand',
-    }" />
+    <div class="relative mt-2">
+        <x-progress-bar :percent="$completion" class="h-2.5" :tone="match(true) {
+            $completion >= 100 => 'emerald',
+            default => 'brand',
+        }" />
+        @if ($variance !== null)
+            {{-- Where the plan says completion should be today. --}}
+            <span class="absolute -top-1 h-[18px] w-0.5 rounded-full bg-slate-500" style="left: calc({{ $planned }}% - 1px)" title="Planned for today: {{ $planned }}%"></span>
+        @endif
+    </div>
+    @if ($variance !== null)
+        <div class="mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-xs">
+            <span class="inline-flex items-center gap-1.5 text-slate-500">
+                <span class="h-3 w-0.5 rounded-full bg-slate-500"></span>
+                Planned for today: <span class="font-semibold tabular-nums text-slate-700">{{ $planned }}%</span>
+            </span>
+            <span class="inline-flex items-center gap-1 font-semibold {{ $behindPlan ? 'text-red-600' : ($variance < 0 ? 'text-amber-600' : 'text-emerald-600') }}">
+                <i data-lucide="{{ $variance < 0 ? 'trending-down' : 'trending-up' }}" class="h-3.5 w-3.5"></i>
+                @if ($variance === 0)
+                    On plan
+                @else
+                    {{ abs($variance) }} {{ Str::plural('point', abs($variance)) }} {{ $variance < 0 ? 'behind' : 'ahead of' }} plan
+                @endif
+            </span>
+        </div>
+    @endif
 
     <div class="mt-6">
-        <x-phase-stepper :phases="$phases" />
+        <x-phase-stepper :phases="$phases" :shares="$phases->mapWithKeys(fn ($phase) => [$phase->id => (int) round($stageShare($phase))])->all()" />
+    </div>
+
+    <div class="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-slate-50 px-4 py-3 text-xs text-slate-600">
+        <p class="min-w-0 flex-1">
+            Completion adds up each stage's progress by its share of the project. A stage worth 25% that is half done adds about 12.5%.
+        </p>
+        @can('update', $project)
+            @if ($phases->isNotEmpty())
+                <button type="button" @click="$dispatch('open-modal', 'stage-shares')" class="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-colors duration-150 hover:bg-slate-50">
+                    <i data-lucide="sliders-horizontal" class="h-3.5 w-3.5"></i>
+                    Stage Shares
+                </button>
+            @endif
+        @endcan
     </div>
 
     <dl class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -83,9 +122,9 @@
         <div class="flex items-center justify-between gap-4">
             <h2 class="text-lg font-semibold text-slate-900">Schedule</h2>
             <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-500">
-                <span class="inline-flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-slate-900"></span>Completed</span>
-                <span class="inline-flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-brand-600"></span>In Progress</span>
-                <span class="inline-flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-slate-200"></span>Not Started</span>
+                <span class="inline-flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-slate-900"></span>Finished</span>
+                <span class="inline-flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-brand-600"></span>Done so far</span>
+                <span class="inline-flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-slate-200"></span>Still to do</span>
             </div>
         </div>
         <div class="mt-5 overflow-x-auto">
@@ -95,12 +134,17 @@
                         <span class="absolute -top-1 bottom-[-2px] z-10 w-px bg-slate-400/70" style="left: {{ $todayPercent }}%" title="Today"></span>
                     @endif
                     @foreach ($segments as $segment)
-                        <div class="absolute inset-y-0 {{ match ($segment['phase']->status) { 'Completed' => 'bg-slate-900', 'In Progress' => 'bg-brand-600', default => 'bg-slate-200' } }} {{ $loop->first ? 'rounded-l-full' : '' }} {{ $loop->last ? 'rounded-r-full' : '' }}" style="left: {{ $segment['left'] }}%; width: {{ $segment['width'] }}%; {{ ! $loop->last ? 'border-right: 2px solid white;' : '' }}" title="{{ $segment['phase']->name }} — {{ $segment['phase']->status }}"></div>
+                        @php $stageDone = $segment['phase']->currentProgress(); @endphp
+                        {{-- Each slice is the stage's planned time window, filled as far as the stage has progressed. --}}
+                        <div class="absolute inset-y-0 overflow-hidden bg-slate-200 {{ $loop->first ? 'rounded-l-full' : '' }} {{ $loop->last ? 'rounded-r-full' : '' }}" style="left: {{ $segment['left'] }}%; width: {{ $segment['width'] }}%; {{ ! $loop->last ? 'border-right: 2px solid white;' : '' }}" title="{{ $segment['phase']->name }}: {{ $stageDone }}% done">
+                            <div class="h-full {{ $stageDone >= 100 ? 'bg-slate-900' : 'bg-brand-600' }}" style="width: {{ $stageDone }}%"></div>
+                        </div>
                     @endforeach
                 </div>
                 <div class="mt-2 flex">
                     @foreach ($segments as $segment)
-                        <div class="text-center text-[10.5px] font-medium text-slate-500" style="width: {{ $segment['width'] }}%">{{ $segment['phase']->name }}</div>
+                        {{-- A thin slice only has room for its number; the full name is in the tooltip. --}}
+                        <div class="truncate px-0.5 text-center text-[10.5px] font-medium text-slate-500" style="width: {{ $segment['width'] }}%" title="{{ $segment['phase']->name }}">{{ $segment['width'] < 12 ? $segment['phase']->sequence : $segment['phase']->name }}</div>
                     @endforeach
                 </div>
             </div>
@@ -112,8 +156,14 @@
     // Oldest first so each entry can show how much completion moved since the previous one.
     $history = $project->progress->sortBy([['progress_date', 'asc'], ['id', 'asc']])->values();
     $previousByEntry = [];
+    $stageBeforeByEntry = [];
+    $lastStageProgress = [];
     foreach ($history as $index => $entry) {
         $previousByEntry[$entry->id] = $index > 0 ? $history[$index - 1]->progress_percentage : 0;
+        $stageBeforeByEntry[$entry->id] = $lastStageProgress[$entry->phase_id] ?? 0;
+        if ($entry->stage_progress !== null) {
+            $lastStageProgress[$entry->phase_id] = $entry->stage_progress;
+        }
     }
     $positions = $project->assignments->pluck('position_type', 'user_id');
     $phaseCount = max(1, $phases->count());
@@ -135,7 +185,10 @@
             @php
                 $previous = $previousByEntry[$entry->id];
                 $delta = $entry->progress_percentage - $previous;
-                $finishedStage = $entry->phase && $entry->progress_percentage >= (int) round($entry->phase->sequence / $phaseCount * 100);
+                $finishedStage = $entry->stage_progress !== null
+                    ? $entry->stage_progress >= 100
+                    : $entry->phase && $entry->progress_percentage >= (int) round($entry->phase->sequence / $phaseCount * 100);
+                $stageBefore = $stageBeforeByEntry[$entry->id];
                 $photos = $entry->projectDocuments->filter->isInlineImage()->values();
                 $files = $entry->projectDocuments->reject->isInlineImage();
                 $viewerPhotos = $photos->map(fn ($doc) => $doc->toViewerPhoto('Site photo · '.$entry->progress_date->format('M d, Y')))->all();
@@ -176,6 +229,9 @@
                     <p class="mt-3 inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium {{ $finishedStage ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-700' }}">
                         <i data-lucide="{{ $finishedStage ? 'circle-check-big' : 'hammer' }}" class="h-3.5 w-3.5"></i>
                         {{ $finishedStage ? 'Finished' : 'Working on' }}: {{ $entry->phase->name }}
+                        @if ($entry->stage_progress !== null && ! $finishedStage)
+                            <span class="tabular-nums opacity-70">&middot; {{ $stageBefore }}% &rarr; {{ $entry->stage_progress }}% of stage</span>
+                        @endif
                     </p>
                 @endif
 

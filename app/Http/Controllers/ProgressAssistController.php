@@ -24,7 +24,8 @@ class ProgressAssistController extends Controller
 
         $validated = $request->validate([
             'phase_id' => ['required', Rule::exists('project_phases', 'id')->where('project_id', $project->id)],
-            'phase_status' => ['required', Rule::in(['In Progress', 'Completed'])],
+            'stage_progress' => ['nullable', 'integer', 'between:0,100'],
+            'phase_status' => ['required_without:stage_progress', 'nullable', Rule::in(['In Progress', 'Completed'])],
             'notes' => ['required', 'string', 'min:3', 'max:2000'],
             'photos' => ['nullable', 'array', 'max:'.ProgressReportAssistant::MAX_IMAGES],
             'photos.*' => ['image', 'max:5120'],
@@ -34,9 +35,12 @@ class ProgressAssistController extends Controller
             $draft = $assistant->draft(
                 $project,
                 ProjectPhase::findOrFail($validated['phase_id']),
-                $validated['phase_status'],
+                isset($validated['stage_progress'])
+                    ? ($validated['stage_progress'] >= 100 ? 'Completed' : 'In Progress')
+                    : $validated['phase_status'],
                 $validated['notes'],
                 $request->file('photos', []),
+                $validated['stage_progress'] ?? null,
             );
         } catch (RuntimeException $e) {
             return response()->json(['message' => $e->getMessage()], 503);

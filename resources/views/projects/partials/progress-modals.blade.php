@@ -10,15 +10,20 @@
 @if ($canWriteProgress)
     @php
         $isCreateError = old('_form') === 'progress-create';
+        $stageWeights = $project->stageWeights();
+        $stageWeightTotal = max(1, array_sum($stageWeights));
         $formConfig = [
             'phases' => $phases->map(fn ($phase) => [
                 'id' => (string) $phase->id,
                 'sequence' => $phase->sequence,
                 'name' => $phase->name,
                 'status' => $phase->status,
+                'progress' => $phase->currentProgress(),
+                'share' => (int) round($stageWeights[$phase->id] / $stageWeightTotal * 100),
+                'weight' => $stageWeights[$phase->id],
             ])->values(),
             'phaseId' => (string) ($isCreateError ? old('phase_id') : $project->currentPhase()?->id),
-            'phaseStatus' => $isCreateError ? old('phase_status', 'In Progress') : 'In Progress',
+            'stageProgress' => $isCreateError && old('stage_progress') !== null ? (int) old('stage_progress') : null,
             'currentCompletion' => $completion,
             'date' => $isCreateError ? old('progress_date', now()->toDateString()) : now()->toDateString(),
             'today' => now()->toDateString(),
@@ -38,7 +43,7 @@
                     </span>
                     <div>
                         <h2 class="font-display text-lg font-semibold text-slate-900">Update Project Progress</h2>
-                        <p class="mt-0.5 text-sm text-slate-500">Pick the stage status, add up to {{ $maxAttachments }} photos, and write a short note.</p>
+                        <p class="mt-0.5 text-sm text-slate-500">Say how far along the stage is, add up to {{ $maxAttachments }} photos, and write a short note.</p>
                     </div>
                 </div>
                 <button type="button" x-on:click="closeCamera(); $dispatch('close')" class="shrink-0 rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-slate-100 hover:text-slate-700" aria-label="Close">
@@ -50,7 +55,7 @@
                 @csrf
                 <input type="hidden" name="_form" value="progress-create">
                 <input type="hidden" name="phase_id" :value="phaseId">
-                <input type="hidden" name="phase_status" :value="phaseStatus">
+                <input type="hidden" name="stage_progress" :value="stageProgress">
                 <input type="hidden" name="accomplishments" :value="accomplishments">
                 <input type="hidden" name="activities_completed" :value="draft ? draft.activities_completed : ''">
                 <input type="hidden" name="activities_remaining" :value="draft ? draft.activities_remaining : ''">
@@ -85,30 +90,53 @@
                     </p>
                     <select x-show="changingStage" x-model="phaseId" class="mt-2 {{ $input }}" style="display: none;" aria-label="Construction stage">
                         @foreach ($phases as $phase)
-                            <option value="{{ $phase->id }}">{{ $phase->sequence }}. {{ $phase->name }} ({{ $phase->status }})</option>
+                            <option value="{{ $phase->id }}">{{ $phase->sequence }}. {{ $phase->name }} ({{ $phase->currentProgress() }}% done)</option>
                         @endforeach
                     </select>
 
-                    <div class="mt-3 grid grid-cols-2 gap-2.5" role="radiogroup" aria-label="Stage status">
-                        @foreach ([
-                            ['value' => 'In Progress', 'icon' => 'hammer', 'title' => 'Still working', 'hint' => 'Work continues on this stage'],
-                            ['value' => 'Completed', 'icon' => 'circle-check-big', 'title' => 'Stage finished', 'hint' => 'Marks this stage complete'],
-                        ] as $option)
-                            <button
-                                type="button"
-                                role="radio"
-                                @click="phaseStatus = '{{ $option['value'] }}'"
-                                :aria-checked="phaseStatus === '{{ $option['value'] }}'"
-                                :class="phaseStatus === '{{ $option['value'] }}' ? 'border-brand-600 bg-brand-600 text-white shadow-sm' : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'"
-                                class="flex min-h-[4rem] flex-col items-start justify-center rounded-xl border px-3.5 py-3 text-left transition-colors duration-150"
-                            >
-                                <span class="flex items-center gap-2 text-sm font-semibold">
-                                    <i data-lucide="{{ $option['icon'] }}" class="h-4 w-4"></i>
-                                    {{ $option['title'] }}
-                                </span>
-                                <span class="mt-0.5 text-xs opacity-70">{{ $option['hint'] }}</span>
+                    <p class="mt-0.5 text-xs text-slate-500" x-show="phase" x-text="phase ? 'This stage is ' + phase.share + '% of the whole project.' : ''"></p>
+
+                    {{-- How far along the stage is: the slider never goes below what's already recorded. --}}
+                    <div class="mt-3 rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 sm:p-4">
+                        <div class="flex items-end justify-between gap-3">
+                            <div>
+                                <label for="stage-progress" class="text-sm font-medium text-slate-700">How much of this stage is done now?</label>
+                                <p class="mt-0.5 text-xs text-slate-500">
+                                    <span x-text="phase && phase.progress > 0 ? 'Last recorded: ' + phase.progress + '%' : 'Not started yet'"></span>
+                                </p>
+                            </div>
+                            <p class="font-display text-3xl font-semibold tabular-nums text-slate-900"><span x-text="stageProgress"></span>%</p>
+                        </div>
+
+                        <input
+                            id="stage-progress"
+                            type="range"
+                            min="0"
+                            max="100"
+                            step="5"
+                            x-model.number="stageProgress"
+                            @input="keepStageProgressForward()"
+                            class="mt-3 h-2 w-full cursor-pointer accent-brand-600"
+                            :aria-valuetext="stageProgress + '% of this stage done'"
+                        >
+
+                        <div class="mt-3 grid grid-cols-4 gap-2">
+                            @foreach ([5, 10, 25] as $step)
+                                <button type="button" @click="addStageProgress({{ $step }})" :disabled="stageProgress >= 100" class="min-h-[2.75rem] rounded-lg border border-slate-200 bg-white text-sm font-semibold text-slate-700 transition-colors duration-150 hover:border-slate-300 disabled:opacity-40">+{{ $step }}%</button>
+                            @endforeach
+                            <button type="button" @click="stageProgress = 100" :class="stageProgress >= 100 ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'" class="inline-flex min-h-[2.75rem] items-center justify-center gap-1 rounded-lg border text-sm font-semibold transition-colors duration-150">
+                                <i data-lucide="circle-check-big" class="h-4 w-4"></i>
+                                Done
                             </button>
-                        @endforeach
+                        </div>
+
+                        <p class="mt-3 text-xs text-slate-500" x-show="stageProgress < 100">
+                            Base it on what you can count: for example, 6 of 10 columns poured is about 60%.
+                        </p>
+                        <p class="mt-3 flex items-start gap-1.5 text-xs font-medium text-emerald-700" x-show="stageProgress >= 100" style="display: none;">
+                            <i data-lucide="circle-check-big" class="mt-px h-3.5 w-3.5 shrink-0"></i>
+                            <span>This marks the stage finished<span x-show="phase && phase.sequence > 1">, along with any earlier stage still open</span>.</span>
+                        </p>
                     </div>
 
                     <div class="mt-3 flex items-center gap-3 text-xs text-slate-500">
@@ -487,3 +515,79 @@
             </form>
         </x-modal>
 @endforeach
+
+@can('update', $project)
+    @if ($phases->isNotEmpty())
+        @php
+            $isSharesError = old('_form') === 'stage-shares';
+            $currentWeights = $project->stageWeights();
+            $currentWeightTotal = max(1, array_sum($currentWeights));
+            // Equal shares from before weights existed are shown as percentages of the project.
+            $shareValues = $phases->mapWithKeys(fn ($phase) => [
+                (string) $phase->id => (int) ($isSharesError ? old('weights.'.$phase->id, 0) : round($currentWeights[$phase->id] / $currentWeightTotal * 100)),
+            ])->all();
+        @endphp
+
+        <x-modal name="stage-shares" :show="$isSharesError && $errors->any()" max-width="lg">
+            <form method="POST" action="{{ route('projects.stages.update', $project) }}" x-data="{ shares: @js($shareValues), get total() { return Object.values(this.shares).reduce((sum, value) => sum + (Number(value) || 0), 0) } }">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="_form" value="stage-shares">
+
+                <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4 sm:px-6">
+                    <div class="flex items-center gap-3">
+                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl chip-ink text-white shadow-sm">
+                            <i data-lucide="sliders-horizontal" class="h-[18px] w-[18px]"></i>
+                        </span>
+                        <div>
+                            <h2 class="font-display text-lg font-semibold text-slate-900">Stage Shares</h2>
+                            <p class="mt-0.5 text-sm text-slate-500">How much of the whole project each stage is worth. Base it on cost or effort.</p>
+                        </div>
+                    </div>
+                    <button type="button" x-on:click="$dispatch('close')" class="shrink-0 rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-slate-100 hover:text-slate-700" aria-label="Close">
+                        <i data-lucide="x" class="h-5 w-5"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-3 px-5 py-5 sm:px-6">
+                    @if ($isSharesError && $errors->any())
+                        <div class="rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700">
+                            <ul class="list-disc space-y-0.5 pl-5">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    @foreach ($phases as $phase)
+                        <div class="flex items-center justify-between gap-4">
+                            <label for="stage-share-{{ $phase->id }}" class="min-w-0 text-sm text-slate-700">
+                                <span class="font-medium text-slate-900">{{ $phase->sequence }}. {{ $phase->name }}</span>
+                                <span class="block text-xs text-slate-500">{{ $phase->currentProgress() }}% done</span>
+                            </label>
+                            <div class="relative w-24 shrink-0">
+                                <input id="stage-share-{{ $phase->id }}" type="number" name="weights[{{ $phase->id }}]" min="1" max="100" step="1" inputmode="numeric" x-model.number="shares['{{ $phase->id }}']" class="{{ $input }} pr-7 text-right tabular-nums" required>
+                                <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">%</span>
+                            </div>
+                        </div>
+                    @endforeach
+
+                    <div class="flex items-center justify-between border-t border-slate-100 pt-3 text-sm">
+                        <span class="text-slate-500">Total</span>
+                        <span class="font-semibold tabular-nums" :class="total === 100 ? 'text-emerald-600' : 'text-red-600'" x-text="total + '%' + (total === 100 ? '' : ' (must be 100%)')"></span>
+                    </div>
+                    <p class="text-xs text-slate-500">Changing the shares recalculates overall completion. What's recorded for each stage stays the same.</p>
+                </div>
+
+                <div class="flex flex-col-reverse gap-2.5 border-t border-slate-100 bg-slate-50/80 px-5 py-4 sm:flex-row sm:justify-end sm:px-6">
+                    <button type="button" x-on:click="$dispatch('close')" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors duration-150 hover:bg-slate-50">Cancel</button>
+                    <button type="submit" :disabled="total !== 100" class="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors duration-150 hover:bg-brand-700 disabled:opacity-50">
+                        <i data-lucide="check" class="h-4 w-4"></i>
+                        Save Shares
+                    </button>
+                </div>
+            </form>
+        </x-modal>
+    @endif
+@endcan

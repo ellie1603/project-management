@@ -136,7 +136,7 @@
                     };
 
                     $workTooltip = $row['progress'].'% of work reported complete'
-                        .($row['behind_pace'] ? ' — behind the '.$row['elapsed_percent'].'% of time already used' : '');
+                        .($row['behind_pace'] ? ' — the plan expects '.$row['planned_percent'].'% by today' : '');
 
                     $timeTooltip = match (true) {
                         $row['status_key'] === 'completed' => 'Completed — schedule closed',

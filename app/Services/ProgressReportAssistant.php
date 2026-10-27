@@ -59,7 +59,7 @@ class ProgressReportAssistant
      *
      * @throws RuntimeException with a message safe to show the user
      */
-    public function draft(Project $project, ProjectPhase $phase, string $phaseStatus, string $notes, array $photos = []): array
+    public function draft(Project $project, ProjectPhase $phase, string $phaseStatus, string $notes, array $photos = [], ?int $stageProgress = null): array
     {
         $driver = $this->driver();
 
@@ -79,7 +79,11 @@ class ProgressReportAssistant
             "Project: {$project->title}",
             'Location: '.($project->location ?? 'Not specified'),
             "Construction stage: {$phase->name}",
-            'Stage status after this update: '.($phaseStatus === 'Completed' ? 'Finished' : 'Still in progress'),
+            'Stage status after this update: '.match (true) {
+                $phaseStatus === 'Completed' => 'Finished',
+                $stageProgress !== null => "Still in progress, about {$stageProgress}% of this stage done",
+                default => 'Still in progress',
+            },
             count($images) > 0 ? 'Site photos from this update are attached.' : 'No photos attached.',
             '',
             'Site notes from the personnel:',

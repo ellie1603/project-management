@@ -9,20 +9,20 @@ use App\Models\ProjectProgress;
 class ProjectPhaseService
 {
     /**
-     * Apply a personnel-submitted phase status update and return the
-     * project's fresh completion percentage.
+     * Apply a personnel-submitted stage update (how far along the stage is,
+     * 0-100) and return the project's fresh completion percentage.
      *
-     * Marking a phase Completed also completes every earlier phase (by
-     * sequence) — a project can't sensibly be "done" with Implementation
-     * while Planning is still Not Started, and this keeps the derived
-     * completion percentage monotonic as personnel work through phases in
-     * order. Marking a phase In Progress only touches that one phase.
+     * Finishing a stage (100%) also finishes every earlier stage (by
+     * sequence): a project can't sensibly be done with Implementation while
+     * Planning is still open. A stage never moves backwards here; mistakes are
+     * corrected by deleting the update, which replays the history.
      */
-    public function applyUpdate(Project $project, ProjectPhase $phase, string $status, ?string $date = null): int
+    public function applyUpdate(Project $project, ProjectPhase $phase, int $stageProgress, ?string $date = null): int
     {
         $date ??= now()->toDateString();
+        $stageProgress = max($phase->currentProgress(), min(100, max(0, $stageProgress)));
 
-        if ($status === 'Completed') {
+        if ($stageProgress >= 100) {
             $project->phases()
                 ->where('sequence', '<=', $phase->sequence)
                 ->where('status', '!=', 'Completed')
@@ -30,13 +30,15 @@ class ProjectPhaseService
                 ->each(function (ProjectPhase $earlierPhase) use ($date): void {
                     $earlierPhase->update([
                         'status' => 'Completed',
+                        'progress' => 100,
                         'started_at' => $earlierPhase->started_at ?? $date,
                         'completed_at' => $date,
                     ]);
                 });
         } else {
             $phase->update([
-                'status' => $status,
+                'status' => 'In Progress',
+                'progress' => $stageProgress,
                 'started_at' => $phase->started_at ?? $date,
             ]);
         }
@@ -49,11 +51,11 @@ class ProjectPhaseService
     /**
      * Reset every stage and replay the remaining progress updates in order, so
      * deleting an update also undoes the stage changes it made. Each update's
-     * stored percentage is recalculated, since later updates built on the removed one.
+     * stored percentages are recalculated, since later updates built on the removed one.
      */
     public function rebuildFromHistory(Project $project): int
     {
-        $project->phases()->update(['status' => 'Not Started', 'started_at' => null, 'completed_at' => null]);
+        $project->phases()->update(['status' => 'Not Started', 'progress' => 0, 'started_at' => null, 'completed_at' => null]);
 
         $phaseCount = max(1, $project->phases()->count());
 
@@ -68,13 +70,16 @@ class ProjectPhaseService
                     return;
                 }
 
-                // Older rows predate phase_status; a finished stage is the only way completion reached its threshold.
-                $status = $entry->phase_status
-                    ?? ($entry->progress_percentage >= (int) round($entry->phase->sequence / $phaseCount * 100) ? 'Completed' : 'In Progress');
+                $phase = $entry->phase->fresh();
+                $stageProgress = $entry->stage_progress ?? $this->legacyStageProgress($entry, $phase, $phaseCount);
+                $percentage = $this->applyUpdate($project, $phase, $stageProgress, $entry->progress_date->toDateString());
+                $phase->refresh();
 
-                $percentage = $this->applyUpdate($project, $entry->phase->fresh(), $status, $entry->progress_date->toDateString());
-
-                $entry->fill(['progress_percentage' => $percentage, 'phase_status' => $status]);
+                $entry->fill([
+                    'progress_percentage' => $percentage,
+                    'stage_progress' => $phase->currentProgress(),
+                    'phase_status' => $phase->status,
+                ]);
 
                 if ($entry->isDirty()) {
                     $entry->save();
@@ -84,5 +89,18 @@ class ProjectPhaseService
         $project->unsetRelation('phases');
 
         return $project->completionPercentage();
+    }
+
+    /**
+     * Updates saved before stages had their own percentage only recorded
+     * "still working" or "finished". Older rows predate even that status; a
+     * finished stage is the only way completion reached its threshold.
+     */
+    private function legacyStageProgress(ProjectProgress $entry, ProjectPhase $phase, int $phaseCount): int
+    {
+        $status = $entry->phase_status
+            ?? ($entry->progress_percentage >= (int) round($phase->sequence / $phaseCount * 100) ? 'Completed' : 'In Progress');
+
+        return $status === 'Completed' ? 100 : $phase->currentProgress();
     }
 }
