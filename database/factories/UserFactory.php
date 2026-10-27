@@ -34,6 +34,17 @@ class UserFactory extends Factory
     }
 
     /**
+     * The System Administrator: an admin-role account flagged as the system's maintainer.
+     */
+    public function systemAdmin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'admin',
+            'is_system_admin' => true,
+        ]);
+    }
+
+    /**
      * Indicate that the model's email address should be unverified.
      */
     public function unverified(): static

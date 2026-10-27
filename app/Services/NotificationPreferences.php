@@ -37,7 +37,7 @@ class NotificationPreferences
         return [
             'assignment' => [
                 'label' => 'Project assigned to you',
-                'description' => 'When the Admin/CEO assigns you to a project.',
+                'description' => 'When the CEO assigns you to a project.',
                 'classes' => [ProjectAssignmentNotification::class],
                 'roles' => [self::PERSONNEL],
                 'required' => true,
@@ -100,7 +100,7 @@ class NotificationPreferences
             ],
             'request_decided' => [
                 'label' => 'Decision on your budget request',
-                'description' => 'When the Admin/CEO approves or rejects your request.',
+                'description' => 'When the CEO approves or rejects your request.',
                 'classes' => [BudgetRequestApprovedNotification::class, BudgetRequestRejectedNotification::class],
                 'roles' => [self::PERSONNEL],
                 'required' => false,

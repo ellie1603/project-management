@@ -1,11 +1,3 @@
-@php
-    $roleMeta = [
-        'admin' => ['label' => 'Admin / CEO', 'chip' => 'chip-ink'],
-        'project_personnel' => ['label' => 'Project Personnel', 'chip' => 'chip-ink'],
-        'finance_accounting' => ['label' => 'Finance & Accounting', 'chip' => 'chip-ink'],
-    ];
-@endphp
-
 <section class="overflow-hidden rounded-3xl bg-white shadow-soft ring-1 ring-slate-900/5">
     <div class="overflow-x-auto">
         <table class="min-w-full">
@@ -20,11 +12,10 @@
             </thead>
             <tbody class="divide-y divide-slate-100">
                 @forelse ($users as $user)
-                    @php $meta = $roleMeta[$user->role] ?? $roleMeta['admin']; @endphp
                     <tr class="transition-colors duration-150 hover:bg-slate-50/80">
                         <td class="px-5 py-3.5">
                             <div class="flex items-center gap-3">
-                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full {{ $meta['chip'] }} text-xs font-semibold text-white shadow-sm">
+                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full chip-ink text-xs font-semibold text-white shadow-sm">
                                     {{ strtoupper(substr($user->name, 0, 1)) }}
                                 </span>
                                 <div class="min-w-0">
@@ -40,7 +31,7 @@
                             </div>
                         </td>
                         <td class="px-4 py-3.5">
-                            <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">{!! $meta['label'] !!}</span>
+                            <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">{{ $user->roleLabel() }}</span>
                         </td>
                         <td class="px-4 py-3.5 text-sm text-slate-600">{{ $user->position_type ?? '—' }}</td>
                         <td class="px-4 py-3.5">
@@ -125,7 +116,7 @@
 
             <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
                 <div class="flex items-center gap-3">
-                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ ($roleMeta[$user->role] ?? $roleMeta['admin'])['chip'] }} text-xs font-semibold text-white shadow-sm">
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl chip-ink text-xs font-semibold text-white shadow-sm">
                         {{ strtoupper(substr($user->name, 0, 1)) }}
                     </span>
                     <div>

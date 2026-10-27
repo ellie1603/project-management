@@ -86,7 +86,7 @@ class NotificationsTest extends TestCase
 
     public function test_success_message_is_not_repeated_as_an_error(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->systemAdmin()->create();
 
         $this->actingAs($admin)
             ->withSession(['status' => 'Saved it.'])

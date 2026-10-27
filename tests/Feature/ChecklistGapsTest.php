@@ -76,13 +76,17 @@ class ChecklistGapsTest extends TestCase
         $this->get('/_test/maintenance')->assertStatus(503)->assertSee('Down for maintenance');
     }
 
-    public function test_pdf_reports_end_with_signature_lines(): void
+    public function test_pdf_reports_have_no_signature_lines(): void
     {
-        $admin = User::factory()->create(['role' => 'admin', 'name' => 'Ana Admin']);
+        $admin = User::factory()->create(['role' => 'admin']);
         Project::factory()->create();
 
-        $this->actingAs($admin)->get(route('reports.budget'))
-            ->assertOk()
-            ->assertSeeInOrder(['Prepared by', 'Ana Admin', 'Noted by', 'Approved by']);
+        foreach (['reports.budget', 'reports.project-status'] as $report) {
+            $this->actingAs($admin)->get(route($report))
+                ->assertOk()
+                ->assertDontSee('Prepared by')
+                ->assertDontSee('Noted by')
+                ->assertDontSee('Approved by');
+        }
     }
 }

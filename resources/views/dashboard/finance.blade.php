@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+@php $seesRequests = auth()->user()->hasPermission('budget_requests.view'); @endphp
 <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
     <x-page-hero
         eyebrow="Finance & Accounting"
@@ -14,10 +15,12 @@
                     <i data-lucide="receipt" class="h-4 w-4"></i>
                     Expenses
                 </a>
-                <a href="{{ route('budget.requests') }}" class="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-medium text-slate-200 backdrop-blur transition-colors duration-200 hover:bg-white/10 hover:text-white">
-                    Budget Requests
-                    <i data-lucide="arrow-right" class="h-4 w-4"></i>
-                </a>
+                @if ($seesRequests)
+                    <a href="{{ route('budget.requests') }}" class="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-medium text-slate-200 backdrop-blur transition-colors duration-200 hover:bg-white/10 hover:text-white">
+                        Budget Requests
+                        <i data-lucide="arrow-right" class="h-4 w-4"></i>
+                    </a>
+                @endif
             </div>
         </x-slot>
 
@@ -35,12 +38,14 @@
         </x-slot>
     </x-page-hero>
 
-    <div class="mt-6 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-5">
+    <div class="mt-6 grid grid-cols-2 gap-3 sm:gap-4 {{ $seesRequests ? 'md:grid-cols-3 xl:grid-cols-5' : 'xl:grid-cols-4' }}">
         <x-stat-card label="Approved Budget" value="₱{{ number_format($stats['total_approved_budget'], 2) }}" icon="wallet" sub="Baseline allocation" class="animate-rise-in" style="animation-delay: 30ms" />
         <x-stat-card label="Total Expenses" value="₱{{ number_format($stats['total_expenses'], 2) }}" icon="calculator" sub="Recorded to date" class="animate-rise-in" style="animation-delay: 55ms" />
         <x-stat-card label="Remaining Budget" value="₱{{ number_format($stats['remaining_budget'], 2) }}" icon="piggy-bank" sub="Available to spend" class="animate-rise-in" style="animation-delay: 80ms" />
         <x-stat-card label="Over Budget" :value="$stats['over_budget']" icon="triangle-alert" :sub="$stats['near_budget_limit'].' near limit'" class="animate-rise-in" style="animation-delay: 105ms" />
-        <x-stat-card label="Pending Requests" value="₱{{ number_format($stats['pending_budget_requests_total'], 2) }}" icon="hand-coins" :sub="$stats['pending_budget_requests'].' awaiting CEO approval'" class="col-span-2 animate-rise-in md:col-span-1" style="animation-delay: 130ms" />
+        @if ($seesRequests)
+            <x-stat-card label="Pending Requests" value="₱{{ number_format($stats['pending_budget_requests_total'], 2) }}" icon="hand-coins" :sub="$stats['pending_budget_requests'].' awaiting CEO approval'" class="col-span-2 animate-rise-in md:col-span-1" style="animation-delay: 130ms" />
+        @endif
     </div>
 
     <div class="mt-6 grid gap-4 lg:grid-cols-3">

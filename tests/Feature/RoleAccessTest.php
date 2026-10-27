@@ -24,26 +24,38 @@ class RoleAccessTest extends TestCase
             ->assertOk();
     }
 
-    public function test_admin_sees_audit_navigation_but_project_personnel_does_not(): void
+    public function test_only_the_system_administrator_sees_users_and_audit_logs(): void
     {
-        $admin = User::factory()->create([
-            'role' => 'admin',
-            'position_type' => null,
-        ]);
+        $sysadmin = User::factory()->systemAdmin()->create();
+        $ceo = User::factory()->create(['role' => 'admin']);
         $personnel = User::factory()->create([
             'role' => 'project_personnel',
             'position_type' => 'Foreman',
         ]);
 
-        $this->actingAs($admin)
+        $this->actingAs($sysadmin)
             ->get('/dashboard')
             ->assertOk()
-            ->assertSee('Audit Logs');
+            ->assertSee(route('users.index'))
+            ->assertSee(route('audit-logs.index'));
 
-        $this->actingAs($personnel)
-            ->get('/dashboard')
-            ->assertOk()
-            ->assertDontSee('Audit Logs');
+        foreach ([$ceo, $personnel] as $user) {
+            $this->actingAs($user)
+                ->get('/dashboard')
+                ->assertOk()
+                ->assertDontSee(route('users.index'))
+                ->assertDontSee(route('audit-logs.index'));
+        }
+
+        $this->actingAs($ceo)->get(route('users.index'))->assertForbidden();
+        $this->actingAs($ceo)->get(route('audit-logs.index'))->assertForbidden();
+        $this->actingAs($ceo)->post(route('users.store'), [
+            'name' => 'New Foreman', 'email' => 'new.foreman@bmpc.test', 'password' => 'password123',
+            'role' => 'project_personnel', 'position_type' => 'Foreman',
+        ])->assertForbidden();
+
+        // The CEO keeps Settings.
+        $this->actingAs($ceo)->get('/dashboard')->assertSee(route('settings.edit'));
     }
 
     public function test_project_personnel_cannot_access_unassigned_project(): void

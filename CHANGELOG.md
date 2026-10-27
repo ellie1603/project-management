@@ -2,6 +2,15 @@
 
 Notable changes to the BMPC Project Management System. Newest first.
 
+## 2026-10-27
+
+### Changed
+- **Users and Audit Logs are System Administrator pages.** The CEO no longer sees them in the sidebar, and opening their addresses directly shows Access Denied. Creating accounts, resetting passwords, and deactivating users are done by the System Administrator; the CEO keeps Settings and everything project-related. Finance can still be given Audit Logs on Roles & Permissions.
+- **System Administrator and CEO are separate account types.** On Users, the Role list is System Administrator, CEO, Project Personnel, and Finance & Accounting, and every badge, filter, and profile shows "CEO" or "System Administrator" instead of "Admin / CEO". Both are still the admin role underneath, so the CEO's abilities are unchanged. A System Administrator can't change their own account to another type.
+- **Finance no longer sees budget requests**: no Budget Requests page or sidebar item, no Pending Requests card on the Finance dashboard or Budget & Finance, and no requests on a project's Budget tab. Requests stay between contractor personnel and the CEO; Finance records the actual payments as expenses. A new "See budget requests" permission (on for the CEO and personnel) lets the System Administrator turn it back on for Finance on Roles & Permissions.
+- PDF reports no longer have signature lines ("Prepared by", "Noted by", "Approved by"); they end with the report itself.
+- Servers seeded before the System Administrator existed get that account flagged automatically on the next deploy (the `admin@bmpc.test` account, or the only admin account named "System Administrator").
+
 ## 2026-10-26
 
 ### Added

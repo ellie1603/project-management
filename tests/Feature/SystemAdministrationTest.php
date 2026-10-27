@@ -115,8 +115,9 @@ class SystemAdministrationTest extends TestCase
         $this->assertTrue($this->sysadmin->fresh()->isSystemAdmin());
         $this->assertTrue($this->sysadmin->fresh()->is_active);
 
-        // The CEO still manages everyone else.
-        $this->actingAs($this->ceo)->patch(route('users.toggle-status', $this->finance))->assertRedirect();
+        // User accounts are the System Administrator's job, not the CEO's.
+        $this->actingAs($this->ceo)->patch(route('users.toggle-status', $this->finance))->assertForbidden();
+        $this->actingAs($this->sysadmin)->patch(route('users.toggle-status', $this->finance))->assertRedirect();
     }
 
     public function test_sign_ins_failed_attempts_and_sign_outs_are_recorded(): void

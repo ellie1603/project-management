@@ -18,11 +18,11 @@ There are exactly three roles. Each role's abilities are set on **System → Rol
 
 | Role | Does |
 |---|---|
-| **Admin / CEO** (`admin`) | Registers and manages projects, assigns personnel, approves or rejects budget requests, reviews expenses and reports, manages users and settings. |
+| **CEO** (`admin`) | Registers and manages projects, assigns personnel, approves or rejects budget requests, reviews expenses and reports, manages settings. |
 | **Project Personnel** (`project_personnel`) | Sees only assigned projects. Submits progress updates, photos, and documents. Position types: OIC, Staff, Branch Manager, Foreman (in-house, "by administration") and Contractor (3rd party). Only **Contractor** personnel submit budget requests. |
-| **Finance & Accounting** (`finance_accounting`) | Records project expenses (one at a time or several at once) and monitors budget utilization. Does not approve requests. |
+| **Finance & Accounting** (`finance_accounting`) | Records project expenses (one at a time or several at once) and monitors budget utilization. Does not see or approve budget requests. |
 
-The **System Administrator** is an Admin/CEO account flagged `is_system_admin` (the developer who maintains the system). It always has every permission, is the only account that sees Roles & Permissions and System Usage, and cannot be edited or removed by the CEO.
+The **System Administrator** is a separate account type on Users, stored as the `admin` role flagged `is_system_admin` (the developer who maintains the system). It always has every permission, is the only account that sees **Users**, **Audit Logs**, Roles & Permissions, and System Usage, and cannot be edited or removed by the CEO. New accounts (including contractor personnel) are created by the System Administrator; the CEO then assigns them to projects.
 
 ## Default accounts (development seed)
 
@@ -37,7 +37,7 @@ The **System Administrator** is an Admin/CEO account flagged `is_system_admin` (
 
 Re-running the seeder never resets an existing password. **Change every password before real users get access.**
 
-**Forgotten passwords:** an admin opens **Users → Reset password** on that person's row and gives them the one-time code shown (valid 24 hours). They sign in with their email and the code, then set a new password. Everyone changes their own details and password in **My Account**.
+**Forgotten passwords:** the System Administrator opens **Users → Reset password** on that person's row and gives them the one-time code shown (valid 24 hours). They sign in with their email and the code, then set a new password. Everyone changes their own details and password in **My Account**.
 
 ## Local setup (Laragon on Windows)
 
@@ -143,7 +143,8 @@ Targets: pages respond in under 0.5 s on the server and under 2 s for the person
 
 | Data | Owner (who keeps it correct) |
 |---|---|
-| Projects, assignments, contractors, users, settings, permissions | Admin/CEO (permissions: System Administrator) |
+| Projects, assignments, contractors, settings | Admin/CEO |
+| User accounts, permissions | System Administrator |
 | Expenses, saved finance reports | Finance & Accounting |
 | Budget requests | Contractor personnel submit; Admin/CEO decides |
 | Progress updates, site photos, project documents | Assigned personnel (Admin/CEO for approved designs) |

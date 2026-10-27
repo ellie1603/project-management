@@ -58,7 +58,7 @@ class BreadcrumbsTest extends TestCase
 
     public function test_provider_page_goes_back_to_users_for_admins(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->systemAdmin()->create();
         $contractor = Contractor::factory()->create(['name' => 'ABC Company']);
 
         $this->actingAs($admin)->get(route('contractors.show', $contractor))

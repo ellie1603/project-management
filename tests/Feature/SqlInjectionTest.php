@@ -56,7 +56,7 @@ class SqlInjectionTest extends TestCase
     #[DataProvider('payloads')]
     public function test_admin_list_filters_survive_injection_payloads(string $payload): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->systemAdmin()->create();
         Project::factory()->create();
 
         foreach (['users.index', 'audit-logs.index', 'documents.index', 'budget.expenses', 'budget.requests'] as $route) {

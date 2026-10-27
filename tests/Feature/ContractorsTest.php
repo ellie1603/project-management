@@ -14,7 +14,7 @@ class ContractorsTest extends TestCase
 
     public function test_admin_can_create_contractor_user_and_attach_it_to_a_project(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->systemAdmin()->create();
         $project = Project::factory()->create([
             'project_code' => 'BMPC-PRJ-'.date('Y').'-0001',
             'created_by' => $admin->id,

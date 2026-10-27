@@ -17,19 +17,17 @@ use Illuminate\View\View;
 
 class UsersController extends Controller
 {
-    private const ROLE_LABELS = [
-        'admin' => 'Admin / CEO',
-        'project_personnel' => 'Project Personnel',
-        'finance_accounting' => 'Finance & Accounting',
-    ];
-
     public function index(Request $request): View
     {
         $this->authorize('viewAny', User::class);
 
         $users = User::query()
             ->with('contractor')
-            ->when($request->filled('role'), fn ($query) => $query->where('role', $request->string('role')->toString()))
+            ->when($request->filled('role'), function ($query) use ($request): void {
+                $type = $request->string('role')->toString();
+                $query->where('role', $type === 'system_admin' ? 'admin' : $type)
+                    ->when(in_array($type, ['system_admin', 'admin'], true), fn ($query) => $query->where('is_system_admin', $type === 'system_admin'));
+            })
             ->when($request->filled('search'), function ($query) use ($request): void {
                 $search = $request->string('search')->toString();
                 $query->where(function ($nested) use ($search): void {
@@ -60,10 +58,11 @@ class UsersController extends Controller
         $contractorData = $this->validatedContractorProfile($request, $validated['position_type'] ?? null);
 
         $user = DB::transaction(function () use ($validated, $contractorData): User {
-            $user = User::create([
+            $user = new User;
+            $user->forceFill([
                 ...$validated,
                 'password' => Hash::make($validated['password']),
-            ]);
+            ])->save();
 
             if ($contractorData !== null) {
                 $contractor = Contractor::create($contractorData);
@@ -86,7 +85,7 @@ class UsersController extends Controller
         return redirect()->route('users.index')->with('created_user', [
             'name' => $user->name,
             'email' => $user->email,
-            'role' => self::ROLE_LABELS[$user->role],
+            'role' => $user->roleLabel(),
             'position_type' => $user->position_type,
         ]);
     }
@@ -133,11 +132,16 @@ class UsersController extends Controller
         $this->authorize('update', $user);
 
         $validated = $this->validatedUser($request, requirePassword: false, ignoreUserId: $user->id);
+
+        if ($user->is($request->user()) && ! $validated['is_system_admin']) {
+            throw ValidationException::withMessages(['role' => 'You cannot remove your own System Administrator access.']);
+        }
+
         $contractorData = $this->validatedContractorProfile($request, $validated['position_type'] ?? null);
         $oldValues = $user->makeHidden('password')->toArray();
 
         DB::transaction(function () use ($user, $validated, $contractorData): void {
-            $user->fill($validated);
+            $user->forceFill($validated);
 
             if (! empty($validated['password'])) {
                 $user->password = Hash::make($validated['password']);
@@ -228,7 +232,10 @@ class UsersController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', $emailRule],
             'password' => [$requirePassword ? 'required' : 'nullable', 'string', 'min:8'],
-            'role' => ['required', Rule::in(['admin', 'project_personnel', 'finance_accounting'])],
+            // Only a System Administrator can make another System Administrator.
+            'role' => ['required', Rule::in(array_keys($request->user()->isSystemAdmin()
+                ? User::ACCOUNT_TYPES
+                : array_diff_key(User::ACCOUNT_TYPES, ['system_admin' => true])))],
             'position_type' => [
                 Rule::requiredIf(fn () => $request->input('role') === 'project_personnel'),
                 'nullable',
@@ -238,6 +245,12 @@ class UsersController extends Controller
 
         if ($validated['role'] !== 'project_personnel') {
             $validated['position_type'] = null;
+        }
+
+        // The System Administrator and the CEO share the admin role; the flag tells them apart.
+        $validated['is_system_admin'] = $validated['role'] === 'system_admin';
+        if ($validated['is_system_admin']) {
+            $validated['role'] = 'admin';
         }
 
         if (empty($validated['password'])) {

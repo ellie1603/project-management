@@ -20,7 +20,7 @@ class AdminPasswordResetTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = User::factory()->create(['role' => 'admin', 'is_active' => true]);
+        $this->admin = User::factory()->systemAdmin()->create(['is_active' => true]);
         $this->juan = User::factory()->create([
             'role' => 'project_personnel', 'position_type' => 'Foreman', 'is_active' => true,
             'email' => 'juan@bmpc.test', 'password' => 'old-password-1',
@@ -87,9 +87,10 @@ class AdminPasswordResetTest extends TestCase
         $finance = User::factory()->create(['role' => 'finance_accounting', 'is_active' => true]);
         $this->actingAs($finance)->post(route('users.reset-password', $this->juan))->assertForbidden();
 
-        $sysadmin = User::factory()->create(['role' => 'admin', 'is_active' => true]);
-        $sysadmin->forceFill(['is_system_admin' => true])->save();
-        $this->actingAs($this->admin)->post(route('users.reset-password', $sysadmin))->assertForbidden();
+        // Only the System Administrator resets passwords; the CEO cannot, least of all the System Administrator's.
+        $ceo = User::factory()->create(['role' => 'admin', 'is_active' => true]);
+        $this->actingAs($ceo)->post(route('users.reset-password', $this->juan))->assertForbidden();
+        $this->actingAs($ceo)->post(route('users.reset-password', $this->admin))->assertForbidden();
 
         // Your own password is changed in My Account instead.
         $this->actingAs($this->admin)->post(route('users.reset-password', $this->admin))->assertForbidden();

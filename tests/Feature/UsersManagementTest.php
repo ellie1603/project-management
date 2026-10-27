@@ -13,7 +13,7 @@ class UsersManagementTest extends TestCase
 
     public function test_admin_can_create_a_user_account(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->systemAdmin()->create();
 
         $this->actingAs($admin)
             ->post('/users', [
@@ -38,7 +38,7 @@ class UsersManagementTest extends TestCase
 
     public function test_admin_can_delete_a_user_without_project_history(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->systemAdmin()->create();
         $user = User::factory()->create(['role' => 'finance_accounting']);
 
         $this->actingAs($admin)
@@ -52,7 +52,7 @@ class UsersManagementTest extends TestCase
 
     public function test_user_with_project_history_needs_typed_confirmation(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->systemAdmin()->create();
         $creator = User::factory()->create(['role' => 'admin']);
         Project::factory()->create(['created_by' => $creator->id]);
 
@@ -65,7 +65,7 @@ class UsersManagementTest extends TestCase
 
     public function test_force_delete_removes_the_login_but_keeps_project_history(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->systemAdmin()->create();
         $creator = User::factory()->create(['role' => 'admin', 'email' => 'old.admin@bmpc.test', 'password' => bcrypt('password123')]);
         $project = Project::factory()->create(['created_by' => $creator->id]);
         $project->assignPersonnel($creator, 'Staff');
@@ -94,7 +94,7 @@ class UsersManagementTest extends TestCase
 
     public function test_admin_cannot_delete_own_account_and_others_cannot_delete(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->systemAdmin()->create();
         $finance = User::factory()->create(['role' => 'finance_accounting']);
         $target = User::factory()->create(['role' => 'project_personnel', 'position_type' => 'Staff']);
 
@@ -107,7 +107,7 @@ class UsersManagementTest extends TestCase
 
     public function test_admin_can_deactivate_and_reactivate_a_user(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->systemAdmin()->create();
         $user = User::factory()->create(['role' => 'project_personnel', 'position_type' => 'Staff']);
 
         $this->actingAs($admin)
@@ -146,5 +146,40 @@ class UsersManagementTest extends TestCase
 
         $this->actingAs($personnel)->get('/users')->assertStatus(403);
         $this->actingAs($finance)->get('/users')->assertStatus(403);
+    }
+
+    public function test_system_administrator_and_ceo_are_separate_account_types(): void
+    {
+        $admin = User::factory()->systemAdmin()->create();
+        $account = ['password' => 'password123', 'position_type' => 'Foreman'];
+
+        $this->actingAs($admin)->post('/users', [...$account, 'name' => 'Board CEO', 'email' => 'ceo2@bmpc.test', 'role' => 'admin'])->assertRedirect('/users');
+        $this->actingAs($admin)->post('/users', [...$account, 'name' => 'Backup Maintainer', 'email' => 'dev2@bmpc.test', 'role' => 'system_admin'])->assertRedirect('/users');
+
+        $ceo = User::where('email', 'ceo2@bmpc.test')->first();
+        $maintainer = User::where('email', 'dev2@bmpc.test')->first();
+        $this->assertSame(['admin', false, null], [$ceo->role, $ceo->is_system_admin, $ceo->position_type]);
+        $this->assertSame(['admin', true], [$maintainer->role, $maintainer->is_system_admin]);
+        $this->assertSame('CEO', $ceo->roleLabel());
+        $this->assertSame('System Administrator', $maintainer->roleLabel());
+
+        $this->actingAs($admin)->get('/users')->assertDontSee('Admin / CEO'); // also clears the "account created" message
+        $this->actingAs($admin)->get('/users?role=admin')->assertSee('Board CEO')->assertDontSee('Backup Maintainer');
+        $this->actingAs($admin)->get('/users?role=system_admin')->assertSee('Backup Maintainer')->assertDontSee('Board CEO');
+
+        // Changing the account type moves the flag, keeping the admin role.
+        $this->actingAs($admin)->put('/users/'.$maintainer->id, ['name' => 'Backup Maintainer', 'email' => 'dev2@bmpc.test', 'role' => 'admin'])->assertRedirect('/users');
+        $this->assertFalse($maintainer->fresh()->isSystemAdmin());
+    }
+
+    public function test_the_system_administrator_cannot_remove_their_own_access(): void
+    {
+        $admin = User::factory()->systemAdmin()->create(['name' => 'Dev', 'email' => 'dev@bmpc.test']);
+
+        $this->actingAs($admin)
+            ->put('/users/'.$admin->id, ['name' => 'Dev', 'email' => 'dev@bmpc.test', 'role' => 'admin'])
+            ->assertSessionHasErrors('role');
+
+        $this->assertTrue($admin->fresh()->isSystemAdmin());
     }
 }

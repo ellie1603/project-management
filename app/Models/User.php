@@ -76,9 +76,25 @@ class User extends Authenticatable
         return $this->isSystemAdmin() || Permissions::roleHas($this->role, $permission);
     }
 
+    /**
+     * The account types chosen on Users. The System Administrator and the CEO
+     * share the admin role; the System Administrator is the flagged one.
+     */
+    public const ACCOUNT_TYPES = [
+        'system_admin' => 'System Administrator',
+        'admin' => 'CEO',
+        'project_personnel' => 'Project Personnel',
+        'finance_accounting' => 'Finance & Accounting',
+    ];
+
+    public function accountType(): string
+    {
+        return $this->isSystemAdmin() ? 'system_admin' : (string) $this->role;
+    }
+
     public function roleLabel(): string
     {
-        return $this->isSystemAdmin() ? 'System Administrator' : (Permissions::ROLES[$this->role] ?? Str::headline((string) $this->role));
+        return self::ACCOUNT_TYPES[$this->accountType()] ?? Permissions::ROLES[$this->role] ?? Str::headline((string) $this->role);
     }
 
     public function signIns(): HasMany

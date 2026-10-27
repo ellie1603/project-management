@@ -46,14 +46,12 @@
             ],
             [
                 'title' => 'Finance',
-                'items' => $allowed('finance.view') ? [
-                    $navLink('budget.overview', 'Budget Monitoring', 'wallet'),
-                    $navLink('budget.requests', 'Budget Requests', 'hand-coins'),
-                    $navLink('budget.expenses', 'Expenses', 'calculator'),
-                ] : [],
-            ],
-            [
                 'items' => [
+                    ...($allowed('finance.view') ? [
+                        $navLink('budget.overview', 'Budget Monitoring', 'wallet'),
+                        $allowed('budget_requests.view') ? $navLink('budget.requests', 'Budget Requests', 'hand-coins') : null,
+                        $navLink('budget.expenses', 'Expenses', 'calculator'),
+                    ] : []),
                     $allowed('documents.library') ? $navLink('documents.index', 'Documents', 'file-text') : null,
                     $allowed('reports.view') ? $navLink('reports.index', 'Reports', 'file-text', 'reports.*') : null,
                     $allowed('audit_logs.view') ? $navLink('audit-logs.index', 'Audit Logs', 'clock') : null,
@@ -73,7 +71,8 @@
     }
 
     // Every role edits its own name, email, password, and notifications here.
-    $sections[] = ['items' => [$navLink('profile.edit', 'My Account', 'user-round')]];
+    // Titled so the gap above it reads as a new section, not a stray space.
+    $sections[] = ['title' => 'Account', 'items' => [$navLink('profile.edit', 'My Account', 'user-round')]];
 
     if ($user->isSystemAdmin()) {
         $sections[] = [

@@ -38,9 +38,9 @@
 
         <select name="role" aria-label="Filter by role" class="rounded-xl border-slate-200 bg-slate-50/60 py-2.5 pl-3.5 pr-9 text-sm transition-all duration-200 ease-smooth focus:border-brand-400 focus:bg-white focus:ring-2 focus:ring-brand-100">
             <option value="">All Roles</option>
-            <option value="admin" @selected(request('role') === 'admin')>Admin / CEO</option>
-            <option value="project_personnel" @selected(request('role') === 'project_personnel')>Project Personnel</option>
-            <option value="finance_accounting" @selected(request('role') === 'finance_accounting')>Finance & Accounting</option>
+            @foreach (\App\Models\User::ACCOUNT_TYPES as $type => $label)
+                <option value="{{ $type }}" @selected(request('role') === $type)>{{ $label }}</option>
+            @endforeach
         </select>
 
         <x-filter-reset />
@@ -61,7 +61,7 @@
                     </span>
                     <div>
                         <h2 class="font-display text-lg font-semibold text-slate-900">New User Account</h2>
-                        <p class="mt-0.5 text-sm text-slate-500">Create a login for an Admin, Project Personnel, or Finance user.</p>
+                        <p class="mt-0.5 text-sm text-slate-500">Create a login for the System Administrator, CEO, Project Personnel, or Finance.</p>
                     </div>
                 </div>
                 <button type="button" x-on:click="$dispatch('close')" class="shrink-0 rounded-lg p-1.5 text-slate-400 outline-none transition-colors duration-150 hover:bg-slate-100 hover:text-slate-700 focus-visible:ring-2 focus-visible:ring-brand-200" aria-label="Close">

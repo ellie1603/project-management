@@ -5,7 +5,7 @@
 
 <div
     x-data="{
-        role: '{{ old('role', $user->role ?? 'project_personnel') }}',
+        role: '{{ old('role', $user?->accountType() ?? 'project_personnel') }}',
         positionType: '{{ old('position_type', $user->position_type ?? '') }}',
     }"
 >
@@ -28,9 +28,9 @@
         <div>
             <label for="user-role" class="mb-1.5 block text-sm font-medium text-slate-700">Role</label>
             <select id="user-role" name="role" x-model="role" class="w-full rounded-xl border-slate-200 bg-slate-50/60 shadow-sm transition-all duration-150 ease-smooth focus:border-brand-400 focus:bg-white focus:ring-2 focus:ring-brand-100" required>
-                <option value="admin">Admin / CEO</option>
-                <option value="project_personnel">Project Personnel</option>
-                <option value="finance_accounting">Finance & Accounting</option>
+                @foreach (\App\Models\User::ACCOUNT_TYPES as $type => $label)
+                    <option value="{{ $type }}">{{ $label }}</option>
+                @endforeach
             </select>
         </div>
 

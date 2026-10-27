@@ -19,7 +19,7 @@ use InvalidArgumentException;
 class Permissions
 {
     public const ROLES = [
-        'admin' => 'Admin / CEO',
+        'admin' => 'CEO',
         'finance_accounting' => 'Finance & Accounting',
         'project_personnel' => 'Project Personnel',
     ];
@@ -107,7 +107,7 @@ class Permissions
             'Budget & Finance' => [
                 'finance.view' => [
                     'label' => 'View budget and expenses',
-                    'description' => 'Open Budget & Finance, the expense list, and budget requests.',
+                    'description' => 'Open Budget & Finance and the expense list.',
                     'roles' => [self::ADMIN, self::FINANCE],
                     'default' => [self::ADMIN, self::FINANCE],
                 ],
@@ -117,9 +117,15 @@ class Permissions
                     'roles' => [self::ADMIN, self::FINANCE],
                     'default' => [self::FINANCE],
                 ],
+                'budget_requests.view' => [
+                    'label' => 'See budget requests',
+                    'description' => 'See the Budget Requests page and the requests on the Budget tab of each project. Personnel only on assigned projects.',
+                    'roles' => [self::ADMIN, self::FINANCE, self::PERSONNEL],
+                    'default' => [self::ADMIN, self::PERSONNEL],
+                ],
                 'budget_requests.submit' => [
                     'label' => 'Submit budget requests',
-                    'description' => 'Contractor (3rd-party) personnel ask the Admin/CEO for budget. In-house personnel never do; Finance records their expenses.',
+                    'description' => 'Contractor (3rd-party) personnel ask the CEO for budget. In-house personnel never do; Finance records their expenses.',
                     'roles' => [self::PERSONNEL],
                     'default' => [self::PERSONNEL],
                 ],
@@ -137,19 +143,20 @@ class Permissions
                     'roles' => [self::ADMIN, self::FINANCE, self::PERSONNEL],
                     'default' => [self::ADMIN, self::FINANCE, self::PERSONNEL],
                 ],
+                // Users and Audit Logs belong to the System Administrator, not the CEO.
                 'audit_logs.view' => [
                     'label' => 'View audit logs',
-                    'description' => 'See the full history of actions taken in the system.',
-                    'roles' => [self::ADMIN, self::FINANCE],
-                    'default' => [self::ADMIN],
+                    'description' => 'See the full history of actions taken in the system. The System Administrator always can; the CEO cannot.',
+                    'roles' => [self::FINANCE],
+                    'default' => [],
                 ],
             ],
             'Administration' => [
                 'users.manage' => [
                     'label' => 'Manage users',
-                    'description' => 'Create, edit, deactivate, and delete user accounts.',
-                    'roles' => [self::ADMIN],
-                    'default' => [self::ADMIN],
+                    'description' => 'Create, edit, deactivate, and delete user accounts, and reset passwords. System Administrator only.',
+                    'roles' => [],
+                    'default' => [],
                 ],
                 'settings.manage' => [
                     'label' => 'Manage settings',

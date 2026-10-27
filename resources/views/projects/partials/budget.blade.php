@@ -1,6 +1,7 @@
 @php
     $budget = $project->budgetSummary();
     $canReview = auth()->user()->can('reviewBudgetRequest', $project);
+    $seesRequests = auth()->user()->hasPermission('budget_requests.view');
     $canRecordExpense = auth()->user()->can('create', App\Models\ProjectExpense::class);
 @endphp
 
@@ -18,6 +19,7 @@
         <p class="text-xs uppercase tracking-wide text-slate-500">Approved Budget</p>
         <p class="mt-2 text-lg font-semibold tabular-nums [overflow-wrap:anywhere] sm:text-xl text-slate-900">₱{{ number_format((float) $budget['approved_budget'], 2) }}</p>
     </div>
+    @if ($seesRequests)
     <div class="min-w-0 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <p class="text-xs uppercase tracking-wide text-slate-500">Pending Requests</p>
         <p class="mt-2 text-lg font-semibold tabular-nums [overflow-wrap:anywhere] sm:text-xl text-amber-600">₱{{ number_format((float) $budget['pending_requests'], 2) }}</p>
@@ -26,6 +28,7 @@
         <p class="text-xs uppercase tracking-wide text-slate-500">Approved Requests</p>
         <p class="mt-2 text-lg font-semibold tabular-nums [overflow-wrap:anywhere] sm:text-xl text-slate-900">₱{{ number_format((float) $budget['approved_requests'], 2) }}</p>
     </div>
+    @endif
     <div class="min-w-0 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <p class="text-xs uppercase tracking-wide text-slate-500">Utilized</p>
         <p class="mt-2 text-lg font-semibold tabular-nums [overflow-wrap:anywhere] sm:text-xl text-slate-900">₱{{ number_format((float) $budget['total_expenses'], 2) }}</p>
@@ -46,6 +49,7 @@
     }" />
 </div>
 
+@if ($seesRequests)
 <section class="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
     <h3 class="text-sm font-semibold text-slate-900">Budget Requests</h3>
     <div x-data="pager(10)" data-pager>
@@ -122,6 +126,7 @@
     <x-pager-controls class="!px-0" />
     </div>
 </section>
+@endif
 
     <section class="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <div class="flex flex-wrap items-center justify-between gap-2">

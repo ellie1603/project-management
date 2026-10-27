@@ -131,12 +131,12 @@ class BudgetRequestController extends Controller
     }
 
     /**
-     * Finance-wide queue of budget requests across every project, filterable
-     * by status (defaults to Pending, since that's the actionable queue).
+     * Queue of budget requests across every project, filterable by status
+     * (defaults to Pending, since that's the actionable queue).
      */
     public function index(Request $request): View
     {
-        abort_unless(Auth::user()->hasPermission('finance.view'), 403);
+        abort_unless(Auth::user()->hasPermission('finance.view') && Auth::user()->hasPermission('budget_requests.view'), 403);
 
         $status = $request->string('status', 'Pending')->toString();
 

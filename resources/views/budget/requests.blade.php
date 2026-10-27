@@ -10,7 +10,7 @@
         <p class="mt-1 text-sm text-slate-600">
             {{ auth()->user()->hasPermission('budget_requests.review')
                 ? 'Review and act on budget requests submitted by project personnel.'
-                : 'Budget requests from project personnel and the Admin/CEO decision on each.' }}
+                : 'Budget requests from project personnel and the CEO\'s decision on each.' }}
         </p>
     </div>
 

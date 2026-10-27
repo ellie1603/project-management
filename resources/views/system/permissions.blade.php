@@ -77,7 +77,7 @@
 
         <p class="mt-4 flex items-center gap-2 text-xs text-slate-500">
             <i data-lucide="lock" class="h-3.5 w-3.5"></i>
-            Locked boxes protect BMPC's rules, for example only the Admin/CEO approves budget requests and project personnel only see projects assigned to them.
+            Locked boxes protect BMPC's rules, for example only the CEO approves budget requests and project personnel only see projects assigned to them.
         </p>
 
         <div class="sticky bottom-0 z-10 -mx-4 mt-6 border-t border-slate-200 bg-slate-50/95 px-4 py-4 backdrop-blur sm:mx-0 sm:rounded-2xl sm:border sm:bg-white/95 sm:px-5 sm:shadow-elevated">

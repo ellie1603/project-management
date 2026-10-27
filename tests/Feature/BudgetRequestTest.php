@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Project;
 use App\Models\User;
+use App\Services\Permissions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -106,7 +107,7 @@ class BudgetRequestTest extends TestCase
         $this->assertSame(0, $project->expenses()->count());
     }
 
-    public function test_finance_sees_budget_requests_without_approval_buttons(): void
+    public function test_finance_does_not_see_budget_requests_unless_given_the_permission(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);
         $finance = User::factory()->create(['role' => 'finance_accounting']);
@@ -124,17 +125,29 @@ class BudgetRequestTest extends TestCase
         ]);
         $approveUrl = route('projects.budget-requests.approve', [$project, $budgetRequest]);
 
-        $this->actingAs($finance)->get(route('budget.requests'))
-            ->assertOk()
-            ->assertSee('Mobilization')
-            ->assertDontSee($approveUrl);
+        $this->actingAs($finance)->get(route('budget.requests'))->assertForbidden();
+        foreach (['dashboard', 'budget.overview'] as $page) {
+            $this->actingAs($finance)->get(route($page))->assertOk()->assertDontSee(route('budget.requests'))->assertDontSee('Pending Requests');
+        }
         $this->actingAs($finance)->get(route('projects.show', $project))
             ->assertOk()
-            ->assertDontSee($approveUrl);
+            ->assertDontSee('Mobilization')
+            ->assertDontSee('Pending Requests');
 
         $this->actingAs($admin)->get(route('budget.requests'))
             ->assertOk()
             ->assertSee($approveUrl);
+        $this->actingAs($admin)->get(route('projects.show', $project))->assertSee('Mobilization');
+
+        // The System Administrator can turn it back on; Finance still can't decide.
+        $matrix = Permissions::grantedMap();
+        $matrix['finance_accounting'][] = 'budget_requests.view';
+        Permissions::save($matrix);
+
+        $this->actingAs($finance)->get(route('budget.requests'))
+            ->assertOk()
+            ->assertSee('Mobilization')
+            ->assertDontSee($approveUrl);
     }
 
     public function test_finance_cannot_assign_project_personnel(): void

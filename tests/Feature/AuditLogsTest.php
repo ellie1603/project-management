@@ -13,7 +13,7 @@ class AuditLogsTest extends TestCase
 
     public function test_project_assignment_writes_an_audit_log_and_admin_can_view_it(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->systemAdmin()->create();
         $personnel = User::factory()->create(['role' => 'project_personnel', 'position_type' => 'Foreman']);
         $project = Project::factory()->create(['created_by' => $admin->id]);
 
