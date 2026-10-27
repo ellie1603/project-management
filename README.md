@@ -115,7 +115,7 @@ The `Dockerfile` builds one image with nginx, PHP-FPM, and the scheduler under s
 
 1. Provide the environment variables above (at least `APP_KEY`, `APP_URL`, `DB_*`), with `APP_ENV=production`, `APP_DEBUG=false`.
 2. Set `RUN_MIGRATIONS=true` so each start applies new migrations; set `SEED_ON_FIRST_DEPLOY=true` for the very first deploy only.
-3. Mount `storage/app` on a persistent volume: uploaded documents and photos live there.
+3. Mount a persistent volume at `/var/www/html/storage` (Dokploy: Advanced → Volumes). Uploaded documents and photos live there. Without it, **every redeploy deletes all uploaded files** while the database still lists them, so they show as broken images.
 4. To roll back a bad release, redeploy the previous image. Run `php artisan migrate:rollback` only if that release added migrations, and back up the database first.
 
 ## Backups (to set up on the server)

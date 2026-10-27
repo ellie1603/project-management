@@ -21,10 +21,6 @@
             [
                 'items' => [
                     $navLink('dashboard', 'Dashboard', 'layout-dashboard'),
-                ],
-            ],
-            [
-                'items' => [
                     $navLink('projects.index', 'Projects', 'folder'),
                     $allowed('finance.view') ? $navLink('budget.overview', 'Budget & Finance', 'wallet', 'budget.*') : null,
                     $allowed('documents.library') ? $navLink('documents.index', 'Documents', 'file-text') : null,
