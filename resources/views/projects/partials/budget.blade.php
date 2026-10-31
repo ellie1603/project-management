@@ -15,31 +15,31 @@
 
 {{-- Cards wrap onto more rows as space runs out, so long peso amounts always fit. --}}
 <div class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,12rem),1fr))] gap-4">
-    <div class="min-w-0 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div class="min-w-0 rounded-xl glass p-5">
         <p class="text-xs uppercase tracking-wide text-slate-500">Approved Budget</p>
         <p class="mt-2 text-lg font-semibold tabular-nums [overflow-wrap:anywhere] sm:text-xl text-slate-900">₱{{ number_format((float) $budget['approved_budget'], 2) }}</p>
     </div>
     @if ($seesRequests)
-    <div class="min-w-0 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div class="min-w-0 rounded-xl glass p-5">
         <p class="text-xs uppercase tracking-wide text-slate-500">Pending Requests</p>
         <p class="mt-2 text-lg font-semibold tabular-nums [overflow-wrap:anywhere] sm:text-xl text-amber-600">₱{{ number_format((float) $budget['pending_requests'], 2) }}</p>
     </div>
-    <div class="min-w-0 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div class="min-w-0 rounded-xl glass p-5">
         <p class="text-xs uppercase tracking-wide text-slate-500">Approved Requests</p>
         <p class="mt-2 text-lg font-semibold tabular-nums [overflow-wrap:anywhere] sm:text-xl text-slate-900">₱{{ number_format((float) $budget['approved_requests'], 2) }}</p>
     </div>
     @endif
-    <div class="min-w-0 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div class="min-w-0 rounded-xl glass p-5">
         <p class="text-xs uppercase tracking-wide text-slate-500">Utilized</p>
         <p class="mt-2 text-lg font-semibold tabular-nums [overflow-wrap:anywhere] sm:text-xl text-slate-900">₱{{ number_format((float) $budget['total_expenses'], 2) }}</p>
     </div>
-    <div class="min-w-0 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div class="min-w-0 rounded-xl glass p-5">
         <p class="text-xs uppercase tracking-wide text-slate-500">Remaining Budget</p>
         <p class="mt-2 text-lg font-semibold tabular-nums [overflow-wrap:anywhere] sm:text-xl text-slate-900">₱{{ number_format((float) $budget['remaining_budget'], 2) }}</p>
     </div>
 </div>
 
-<div class="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+<div class="mt-6 rounded-xl glass p-5">
     <p class="text-sm text-slate-500">Utilization</p>
     <p class="mt-1 text-2xl font-semibold text-slate-900">{{ number_format((float) $budget['budget_utilization_percent'], 2) }}%</p>
     <x-progress-bar :percent="$budget['budget_utilization_percent']" class="mt-3 h-2" :tone="match(true) {
@@ -50,7 +50,7 @@
 </div>
 
 @if ($seesRequests)
-<section class="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+<section class="mt-6 rounded-xl glass p-5">
     <h3 class="text-sm font-semibold text-slate-900">Budget Requests</h3>
     <div x-data="pager(10)" data-pager>
     <div class="mt-3 overflow-x-auto">
@@ -128,7 +128,7 @@
 </section>
 @endif
 
-    <section class="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <section class="mt-6 rounded-xl glass p-5">
         <div class="flex flex-wrap items-center justify-between gap-2">
             <h3 class="text-sm font-semibold text-slate-900">Recorded Expenses</h3>
             @if ($canRecordExpense)

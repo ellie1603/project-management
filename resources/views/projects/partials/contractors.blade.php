@@ -15,7 +15,7 @@
     </div>
 @endif
 
-<section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+<section class="rounded-xl glass p-5">
     <h3 class="text-sm font-semibold text-slate-900">Attached Contractors</h3>
     <div class="mt-3 overflow-x-auto">
         <table class="min-w-full text-left text-sm">
@@ -65,7 +65,7 @@
     @endcan
 </section>
 
-<section class="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+<section class="mt-6 rounded-xl glass p-5">
     <h3 class="text-sm font-semibold text-slate-900">Provider Quotations</h3>
     <div class="mt-3 overflow-x-auto">
         <table class="min-w-full text-left text-sm">

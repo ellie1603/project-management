@@ -42,7 +42,7 @@
         <x-login-splash />
         <x-logout-splash />
 
-        <div class="min-h-screen bg-slate-50">
+        <div class="app-canvas min-h-screen">
             <!-- Mobile backdrop -->
             <div
                 x-show="sidebarOpen"
@@ -59,7 +59,7 @@
 
             <!-- Sidebar: always fixed to the viewport, scrolls independently of the page -->
             <aside
-                class="fixed inset-y-0 left-0 z-40 flex w-64 transform flex-col border-r border-slate-200 bg-white shadow-xl transition-transform duration-300 ease-smooth lg:translate-x-0 lg:shadow-none"
+                class="fixed inset-y-0 left-0 z-40 flex w-64 transform flex-col border-r border-slate-200/60 bg-white/70 shadow-xl backdrop-blur-xl transition-transform duration-300 ease-smooth lg:translate-x-0 lg:shadow-none"
                 :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
             >
                 @include('layouts.partials.sidebar')
@@ -70,7 +70,7 @@
                 @include('layouts.partials.topbar')
 
                 @isset($header)
-                    <header class="border-b border-slate-200 bg-white">
+                    <header class="border-b border-slate-200/60 bg-white/60 backdrop-blur-xl">
                         <div class="px-4 py-6 sm:px-6 lg:px-8">
                             {{ $header }}
                         </div>

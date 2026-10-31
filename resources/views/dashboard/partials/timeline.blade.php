@@ -51,12 +51,12 @@
 @endphp
 
 <section
-    class="flex flex-col overflow-hidden rounded-3xl bg-white shadow-soft ring-1 ring-slate-900/5 transition-shadow duration-300 ease-elegant hover:shadow-elevated"
+    class="flex flex-col overflow-hidden rounded-3xl glass transition-shadow duration-300 ease-elegant hover:shadow-elevated"
     x-data="{ page: 1, perPage: {{ $perPage }}, total: {{ $rows->count() }}, get pages() { return Math.max(1, Math.ceil(this.total / this.perPage)); } }"
 >
     <div class="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
         <div class="flex min-w-0 items-center gap-3">
-            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl chip-ink text-white shadow-sm">
+            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl chip-ink">
                 <i data-lucide="activity" class="h-4 w-4"></i>
             </span>
             <div class="min-w-0">
@@ -292,7 +292,7 @@
                                 <button
                                     type="button"
                                     @click="page = {{ $n }}"
-                                    :class="page === {{ $n }} ? 'bg-brand-600 text-white shadow-sm' : 'text-slate-600 hover:bg-white hover:text-slate-900'"
+                                    :class="page === {{ $n }} ? 'bg-brand-50 text-brand-700 ring-1 ring-brand-100' : 'text-slate-600 hover:bg-white hover:text-slate-900'"
                                     class="h-8 min-w-[2rem] rounded-lg px-2 text-xs font-semibold tabular-nums transition-colors duration-150"
                                     :aria-current="page === {{ $n }} ? 'page' : null"
                                 >{{ $n }}</button>

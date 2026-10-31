@@ -15,6 +15,11 @@ $maxWidth = [
 ][$maxWidth];
 @endphp
 
+{{-- Rendered at the end of <body> so a modal declared inside a glass card (whose
+     backdrop-filter would otherwise become the containing block for position:fixed)
+     still covers the whole viewport. The wrapper gives the teleport an Alpine scope. --}}
+<div x-data class="contents">
+<template x-teleport="body">
 <div
     x-data="{
         show: @js($show),
@@ -78,4 +83,6 @@ $maxWidth = [
             {{ $slot }}
         </div>
     </div>
+</div>
+</template>
 </div>

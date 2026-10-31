@@ -12,7 +12,7 @@
     >
         @can('create', App\Models\Project::class)
             <x-slot name="aside">
-                <a href="{{ route('projects.create') }}" class="inline-flex items-center gap-2 rounded-xl bg-accent-500 px-4 py-2.5 text-sm font-semibold text-white shadow-glow hover:bg-accent-600 transition-transform duration-200 ease-elegant hover:-translate-y-0.5">
+                <a href="{{ route('projects.create') }}" class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 transition-transform duration-200 ease-elegant hover:-translate-y-0.5">
                     <i data-lucide="plus" class="h-4 w-4"></i>
                     Register Project
                 </a>
@@ -22,10 +22,10 @@
         <x-slot name="footer">
             <div class="grid grid-cols-2 gap-6 sm:grid-cols-4">
                 @foreach ([
-                    ['label' => 'Total Projects', 'value' => $summaryStats['total'], 'tone' => 'text-white'],
-                    ['label' => 'Ongoing', 'value' => $summaryStats['ongoing'], 'tone' => 'text-brand-300'],
-                    ['label' => 'Completed', 'value' => $summaryStats['completed'], 'tone' => 'text-emerald-300'],
-                    ['label' => 'On Hold', 'value' => $summaryStats['on_hold'], 'tone' => 'text-amber-300'],
+                    ['label' => 'Total Projects', 'value' => $summaryStats['total'], 'tone' => 'text-slate-900'],
+                    ['label' => 'Ongoing', 'value' => $summaryStats['ongoing'], 'tone' => 'text-brand-700'],
+                    ['label' => 'Completed', 'value' => $summaryStats['completed'], 'tone' => 'text-emerald-600'],
+                    ['label' => 'On Hold', 'value' => $summaryStats['on_hold'], 'tone' => 'text-amber-600'],
                 ] as $i => $figure)
                     <div class="animate-rise-in" style="animation-delay: {{ intdiv(120 + $i * 60, 2) }}ms">
                         <p class="text-[11px] font-medium uppercase tracking-wider text-slate-500">{{ $figure['label'] }}</p>
@@ -36,7 +36,7 @@
         </x-slot>
     </x-page-hero>
 
-    <form method="GET" class="mt-6 flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-soft ring-1 ring-slate-900/5" data-ajax-form="ajax-results" data-turbo="false">
+    <form method="GET" class="mt-6 flex flex-wrap items-center gap-3 rounded-2xl glass p-3" data-ajax-form="ajax-results" data-turbo="false">
         <div class="relative min-w-[16rem] flex-1">
             <i data-lucide="search" class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"></i>
             <input

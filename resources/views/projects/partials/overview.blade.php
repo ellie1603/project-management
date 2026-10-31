@@ -1,4 +1,4 @@
-<section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+<section class="rounded-xl glass p-5">
     <h2 class="text-lg font-semibold text-slate-900">Project Overview</h2>
     <dl class="mt-4 grid gap-4 sm:grid-cols-2">
         <div>

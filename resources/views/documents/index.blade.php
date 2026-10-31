@@ -24,10 +24,10 @@
         <x-slot name="footer">
             <div class="grid grid-cols-2 gap-6 sm:grid-cols-4">
                 @foreach ([
-                    ['label' => 'Total Documents', 'value' => number_format($summaryStats['total']), 'tone' => 'text-white'],
-                    ['label' => 'Current Approved Designs', 'value' => number_format($summaryStats['current_designs']), 'tone' => 'text-brand-300'],
-                    ['label' => 'Storage Used', 'value' => $formatBytes($summaryStats['storage_bytes']), 'tone' => 'text-emerald-300'],
-                    ['label' => 'Uploaded This Week', 'value' => number_format($summaryStats['uploaded_this_week']), 'tone' => 'text-amber-300'],
+                    ['label' => 'Total Documents', 'value' => number_format($summaryStats['total']), 'tone' => 'text-slate-900'],
+                    ['label' => 'Current Approved Designs', 'value' => number_format($summaryStats['current_designs']), 'tone' => 'text-brand-700'],
+                    ['label' => 'Storage Used', 'value' => $formatBytes($summaryStats['storage_bytes']), 'tone' => 'text-emerald-600'],
+                    ['label' => 'Uploaded This Week', 'value' => number_format($summaryStats['uploaded_this_week']), 'tone' => 'text-amber-600'],
                 ] as $i => $figure)
                     <div class="animate-rise-in" style="animation-delay: {{ intdiv(120 + $i * 60, 2) }}ms">
                         <p class="text-[11px] font-medium uppercase tracking-wider text-slate-500">{{ $figure['label'] }}</p>
@@ -38,7 +38,7 @@
         </x-slot>
     </x-page-hero>
 
-    <form method="GET" class="mt-6 flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-soft ring-1 ring-slate-900/5" data-ajax-form="ajax-results" data-turbo="false">
+    <form method="GET" class="mt-6 flex flex-wrap items-center gap-3 rounded-2xl glass p-3" data-ajax-form="ajax-results" data-turbo="false">
         <div class="relative min-w-[16rem] flex-1">
             <i data-lucide="search" class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"></i>
             <input

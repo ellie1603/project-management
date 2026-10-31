@@ -1,4 +1,4 @@
-<section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm" x-data="pager(10)" data-pager>
+<section class="rounded-xl glass p-5" x-data="pager(10)" data-pager>
     <h2 class="text-lg font-semibold text-slate-900">Activity Log</h2>
     <ul class="mt-4 divide-y divide-slate-100">
         @forelse ($activityLog as $entry)

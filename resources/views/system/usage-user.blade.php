@@ -36,7 +36,7 @@
     @endif
 
     <div class="mt-6 grid gap-6 lg:grid-cols-2">
-        <section class="overflow-hidden rounded-2xl bg-white shadow-soft ring-1 ring-slate-900/5">
+        <section class="overflow-hidden rounded-2xl glass">
             <div class="border-b border-slate-100 px-5 py-4">
                 <h2 class="text-sm font-semibold text-slate-900">Sign-in History</h2>
                 <p class="mt-0.5 text-xs text-slate-500">Latest first, up to 100.</p>
@@ -60,7 +60,7 @@
             </ul>
         </section>
 
-        <section class="overflow-hidden rounded-2xl bg-white shadow-soft ring-1 ring-slate-900/5">
+        <section class="overflow-hidden rounded-2xl glass">
             <div class="border-b border-slate-100 px-5 py-4">
                 <h2 class="text-sm font-semibold text-slate-900">Recent Actions</h2>
                 <p class="mt-0.5 text-xs text-slate-500">From the audit log, latest 50.</p>

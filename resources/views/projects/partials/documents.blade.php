@@ -3,7 +3,7 @@
     $documentViewerPhotos = $documentPhotos->map(fn ($doc) => $doc->toViewerPhoto($doc->document_type.' · '.$doc->document_name))->all();
 @endphp
 
-<section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+<section class="rounded-xl glass p-5">
     <div class="flex items-center justify-between gap-4">
         <h2 class="text-lg font-semibold text-slate-900">Documents</h2>
         <span class="text-sm text-slate-500">{{ $project->documents->count() }} files</span>

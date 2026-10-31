@@ -173,7 +173,7 @@ window.markNotificationRead = function markNotificationRead(id, button) {
         row.classList.remove('bg-brand-50/60');
         row.querySelector('[data-notification-dot]')?.remove();
         row.querySelector('[data-notification-title]')?.classList.replace('font-semibold', 'font-medium');
-        row.querySelector('[data-notification-icon]')?.classList.remove('bg-brand-600', 'text-white');
+        row.querySelector('[data-notification-icon]')?.classList.remove('bg-brand-50', 'text-brand-500');
         row.querySelector('[data-notification-icon]')?.classList.add('bg-slate-100', 'text-slate-400');
 
         const badge = document.getElementById('notification-badge');

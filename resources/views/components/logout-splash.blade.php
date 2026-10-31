@@ -8,26 +8,23 @@
     x-transition:enter="transition ease-out duration-200"
     x-transition:enter-start="opacity-0"
     x-transition:enter-end="opacity-100"
-    class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-brand-900 palette-fixed hero-brand"
+    class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-brand-50"
     style="display: none;"
 >
-    <div class="pointer-events-none absolute inset-0 overflow-hidden">
-    </div>
-
     <div class="relative flex flex-col items-center">
         <div class="relative flex h-28 w-28 items-center justify-center">
-            <div class="logout-halo absolute h-28 w-28 rounded-full bg-slate-400/20 blur-2xl"></div>
+            <div class="logout-halo absolute h-28 w-28 rounded-full bg-brand-200/60 blur-2xl"></div>
 
             <svg class="absolute inset-0 h-28 w-28 -rotate-90" viewBox="0 0 112 112">
-                <circle cx="56" cy="56" r="50" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2.5" />
+                <circle cx="56" cy="56" r="50" fill="none" stroke-width="2.5" class="stroke-brand-100" />
                 <circle
-                    cx="56" cy="56" r="50" fill="none" stroke="#94a3b8" stroke-width="2.5"
+                    cx="56" cy="56" r="50" fill="none" stroke-width="2.5"
                     stroke-linecap="round" stroke-dasharray="314"
-                    class="logout-ring"
+                    class="logout-ring stroke-brand-400"
                 />
             </svg>
 
-            <span class="logout-icon-out relative flex h-16 w-16 items-center justify-center rounded-full bg-white/10 text-slate-200 ring-1 ring-white/10">
+            <span class="logout-icon-out relative flex h-16 w-16 items-center justify-center rounded-full bg-white text-slate-600 shadow-soft ring-1 ring-slate-900/5">
                 <i data-lucide="log-out" class="h-7 w-7"></i>
             </span>
         </div>
@@ -35,15 +32,15 @@
         <p class="logout-fade-in mt-8 text-[11px] font-semibold uppercase tracking-[0.35em] text-slate-400" style="animation-delay: 75ms">
             {{ config('app.name', 'Project Management') }}
         </p>
-        <p class="logout-fade-in mt-2 font-display text-xl font-semibold tracking-tight text-white" style="animation-delay: 130ms">
+        <p class="logout-fade-in mt-2 font-display text-xl font-semibold tracking-tight text-slate-900" style="animation-delay: 130ms">
             Signing out&hellip;
         </p>
-        <p class="logout-fade-in mt-1.5 text-sm text-slate-400" style="animation-delay: 180ms">
+        <p class="logout-fade-in mt-1.5 text-sm text-slate-500" style="animation-delay: 180ms">
             See you again soon.
         </p>
     </div>
 
-    <div class="logout-curtain pointer-events-none absolute inset-0 bg-slate-950"></div>
+    <div class="logout-curtain pointer-events-none absolute inset-0 bg-brand-50"></div>
 
     <style>
         .logout-fade-in {

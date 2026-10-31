@@ -11,12 +11,12 @@
     >
         <x-slot name="aside">
             <div class="flex flex-wrap items-center gap-3">
-                <a href="{{ route('budget.expenses') }}" class="inline-flex items-center gap-2 rounded-xl bg-accent-500 px-4 py-2.5 text-sm font-semibold text-white shadow-glow hover:bg-accent-600 transition-transform duration-200 ease-elegant hover:-translate-y-0.5">
+                <a href="{{ route('budget.expenses') }}" class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 transition-transform duration-200 ease-elegant hover:-translate-y-0.5">
                     <i data-lucide="receipt" class="h-4 w-4"></i>
                     Expenses
                 </a>
                 @if ($seesRequests)
-                    <a href="{{ route('budget.requests') }}" class="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-medium text-slate-200 backdrop-blur transition-colors duration-200 hover:bg-white/10 hover:text-white">
+                    <a href="{{ route('budget.requests') }}" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors duration-200 hover:bg-slate-50 hover:text-slate-900">
                         Budget Requests
                         <i data-lucide="arrow-right" class="h-4 w-4"></i>
                     </a>
@@ -27,11 +27,11 @@
         <x-slot name="footer">
             <div class="flex items-center justify-between text-[11px] font-medium text-slate-400">
                 <span>Overall utilization</span>
-                <span class="tabular-nums text-slate-300">{{ $stats['overall_utilization_percent'] }}%</span>
+                <span class="tabular-nums text-slate-600">{{ $stats['overall_utilization_percent'] }}%</span>
             </div>
-            <div class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+            <div class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
                 <div
-                    class="h-full origin-left animate-grow-x rounded-full {{ $stats['overall_utilization_percent'] >= 100 ? 'bg-red-500' : ($stats['overall_utilization_percent'] >= 80 ? 'bg-amber-400' : 'bg-white') }}"
+                    class="h-full origin-left animate-grow-x rounded-full {{ $stats['overall_utilization_percent'] >= 100 ? 'bg-red-500' : ($stats['overall_utilization_percent'] >= 80 ? 'bg-amber-400' : 'bg-brand-600') }}"
                     style="width: {{ min(100, (float) $stats['overall_utilization_percent']) }}%; animation-delay: 125ms"
                 ></div>
             </div>
@@ -48,9 +48,9 @@
         @endif
     </div>
 
-    <section class="mt-6 animate-rise-in overflow-hidden rounded-3xl bg-white shadow-soft ring-1 ring-slate-900/5 transition-shadow duration-300 ease-elegant hover:shadow-elevated" style="animation-delay: 130ms">
+    <section class="mt-6 animate-rise-in overflow-hidden rounded-3xl glass transition-shadow duration-300 ease-elegant hover:shadow-elevated" style="animation-delay: 130ms">
         <div class="flex items-center gap-3 border-b border-slate-100 px-5 py-4">
-            <span class="flex h-9 w-9 items-center justify-center rounded-xl chip-ink text-white shadow-sm">
+            <span class="flex h-9 w-9 items-center justify-center rounded-xl chip-ink">
                 <i data-lucide="table-2" class="h-4 w-4"></i>
             </span>
             <div>

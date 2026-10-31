@@ -15,11 +15,11 @@
     </div>
 
     <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <nav class="inline-flex gap-1 rounded-xl bg-white p-1 shadow-sm ring-1 ring-slate-900/5">
+        <nav class="inline-flex gap-1 rounded-xl glass p-1">
             @foreach (['Pending', 'Approved', 'Rejected'] as $option)
                 <a
                     href="{{ route('budget.requests', ['status' => $option] + request()->except('page')) }}"
-                    class="rounded-lg px-3.5 py-1.5 text-sm font-medium transition-colors duration-150 {{ $status === $option ? 'bg-brand-600 text-white' : 'text-slate-600 hover:bg-slate-100' }}"
+                    class="rounded-lg px-3.5 py-1.5 text-sm font-medium transition-colors duration-150 {{ $status === $option ? 'bg-brand-50 text-brand-700 ring-1 ring-brand-100' : 'text-slate-600 hover:bg-slate-100' }}"
                 >{{ $option }}</a>
             @endforeach
         </nav>

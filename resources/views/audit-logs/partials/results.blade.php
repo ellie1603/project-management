@@ -10,7 +10,7 @@
     ];
 @endphp
 
-<section class="overflow-hidden rounded-3xl bg-white shadow-soft ring-1 ring-slate-900/5">
+<section class="overflow-hidden rounded-3xl glass">
     <div class="overflow-x-auto">
         <table class="min-w-full">
             <thead>
@@ -36,7 +36,7 @@
                             </div>
                         </td>
                         <td class="px-4 py-3.5">
-                            <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold text-white {{ $meta['chip'] }}">
+                            <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold {{ $meta['chip'] }}">
                                 <i data-lucide="{{ $meta['icon'] }}" class="h-3 w-3"></i>
                                 {{ ucfirst($auditLog->action) }}
                             </span>

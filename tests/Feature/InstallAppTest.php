@@ -49,6 +49,14 @@ class InstallAppTest extends TestCase
             ->assertSee('Open in your browser');
     }
 
+    public function test_the_install_page_leads_back(): void
+    {
+        $this->get(route('app.install'))->assertSeeInOrder(['Back to sign in', 'Install BMPC'])->assertSee(route('login'));
+
+        $this->actingAs(User::factory()->create(['role' => 'admin']))
+            ->get(route('app.install'))->assertSee('Back to dashboard')->assertSee(route('dashboard'));
+    }
+
     public function test_the_windows_download_is_offered_only_when_published(): void
     {
         config(['desktop.installer_path' => storage_path('framework/testing/missing-installer.exe')]);

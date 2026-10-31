@@ -39,13 +39,13 @@
             <x-slot name="aside">
                 <div class="flex flex-wrap items-center gap-3">
                     @if ($canEditProject)
-                    <button type="button" @click="$dispatch('open-modal', 'edit-project')" class="inline-flex items-center gap-2 rounded-xl bg-accent-500 px-4 py-2.5 text-sm font-semibold text-white shadow-glow hover:bg-accent-600 transition-transform duration-200 ease-elegant hover:-translate-y-0.5">
+                    <button type="button" @click="$dispatch('open-modal', 'edit-project')" class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 transition-transform duration-200 ease-elegant hover:-translate-y-0.5">
                         <i data-lucide="pencil" class="h-4 w-4"></i>
                         Edit Project
                     </button>
                     @endif
                     @if ($canDeleteProject)
-                    <button type="button" @click="$dispatch('open-modal', 'delete-project')" class="inline-flex items-center gap-2 rounded-xl border border-red-400/40 bg-red-500/10 px-4 py-2.5 text-sm font-semibold text-red-300 transition-colors duration-150 hover:bg-red-600 hover:text-white">
+                    <button type="button" @click="$dispatch('open-modal', 'delete-project')" class="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600 transition-colors duration-150 hover:bg-red-600 hover:text-white">
                         <i data-lucide="trash-2" class="h-4 w-4"></i>
                         Delete Project
                     </button>
@@ -68,7 +68,7 @@
     @endphp
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <div class="group rounded-2xl bg-white p-4 shadow-soft ring-1 ring-slate-900/5 transition-all duration-300 ease-elegant hover:-translate-y-0.5 hover:shadow-elevated">
+        <div class="group rounded-2xl glass p-4 transition-all duration-300 ease-elegant hover:-translate-y-0.5 hover:shadow-elevated">
             <div class="flex items-start justify-between gap-3">
                 <p class="text-[11px] font-medium uppercase tracking-wider text-slate-400">Status</p>
                 <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg {{ $chipTone }} text-white shadow-sm transition-transform duration-300 ease-elegant group-hover:scale-110">
@@ -77,7 +77,7 @@
             </div>
             <p class="mt-2.5"><x-status-badge :status="$project->status" /></p>
         </div>
-        <div class="group rounded-2xl bg-white p-4 shadow-soft ring-1 ring-slate-900/5 transition-all duration-300 ease-elegant hover:-translate-y-0.5 hover:shadow-elevated">
+        <div class="group rounded-2xl glass p-4 transition-all duration-300 ease-elegant hover:-translate-y-0.5 hover:shadow-elevated">
             <div class="flex items-start justify-between gap-3">
                 <p class="text-[11px] font-medium uppercase tracking-wider text-slate-400">Timeline</p>
                 <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg {{ $chipTone }} text-white shadow-sm transition-transform duration-300 ease-elegant group-hover:scale-110">
@@ -87,7 +87,7 @@
             <p class="mt-2 font-display text-[15px] font-semibold text-slate-900">{{ $timeline['timeline_status'] }}</p>
             <p class="mt-0.5 text-xs text-slate-500">{{ $timeline['days_remaining'] ?? 'N/A' }} days remaining</p>
         </div>
-        <div class="group rounded-2xl bg-white p-4 shadow-soft ring-1 ring-slate-900/5 transition-all duration-300 ease-elegant hover:-translate-y-0.5 hover:shadow-elevated">
+        <div class="group rounded-2xl glass p-4 transition-all duration-300 ease-elegant hover:-translate-y-0.5 hover:shadow-elevated">
             <div class="flex items-start justify-between gap-3">
                 <p class="text-[11px] font-medium uppercase tracking-wider text-slate-400">Budget Status</p>
                 <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg {{ $chipTone }} text-white shadow-sm transition-transform duration-300 ease-elegant group-hover:scale-110">
@@ -97,7 +97,7 @@
             <p class="mt-2 font-display text-[15px] font-semibold text-slate-900">{{ $budget['budget_status'] }}</p>
             <p class="mt-0.5 text-xs text-slate-500">{{ number_format((float) $budget['budget_utilization_percent'], 2) }}% utilized</p>
         </div>
-        <div class="group rounded-2xl bg-white p-4 shadow-soft ring-1 ring-slate-900/5 transition-all duration-300 ease-elegant hover:-translate-y-0.5 hover:shadow-elevated">
+        <div class="group rounded-2xl glass p-4 transition-all duration-300 ease-elegant hover:-translate-y-0.5 hover:shadow-elevated">
             <div class="flex items-start justify-between gap-3">
                 <p class="text-[11px] font-medium uppercase tracking-wider text-slate-400">Approved Budget</p>
                 <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg {{ $chipTone }} text-white shadow-sm transition-transform duration-300 ease-elegant group-hover:scale-110">
@@ -109,15 +109,15 @@
         </div>
     </div>
 
-    <div class="sticky top-16 z-10 -mx-4 bg-slate-50/95 px-4 py-2 backdrop-blur sm:mx-0 sm:px-0 sm:py-0 sm:bg-transparent sm:backdrop-blur-0">
-        <nav x-ref="tabNav" class="relative flex max-w-full gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden rounded-2xl bg-white p-1.5 shadow-soft ring-1 ring-slate-900/5 sm:inline-flex">
-            <span x-ref="tabPill" aria-hidden="true" class="pointer-events-none absolute bottom-1.5 top-1.5 rounded-xl bg-brand-600 opacity-0 shadow-sm" style="left: 0; width: 0;"></span>
+    <div class="sticky top-16 z-10 -mx-4 bg-white/60 px-4 py-2 backdrop-blur-xl sm:mx-0 sm:px-0 sm:py-0 sm:bg-transparent sm:backdrop-blur-0">
+        <nav x-ref="tabNav" class="relative flex max-w-full gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden rounded-2xl glass p-1.5 sm:inline-flex">
+            <span x-ref="tabPill" aria-hidden="true" class="pointer-events-none absolute bottom-1.5 top-1.5 rounded-xl bg-brand-50 opacity-0 ring-1 ring-brand-100" style="left: 0; width: 0;"></span>
             @foreach ($tabs as $tabItem)
                 <button
                     type="button"
                     data-tab="{{ $tabItem['id'] }}"
                     @click="switchTab('{{ $tabItem['id'] }}')"
-                    :class="tab === '{{ $tabItem['id'] }}' ? 'text-white delay-200' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'"
+                    :class="tab === '{{ $tabItem['id'] }}' ? 'text-brand-700 delay-200' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'"
                     class="relative z-10 flex shrink-0 items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-sm font-medium transition-colors duration-300 ease-elegant focus:outline-none"
                 >
                     <i data-lucide="{{ $tabItem['icon'] }}" class="h-4 w-4"></i>

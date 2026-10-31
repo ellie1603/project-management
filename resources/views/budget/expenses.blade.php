@@ -15,7 +15,7 @@
         </div>
 
         @if (auth()->user()->can('create', App\Models\ProjectExpense::class))
-            <button type="button" @click="$dispatch('open-modal', 'add-expenses')" class="inline-flex items-center gap-2 rounded-xl bg-accent-500 px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition-transform duration-200 ease-elegant hover:-translate-y-0.5 hover:bg-accent-600">
+            <button type="button" @click="$dispatch('open-modal', 'add-expenses')" class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-transform duration-200 ease-elegant hover:-translate-y-0.5 hover:bg-brand-700">
                 <i data-lucide="plus" class="h-4 w-4"></i>
                 Add Expenses
             </button>

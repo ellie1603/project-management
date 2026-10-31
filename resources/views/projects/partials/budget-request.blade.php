@@ -3,7 +3,7 @@
     $canRequest = $project->hasPersonnel(auth()->user());
 @endphp
 
-<section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+<section class="rounded-xl glass p-5">
     <h2 class="text-lg font-semibold text-slate-900">Budget Request</h2>
 
     <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -23,7 +23,7 @@
 </section>
 
 @if ($canRequest)
-    <section class="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <section class="mt-6 rounded-xl glass p-5">
         <h3 class="text-sm font-semibold text-slate-900">Request Budget</h3>
         <form method="POST" action="{{ route('projects.budget-requests.store', $project) }}" enctype="multipart/form-data" class="mt-4 grid gap-3 sm:grid-cols-2">
             @csrf
@@ -48,7 +48,7 @@
     </section>
 @endif
 
-<section class="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+<section class="mt-6 rounded-xl glass p-5">
     <h3 class="text-sm font-semibold text-slate-900">My Budget Requests</h3>
     <div x-data="pager(10)" data-pager>
     <div class="mt-3 overflow-x-auto">

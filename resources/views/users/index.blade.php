@@ -15,7 +15,7 @@
             <button
                 type="button"
                 x-on:click="$dispatch('open-modal', 'create-user')"
-                class="inline-flex items-center gap-2 rounded-xl bg-accent-500 px-4 py-2.5 text-sm font-semibold text-white shadow-glow hover:bg-accent-600 transition-transform duration-200 ease-elegant hover:-translate-y-0.5"
+                class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 transition-transform duration-200 ease-elegant hover:-translate-y-0.5"
             >
                 <i data-lucide="plus" class="h-4 w-4"></i>
                 New User
@@ -23,7 +23,7 @@
         </x-slot>
     </x-page-hero>
 
-    <form method="GET" class="mt-6 flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-soft ring-1 ring-slate-900/5" data-ajax-form="ajax-results" data-turbo="false">
+    <form method="GET" class="mt-6 flex flex-wrap items-center gap-3 rounded-2xl glass p-3" data-ajax-form="ajax-results" data-turbo="false">
         <div class="relative min-w-[16rem] flex-1">
             <i data-lucide="search" class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"></i>
             <input
@@ -56,7 +56,7 @@
 
             <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
                 <div class="flex items-center gap-3">
-                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl chip-ink text-white shadow-sm">
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl chip-ink">
                         <i data-lucide="user-plus" class="h-[18px] w-[18px]"></i>
                     </span>
                     <div>

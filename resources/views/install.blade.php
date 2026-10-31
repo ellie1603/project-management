@@ -1,6 +1,11 @@
 <x-guest-layout>
     {{-- One link for every device. The card for the device it's opened on comes first. --}}
     <div x-data="installApp">
+        <a href="{{ auth()->check() ? route('dashboard') : route('login') }}" class="mb-5 inline-flex items-center gap-1.5 rounded-lg text-sm font-medium text-slate-500 transition-colors duration-150 hover:text-brand-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">
+            <i data-lucide="arrow-left" class="h-4 w-4"></i>
+            {{ auth()->check() ? 'Back to dashboard' : 'Back to sign in' }}
+        </a>
+
         <div class="mb-6">
             <h1 class="font-display text-2xl font-semibold tracking-tight text-slate-900">Install BMPC</h1>
             <p class="mt-1.5 text-sm text-slate-500">

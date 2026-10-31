@@ -9,7 +9,7 @@
         class="animate-rise-in"
     />
 
-    <form method="GET" class="mt-6 flex flex-wrap items-center gap-3 rounded-2xl bg-white p-3 shadow-soft ring-1 ring-slate-900/5" data-ajax-form="ajax-results" data-turbo="false">
+    <form method="GET" class="mt-6 flex flex-wrap items-center gap-3 rounded-2xl glass p-3" data-ajax-form="ajax-results" data-turbo="false">
         <div class="relative min-w-[16rem] flex-1">
             <i data-lucide="search" class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"></i>
             <input

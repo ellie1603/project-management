@@ -27,7 +27,7 @@
 
         <div class="space-y-5">
             @foreach ($catalog as $group => $permissions)
-                <section class="overflow-hidden rounded-2xl bg-white shadow-soft ring-1 ring-slate-900/5">
+                <section class="overflow-hidden rounded-2xl glass">
                     <div class="overflow-x-auto">
                         <table class="min-w-full">
                             <thead>
@@ -85,7 +85,7 @@
                 <p class="text-sm text-slate-500" x-text="dirty ? 'You have unsaved changes.' : 'Every change is recorded in the audit log.'"></p>
                 <div class="flex items-center gap-3">
                     <a href="{{ route('system.permissions') }}" x-show="dirty" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50" style="display: none;">Undo changes</a>
-                    <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-accent-500 px-5 py-2.5 text-sm font-semibold text-white shadow-glow transition-transform duration-200 ease-elegant hover:-translate-y-0.5 hover:bg-accent-600">
+                    <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-transform duration-200 ease-elegant hover:-translate-y-0.5 hover:bg-brand-700">
                         <i data-lucide="check" class="h-4 w-4"></i>
                         Save Permissions
                     </button>

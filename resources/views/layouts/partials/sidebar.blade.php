@@ -91,7 +91,7 @@
         ->all();
 @endphp
 
-<div class="flex h-full flex-col bg-white">
+<div class="flex h-full flex-col">
     <div class="flex h-16 shrink-0 items-center gap-3 border-b border-slate-100 px-5">
         <a href="{{ route('dashboard') }}" class="flex items-center gap-3 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2">
             <x-application-logo class="h-9 w-9" />
@@ -109,9 +109,9 @@
                     @foreach ($section['items'] as $item)
                         <a
                             href="{{ $item['href'] }}"
-                            class="group relative flex items-center gap-3 rounded-lg px-3 py-2 text-[13.5px] font-medium transition-all duration-150 ease-smooth focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 {{ $item['active'] ? 'bg-brand-600 text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}"
+                            class="group relative flex items-center gap-3 rounded-lg px-3 py-2 text-[13.5px] font-medium transition-all duration-150 ease-smooth focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 {{ $item['active'] ? 'bg-brand-50 text-brand-700 ring-1 ring-brand-100' : 'text-slate-600 hover:bg-brand-50/60 hover:text-slate-900' }}"
                         >
-                            <i data-lucide="{{ $item['icon'] }}" class="h-[17px] w-[17px] shrink-0 transition-colors duration-150 {{ $item['active'] ? 'text-white' : 'text-slate-400 group-hover:text-slate-600' }}"></i>
+                            <i data-lucide="{{ $item['icon'] }}" class="h-[17px] w-[17px] shrink-0 transition-colors duration-150 {{ $item['active'] ? 'text-brand-600' : 'text-slate-400 group-hover:text-slate-600' }}"></i>
                             <span>{{ $item['label'] }}</span>
                         </a>
                     @endforeach
@@ -121,8 +121,8 @@
     </nav>
 
     <div class="border-t border-slate-100 p-4">
-        <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/70 p-2.5 transition-colors duration-150 hover:bg-slate-100" title="My Account">
-            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full chip-ink text-sm font-semibold text-white shadow-soft">
+        <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 rounded-xl border border-slate-100 p-2.5 transition-colors duration-150 hover:bg-slate-50" title="My Account">
+            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full chip-ink text-sm font-semibold">
                 {{ strtoupper(substr($user->name, 0, 1)) }}
             </div>
             <div class="min-w-0 flex-1">

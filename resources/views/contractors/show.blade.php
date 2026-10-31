@@ -17,7 +17,7 @@
         @endif
     </div>
 
-    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div class="rounded-xl glass p-6">
         <h2 class="font-semibold text-slate-900">Provider Information</h2>
         <dl class="mt-4 grid gap-4 sm:grid-cols-2">
             <div>
@@ -51,7 +51,7 @@
         </dl>
     </div>
 
-    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm" x-data="pager(10)" data-pager>
+    <div class="rounded-xl glass p-6" x-data="pager(10)" data-pager>
         <h2 class="font-semibold text-slate-900">Project History</h2>
         <ul class="mt-4 divide-y divide-slate-100">
             @forelse ($contractor->projects as $project)

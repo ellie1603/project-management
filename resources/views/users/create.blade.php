@@ -8,7 +8,7 @@
         <h1 class="mt-1 text-2xl font-semibold tracking-tight text-slate-900">New User</h1>
     </div>
 
-    <form method="POST" action="{{ route('users.store') }}" class="space-y-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <form method="POST" action="{{ route('users.store') }}" class="space-y-6 rounded-2xl glass p-6">
         @csrf
 
         @include('users._form')

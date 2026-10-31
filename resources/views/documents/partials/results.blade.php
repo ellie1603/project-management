@@ -13,7 +13,7 @@
     $documentViewerPhotos = $documentPhotos->map(fn ($doc) => $doc->toViewerPhoto($doc->project->title.' · '.$doc->document_name))->all();
 @endphp
 
-<section class="overflow-hidden rounded-3xl bg-white shadow-soft ring-1 ring-slate-900/5">
+<section class="overflow-hidden rounded-3xl glass">
     <div class="overflow-x-auto">
         <table class="min-w-full">
             <thead>
@@ -32,7 +32,7 @@
                     <tr class="group transition-colors duration-150 hover:bg-slate-50/80">
                         <td class="px-5 py-3.5">
                             <div class="flex items-center gap-3">
-                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl {{ $meta['chip'] }} text-white shadow-sm">
+                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl {{ $meta['chip'] }}">
                                     <i data-lucide="{{ $meta['icon'] }}" class="h-4 w-4"></i>
                                 </span>
                                 <div class="min-w-0">

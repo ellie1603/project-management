@@ -8,7 +8,7 @@
         @if ($isUnread) data-unread @endif
         class="group relative flex items-start gap-3 border-b border-slate-100 px-4 py-3 transition-colors duration-150 last:border-b-0 hover:bg-slate-50 {{ $isUnread ? 'bg-brand-50/60' : '' }}"
     >
-        <div class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full {{ $isUnread ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-400' }}" data-notification-icon>
+        <div class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full {{ $isUnread ? 'bg-brand-50 text-brand-500' : 'bg-slate-100 text-slate-400' }}" data-notification-icon>
             <i data-lucide="bell" class="h-3.5 w-3.5"></i>
         </div>
         <div class="min-w-0 flex-1">
@@ -26,7 +26,7 @@
             <p class="mt-1 text-[11px] text-slate-400">{{ $notification->created_at->diffForHumans() }}</p>
         </div>
         @if ($isUnread)
-            <span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-brand-600" data-notification-dot aria-label="Unread"></span>
+            <span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-brand-400" data-notification-dot aria-label="Unread"></span>
         @endif
     </div>
 @empty

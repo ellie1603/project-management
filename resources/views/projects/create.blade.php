@@ -28,7 +28,7 @@
         </div>
     @endif
 
-    <form action="{{ route('projects.store') }}" method="POST" class="animate-rise-in overflow-hidden rounded-3xl bg-white shadow-soft ring-1 ring-slate-900/5" style="animation-delay: 40ms">
+    <form action="{{ route('projects.store') }}" method="POST" class="animate-rise-in overflow-hidden rounded-3xl glass" style="animation-delay: 40ms">
         @csrf
 
         <div class="p-6 sm:p-7">

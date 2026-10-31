@@ -23,7 +23,7 @@
         {{-- Who you are in the system; role and position are set by the administrator. --}}
         <aside class="{{ $card }} h-fit lg:sticky lg:top-24">
             <div class="flex items-center gap-4">
-                <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full chip-ink font-display text-xl font-semibold text-white">
+                <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full chip-ink font-display text-xl font-semibold">
                     {{ strtoupper(substr($user->name, 0, 1)) }}
                 </div>
                 <div class="min-w-0">

@@ -15,11 +15,11 @@
     >
         <x-slot name="aside">
             <div class="flex flex-wrap items-center gap-3">
-                <a href="{{ route('projects.create') }}" class="inline-flex items-center gap-2 rounded-xl bg-accent-500 px-4 py-2.5 text-sm font-semibold text-white shadow-glow hover:bg-accent-600 transition-transform duration-200 ease-elegant hover:-translate-y-0.5">
+                <a href="{{ route('projects.create') }}" class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 transition-transform duration-200 ease-elegant hover:-translate-y-0.5">
                     <i data-lucide="plus" class="h-4 w-4"></i>
                     Register Project
                 </a>
-                <a href="{{ route('projects.index') }}" class="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-medium text-slate-200 backdrop-blur transition-colors duration-200 hover:bg-white/10 hover:text-white">
+                <a href="{{ route('projects.index') }}" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors duration-200 hover:bg-slate-50 hover:text-slate-900">
                     All Projects
                     <i data-lucide="arrow-right" class="h-4 w-4"></i>
                 </a>
@@ -29,9 +29,9 @@
         <x-slot name="footer">
             <div class="grid grid-cols-2 gap-x-4 gap-y-5 sm:grid-cols-3 sm:gap-6">
                 @foreach ([
-                    ['label' => 'Approved Budget', 'value' => $stats['total_approved_budget'], 'tone' => 'text-white'],
-                    ['label' => 'Total Expenses', 'value' => $stats['total_expenses'], 'tone' => 'text-brand-300'],
-                    ['label' => 'Remaining', 'value' => $stats['remaining_budget'], 'tone' => 'text-emerald-300'],
+                    ['label' => 'Approved Budget', 'value' => $stats['total_approved_budget'], 'tone' => 'text-slate-900'],
+                    ['label' => 'Total Expenses', 'value' => $stats['total_expenses'], 'tone' => 'text-brand-700'],
+                    ['label' => 'Remaining', 'value' => $stats['remaining_budget'], 'tone' => 'text-emerald-600'],
                 ] as $i => $figure)
                     <div class="min-w-0 animate-rise-in {{ $loop->first ? 'col-span-2 sm:col-span-1' : '' }}" style="animation-delay: {{ intdiv(120 + $i * 70, 2) }}ms">
                         <p class="truncate text-[11px] font-medium uppercase tracking-wider text-slate-500">{{ $figure['label'] }}</p>
@@ -45,11 +45,11 @@
             <div class="mt-6">
                 <div class="flex items-center justify-between text-[11px] font-medium text-slate-400">
                     <span>Budget utilization</span>
-                    <span class="tabular-nums text-slate-300">{{ $utilization }}%</span>
+                    <span class="tabular-nums text-slate-600">{{ $utilization }}%</span>
                 </div>
-                <div class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+                <div class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
                     <div
-                        class="h-full origin-left animate-grow-x rounded-full {{ $utilization >= 100 ? 'bg-red-500' : ($utilization >= 80 ? 'bg-amber-400' : 'bg-white') }}"
+                        class="h-full origin-left animate-grow-x rounded-full {{ $utilization >= 100 ? 'bg-red-500' : ($utilization >= 80 ? 'bg-amber-400' : 'bg-brand-600') }}"
                         style="width: {{ min(100, $utilization) }}%; animation-delay: 150ms"
                     ></div>
                 </div>
@@ -72,9 +72,9 @@
 
         {{-- Side column: sits beside the monitoring list on wide screens, pairs up on laptops, stacks on phones. --}}
         <div class="grid min-w-0 gap-4 lg:grid-cols-2 xl:grid-cols-1">
-            <section class="min-w-0 animate-rise-in overflow-hidden rounded-3xl bg-white shadow-soft ring-1 ring-slate-900/5 transition-shadow duration-300 ease-elegant hover:shadow-elevated" style="animation-delay: 155ms">
+            <section class="min-w-0 animate-rise-in overflow-hidden rounded-3xl glass transition-shadow duration-300 ease-elegant hover:shadow-elevated" style="animation-delay: 155ms">
                 <div class="flex items-center gap-3 border-b border-slate-100 px-5 py-4">
-                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl chip-ink text-white shadow-sm">
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl chip-ink">
                         <i data-lucide="chart-pie" class="h-4 w-4"></i>
                     </span>
                     <div class="min-w-0">
@@ -113,10 +113,10 @@
                 </div>
             </section>
 
-            <section class="min-w-0 animate-rise-in overflow-hidden rounded-3xl bg-white shadow-soft ring-1 ring-slate-900/5 transition-shadow duration-300 ease-elegant hover:shadow-elevated" style="animation-delay: 180ms">
+            <section class="min-w-0 animate-rise-in overflow-hidden rounded-3xl glass transition-shadow duration-300 ease-elegant hover:shadow-elevated" style="animation-delay: 180ms">
                 <div class="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
                     <div class="flex min-w-0 items-center gap-3">
-                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl chip-ink text-white shadow-sm">
+                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl chip-ink">
                             <i data-lucide="triangle-alert" class="h-4 w-4"></i>
                         </span>
                         <div class="min-w-0">

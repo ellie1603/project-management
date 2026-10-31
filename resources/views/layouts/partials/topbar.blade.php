@@ -1,4 +1,4 @@
-<header class="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-4 border-b border-slate-200/80 bg-white/75 px-4 shadow-[0_1px_0_rgba(15,23,42,0.03)] backdrop-blur-md sm:px-6 lg:px-8">
+<header class="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-4 border-b border-slate-200/60 bg-white/60 px-4 shadow-[0_1px_0_rgba(15,23,42,0.03)] backdrop-blur-xl sm:px-6 lg:px-8">
     <button
         type="button"
         class="rounded-lg p-1.5 text-slate-500 transition-colors duration-150 hover:bg-slate-100 hover:text-slate-900 lg:hidden"
@@ -112,7 +112,7 @@
         <x-dropdown align="right" width="48">
             <x-slot name="trigger">
                 <button class="flex items-center gap-2.5 rounded-lg py-1.5 pl-1.5 pr-2 text-slate-600 transition-colors duration-150 hover:bg-slate-100">
-                    <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-600 text-xs font-semibold text-white">
+                    <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full chip-ink text-xs font-semibold">
                         {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                     </div>
                     <div class="hidden text-left leading-tight md:block">

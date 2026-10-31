@@ -8,7 +8,7 @@
         <h1 class="mt-2 text-2xl font-semibold tracking-tight text-slate-900">Edit Project</h1>
     </div>
 
-    <form action="{{ route('projects.update', $project) }}" method="POST" class="space-y-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <form action="{{ route('projects.update', $project) }}" method="POST" class="space-y-6 rounded-2xl glass p-6">
         @csrf
         @method('PUT')
 

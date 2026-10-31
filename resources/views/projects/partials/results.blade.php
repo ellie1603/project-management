@@ -1,10 +1,10 @@
 @php
     $statusMeta = [
-        'Ongoing' => ['accent' => 'bg-brand-600', 'chip' => 'chip-ink'],
-        'Completed' => ['accent' => 'bg-slate-700', 'chip' => 'chip-ink'],
+        'Ongoing' => ['accent' => 'bg-brand-400', 'chip' => 'chip-ink'],
+        'Completed' => ['accent' => 'bg-slate-400', 'chip' => 'chip-ink'],
         'On Hold' => ['accent' => 'bg-amber-400', 'chip' => 'chip-ink'],
         'Cancelled' => ['accent' => 'bg-red-400', 'chip' => 'chip-ink'],
-        'Registered' => ['accent' => 'bg-slate-300', 'chip' => 'chip-ink'],
+        'Registered' => ['accent' => 'bg-slate-200', 'chip' => 'chip-ink'],
     ];
 @endphp
 
@@ -13,13 +13,13 @@
         @php $meta = $statusMeta[$project->status] ?? $statusMeta['Registered']; @endphp
         <a
             href="{{ route('projects.show', $project) }}"
-            class="group relative flex animate-rise-in flex-col overflow-hidden rounded-3xl bg-white p-5 shadow-soft ring-1 ring-slate-900/5 transition-all duration-300 ease-elegant hover:-translate-y-0.5 hover:shadow-elevated"
+            class="group relative flex animate-rise-in flex-col overflow-hidden rounded-3xl glass p-5 transition-all duration-300 ease-elegant hover:-translate-y-0.5 hover:shadow-elevated"
             style="animation-delay: {{ intdiv(min($loop->index, 8) * 50, 2) }}ms"
         >
             <span class="absolute inset-x-0 top-0 h-1 {{ $meta['accent'] }}"></span>
 
             <div class="flex items-start justify-between gap-3">
-                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $meta['chip'] }} text-white shadow-sm">
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $meta['chip'] }}">
                     <i data-lucide="building-2" class="h-[18px] w-[18px]"></i>
                 </span>
                 <x-status-badge :status="$project->status" />
@@ -95,7 +95,7 @@
             </div>
         </a>
     @empty
-        <div class="col-span-full rounded-3xl bg-white p-14 text-center shadow-soft ring-1 ring-slate-900/5">
+        <div class="col-span-full rounded-3xl glass p-14 text-center">
             <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
                 <i data-lucide="folder-search" class="h-6 w-6"></i>
             </div>

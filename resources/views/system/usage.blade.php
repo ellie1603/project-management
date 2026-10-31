@@ -44,7 +44,7 @@
         <x-stat-card label="Actions" :value="$totals['actions']" icon="mouse-pointer-click" sub="Recorded in the audit log" />
     </div>
 
-    <section class="mt-6 overflow-hidden rounded-2xl bg-white shadow-soft ring-1 ring-slate-900/5">
+    <section class="mt-6 overflow-hidden rounded-2xl glass">
         <div class="overflow-x-auto">
             <table class="min-w-full text-sm">
                 <thead>

@@ -4,7 +4,7 @@
         $base = 'inline-flex h-9 min-w-[2.25rem] items-center justify-center rounded-lg px-3 text-sm font-medium transition-colors duration-150';
         $link = $base.' text-slate-600 ring-1 ring-slate-200 bg-white hover:bg-slate-100 hover:text-slate-900';
         $disabled = $base.' cursor-not-allowed text-slate-300 ring-1 ring-slate-200 bg-white';
-        $current = $base.' bg-brand-600 text-white shadow-sm';
+        $current = $base.' bg-brand-50 text-brand-700 ring-1 ring-brand-100';
     @endphp
 
     <nav role="navigation" aria-label="{{ __('Pagination Navigation') }}" class="flex flex-col items-center justify-between gap-3 sm:flex-row">

@@ -23,7 +23,7 @@
     <div class="space-y-8">
         <section>
             <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Projects</h2>
-            <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+            <div class="overflow-hidden rounded-xl glass">
                 <div class="divide-y divide-slate-200">
                     @forelse ($projects as $project)
                         <a href="{{ route('projects.show', $project) }}" class="flex items-center justify-between gap-4 px-5 py-4 hover:bg-slate-50">
@@ -43,7 +43,7 @@
         @if ($contractors->isNotEmpty() || auth()->user()->hasPermission('projects.view_all'))
             <section>
                 <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Contractors / Providers</h2>
-                <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                <div class="overflow-hidden rounded-xl glass">
                     <div class="divide-y divide-slate-200">
                         @forelse ($contractors as $contractor)
                             <a href="{{ route('contractors.show', $contractor) }}" class="flex items-center justify-between gap-4 px-5 py-4 hover:bg-slate-50">
@@ -61,7 +61,7 @@
 
             <section>
                 <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Assigned Personnel</h2>
-                <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                <div class="overflow-hidden rounded-xl glass">
                     <div class="divide-y divide-slate-200">
                         @forelse ($personnel as $person)
                             <div class="flex items-center justify-between gap-4 px-5 py-4">

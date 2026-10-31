@@ -16,7 +16,7 @@
                 type="button"
                 @click="go(number)"
                 :aria-current="number === page ? 'page' : null"
-                :class="number === page ? 'bg-brand-600 text-white shadow-sm' : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-100 hover:text-slate-900'"
+                :class="number === page ? 'bg-brand-50 text-brand-700 ring-1 ring-brand-100' : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-100 hover:text-slate-900'"
                 class="hidden h-9 min-w-[2.25rem] items-center justify-center rounded-lg px-3 text-sm font-medium transition-colors duration-150 sm:inline-flex"
                 x-text="number"
             ></button>

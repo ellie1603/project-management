@@ -1,4 +1,4 @@
-<section class="overflow-hidden rounded-3xl bg-white shadow-soft ring-1 ring-slate-900/5">
+<section class="overflow-hidden rounded-3xl glass">
     <div class="overflow-x-auto">
         <table class="min-w-full">
             <thead>
@@ -15,7 +15,7 @@
                     <tr class="transition-colors duration-150 hover:bg-slate-50/80">
                         <td class="px-5 py-3.5">
                             <div class="flex items-center gap-3">
-                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full chip-ink text-xs font-semibold text-white shadow-sm">
+                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full chip-ink text-xs font-semibold">
                                     {{ strtoupper(substr($user->name, 0, 1)) }}
                                 </span>
                                 <div class="min-w-0">
@@ -116,7 +116,7 @@
 
             <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
                 <div class="flex items-center gap-3">
-                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl chip-ink text-xs font-semibold text-white shadow-sm">
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl chip-ink text-xs font-semibold">
                         {{ strtoupper(substr($user->name, 0, 1)) }}
                     </span>
                     <div>

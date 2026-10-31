@@ -6,8 +6,10 @@ import plugin from 'tailwindcss/plugin';
 /*
  * Theme palette
  * -------------
- * Neutrals ("slate"/"gray") are a zinc scale; "brand" is the cooperative's dark blue,
- * with "accent" (orange) and "highlight" (yellow) used sparingly. Every palette is emitted as CSS
+ * Neutrals ("slate"/"gray") are a cool slate scale with a faint blue undertone;
+ * "brand" is a soft cornflower blue: pale tints (50-200) for selected nav, icon chips
+ * and focus rings, and a calm mid blue (600) for buttons, links and progress fills,
+ * so pages read white with a hint of blue. Every palette is emitted as CSS
  * variables so a single `.dark` class on <html> flips the entire app, with no
  * per-view `dark:` classes needed.
  *
@@ -25,27 +27,22 @@ const ACCENTS = ['red', 'rose', 'orange', 'amber', 'yellow', 'lime', 'green', 'e
 
 const DARK_CARD = '#151517';
 
-const ink = defaultColors.zinc;
+// Slate with a touch more blue in the lightest step, so the page canvas reads blue-white.
+const ink = { ...defaultColors.slate, 50: '#f5f8fc' };
 
-// Brand palette: dark blue #0c2d6b is the primary (brand-600). Orange #ff5722
-// ("accent") marks primary calls to action; yellow #efce1b ("highlight") is
-// reserved for small details on dark blue surfaces. Neutrals stay zinc so pages
-// read calm and professional.
-const brandLight = { 50: '#eef3fb', 100: '#d9e4f5', 200: '#b3c8ea', 300: '#84a4db', 400: '#5079c4', 500: '#2553a6', 600: '#0c2d6b', 700: '#0a2558', 800: '#081d46', 900: '#061534', 950: '#040d22' };
-const accent = { 50: '#fff3ef', 100: '#ffe3d9', 200: '#ffc3ad', 300: '#ff9a78', 400: '#ff7447', 500: '#ff5722', 600: '#ed3f0a', 700: '#c42f06', 800: '#9c270b', 900: '#7e230d', 950: '#441004' };
-const highlight = { 50: '#fefbe8', 100: '#fdf5c4', 200: '#fbeb8c', 300: '#f7dc4b', 400: '#f2d22c', 500: '#efce1b', 600: '#cfa70f', 700: '#a67a10', 800: '#896015', 900: '#744e18', 950: '#442a09' };
+// Brand palette: 50-300 are pale blue tints (selected nav, icon chips, focus rings);
+// 500-700 a calm mid blue for buttons, links and filled indicators (white text on
+// 600 passes WCAG AA).
+const brandLight = { 50: '#eff4fe', 100: '#e0eafc', 200: '#c7d8f8', 300: '#a1bdf2', 400: '#7499e8', 500: '#4f7bdc', 600: '#3563c9', 700: '#2a50a6', 800: '#243f80', 900: '#1f3566', 950: '#152241' };
 
 const dark = {
     fgSlate: { 50: '#1d1d20', 100: '#26262a', 200: '#303035', 300: '#3f3f46', 400: '#7c7c85', 500: '#a1a1aa', 600: '#c4c4cc', 700: '#d9d9de', 800: '#e8e8ec', 900: '#f4f4f5', 950: '#fafafa' },
     bgSlate: { 50: '#0a0a0b', 100: '#232326', 200: '#2c2c30', 300: '#3a3a40', 400: '#52525b', 500: '#71717a', 600: '#8b8b94', 700: '#52525b', 800: '#46464e', 900: '#34343a', 950: '#1f1f23' },
     // Dark mode drops the blue entirely: brand text/borders become light neutrals and
-    // brand backgrounds (buttons, chips, active nav) a graphite grey, so orange
-    // stays the only accent and status colours (green/amber/red) carry meaning.
+    // brand backgrounds (buttons, chips, active nav) a graphite grey, so status
+    // colours (green/amber/red) are the only ones that carry meaning.
     fgBrand: { 50: '#1a1a1d', 100: '#2c2c31', 200: '#3a3a40', 300: '#71717a', 400: '#8b8b94', 500: '#a1a1aa', 600: '#e4e4e7', 700: '#f4f4f5', 800: '#fafafa', 900: '#ffffff', 950: '#ffffff' },
     bgBrand: { 50: '#1c1c1f', 100: '#222226', 200: '#2a2a2e', 300: '#333339', 400: '#3f3f46', 500: '#4a4a52', 600: '#52525b', 700: '#5e5e67', 800: '#3f3f46', 900: '#2a2a2f', 950: '#1f1f23' },
-    // The page hero keeps light-theme text colours (it's .palette-fixed); on its
-    // graphite dark surface those resolve to plain zinc greys rather than pale blue.
-    heroFgSlate: { ...ink, 500: '#8e8e96' },
 };
 
 const toRgb = (hex) => {
@@ -121,7 +118,7 @@ export default {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
                 display: ['"Plus Jakarta Sans"', ...defaultTheme.fontFamily.sans],
             },
-            colors: { ...palette('fg'), accent, highlight },
+            colors: palette('fg'),
             backgroundColor: backgrounds,
             gradientColorStops: backgrounds,
             transitionTimingFunction: {
@@ -132,7 +129,7 @@ export default {
                 soft: '0 1px 2px 0 rgb(9 9 11 / 0.04), 0 1px 3px 0 rgb(9 9 11 / 0.06)',
                 elevated: '0 2px 4px -2px rgb(9 9 11 / 0.06), 0 12px 24px -8px rgb(9 9 11 / 0.12)',
                 premium: '0 4px 8px -4px rgb(9 9 11 / 0.08), 0 20px 40px -12px rgb(9 9 11 / 0.16)',
-                glow: '0 8px 28px -6px rgb(255 87 34 / 0.35)',
+                glow: '0 6px 20px -6px rgb(53 99 201 / 0.35)',
             },
             keyframes: {
                 fadeIn: {
@@ -184,11 +181,6 @@ export default {
                 ':root': { ...lightVars, colorScheme: 'light' },
                 '.dark': { ...darkVars, colorScheme: 'dark' },
                 '.dark .palette-fixed': { ...lightVars, colorScheme: 'light' },
-                '.dark .palette-fixed.hero-brand': {
-                    ...vars('fg-slate', dark.heroFgSlate),
-                    ...vars('fg-brand', ink),
-                    ...vars('bg-brand', dark.bgBrand),
-                },
             });
         }),
     ],

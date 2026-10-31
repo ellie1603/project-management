@@ -12,12 +12,12 @@
     <x-flash-toast />
     <x-flash-toast type="error" />
 
-    <form method="POST" action="{{ route('settings.update') }}" class="animate-rise-in overflow-hidden rounded-3xl bg-white shadow-soft ring-1 ring-slate-900/5" style="animation-delay: 40ms">
+    <form method="POST" action="{{ route('settings.update') }}" class="animate-rise-in overflow-hidden rounded-3xl glass" style="animation-delay: 40ms">
         @csrf
         @method('PUT')
 
         <div class="flex items-center gap-3 border-b border-slate-100 px-6 py-5">
-            <span class="flex h-9 w-9 items-center justify-center rounded-xl chip-ink text-white shadow-sm">
+            <span class="flex h-9 w-9 items-center justify-center rounded-xl chip-ink">
                 <i data-lucide="sliders-horizontal" class="h-4 w-4"></i>
             </span>
             <div>
@@ -61,9 +61,9 @@
         </div>
     </form>
 
-    <section class="animate-rise-in overflow-hidden rounded-3xl bg-white shadow-soft ring-1 ring-slate-900/5" style="animation-delay: 65ms">
+    <section class="animate-rise-in overflow-hidden rounded-3xl glass" style="animation-delay: 65ms">
         <div class="flex items-center gap-3 border-b border-slate-100 px-6 py-5">
-            <span class="flex h-9 w-9 items-center justify-center rounded-xl chip-ink text-white shadow-sm">
+            <span class="flex h-9 w-9 items-center justify-center rounded-xl chip-ink">
                 <i data-lucide="tag" class="h-4 w-4"></i>
             </span>
             <div>
