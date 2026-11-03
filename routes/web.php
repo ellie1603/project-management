@@ -148,7 +148,7 @@ Route::middleware('auth')->group(function () {
     // System Administrator (developer account) only.
     Route::middleware('can:manage-system')->prefix('system')->name('system.')->group(function () {
         Route::get('/permissions', [SystemPermissionsController::class, 'edit'])->name('permissions');
-        Route::put('/permissions', [SystemPermissionsController::class, 'update'])->name('permissions.update');
+        Route::put('/permissions/{role}', [SystemPermissionsController::class, 'update'])->name('permissions.update');
         Route::get('/usage', [SystemUsageController::class, 'index'])->name('usage');
         Route::get('/usage/{user}', [SystemUsageController::class, 'show'])->name('usage.user');
     });

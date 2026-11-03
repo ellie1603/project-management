@@ -38,8 +38,36 @@ class SystemAdministrationTest extends TestCase
         foreach ([$this->ceo, $this->finance] as $user) {
             $this->actingAs($user)->get(route('system.permissions'))->assertForbidden();
             $this->actingAs($user)->get(route('system.usage'))->assertForbidden();
-            $this->actingAs($user)->put(route('system.permissions.update'), ['permissions' => []])->assertForbidden();
+            $this->actingAs($user)->put(route('system.permissions.update', 'finance_accounting'), ['permissions' => []])->assertForbidden();
         }
+    }
+
+    public function test_roles_are_listed_with_their_permission_and_user_counts(): void
+    {
+        $this->actingAs($this->sysadmin)->get(route('system.permissions'))
+            ->assertOk()
+            ->assertSeeInOrder(['System Administrator', 'All', '1', 'CEO', (string) count(Permissions::grantedMap()['admin']), '1'])
+            ->assertSee('Edit Finance &amp; Accounting', false)
+            ->assertSee(route('system.permissions.update', 'project_personnel'));
+    }
+
+    public function test_saving_one_role_leaves_the_other_roles_unchanged(): void
+    {
+        $before = Permissions::grantedMap();
+
+        $this->actingAs($this->sysadmin)
+            ->put(route('system.permissions.update', 'finance_accounting'), ['permissions' => []])
+            ->assertRedirect(route('system.permissions'));
+
+        $after = Permissions::grantedMap();
+        $this->assertSame([], $after['finance_accounting']);
+        $this->assertSame($before['admin'], $after['admin']);
+        $this->assertSame($before['project_personnel'], $after['project_personnel']);
+    }
+
+    public function test_an_unknown_role_cannot_be_edited(): void
+    {
+        $this->actingAs($this->sysadmin)->put(route('system.permissions.update', 'board'), ['permissions' => []])->assertNotFound();
     }
 
     public function test_only_the_system_administrator_sees_the_system_menu(): void
@@ -63,7 +91,7 @@ class SystemAdministrationTest extends TestCase
         $this->actingAs($this->finance)->get('/audit-logs')->assertForbidden();
 
         $this->actingAs($this->sysadmin)
-            ->put(route('system.permissions.update'), ['permissions' => $this->matrixWith('finance_accounting', 'audit_logs.view')])
+            ->put(route('system.permissions.update', 'finance_accounting'), ['permissions' => $this->grantsWith('finance_accounting', 'audit_logs.view')])
             ->assertRedirect(route('system.permissions'));
 
         $this->actingAs($this->finance->fresh())->get('/audit-logs')->assertOk();
@@ -72,10 +100,9 @@ class SystemAdministrationTest extends TestCase
 
     public function test_removing_a_permission_from_the_ceo_does_not_affect_the_system_administrator(): void
     {
-        $matrix = Permissions::grantedMap();
-        $matrix['admin'] = array_values(array_diff($matrix['admin'], ['projects.register']));
+        $grants = array_values(array_diff(Permissions::grantedMap()['admin'], ['projects.register']));
 
-        $this->actingAs($this->sysadmin)->put(route('system.permissions.update'), ['permissions' => $matrix]);
+        $this->actingAs($this->sysadmin)->put(route('system.permissions.update', 'admin'), ['permissions' => $grants]);
 
         $this->actingAs($this->ceo)->get(route('projects.create'))->assertForbidden();
         $this->actingAs($this->sysadmin)->get(route('projects.create'))->assertOk();
@@ -84,7 +111,7 @@ class SystemAdministrationTest extends TestCase
     public function test_locked_permissions_cannot_be_granted(): void
     {
         $this->actingAs($this->sysadmin)
-            ->put(route('system.permissions.update'), ['permissions' => $this->matrixWith('finance_accounting', 'budget_requests.review')])
+            ->put(route('system.permissions.update', 'finance_accounting'), ['permissions' => $this->grantsWith('finance_accounting', 'budget_requests.review')])
             ->assertSessionHasErrors('permissions');
 
         $this->assertFalse($this->finance->fresh()->hasPermission('budget_requests.review'));
@@ -97,9 +124,8 @@ class SystemAdministrationTest extends TestCase
 
         $this->actingAs($personnel)->get(route('reports.index'))->assertOk();
 
-        $matrix = Permissions::grantedMap();
-        $matrix['project_personnel'] = array_values(array_diff($matrix['project_personnel'], ['reports.view']));
-        $this->actingAs($this->sysadmin)->put(route('system.permissions.update'), ['permissions' => $matrix]);
+        $grants = array_values(array_diff(Permissions::grantedMap()['project_personnel'], ['reports.view']));
+        $this->actingAs($this->sysadmin)->put(route('system.permissions.update', 'project_personnel'), ['permissions' => $grants]);
 
         $this->actingAs($personnel->fresh())->get(route('reports.index'))->assertForbidden();
     }
@@ -162,13 +188,10 @@ class SystemAdministrationTest extends TestCase
     }
 
     /**
-     * @return array<string, array<int, string>>
+     * @return array<int, string>
      */
-    private function matrixWith(string $role, string $permission): array
+    private function grantsWith(string $role, string $permission): array
     {
-        $matrix = Permissions::grantedMap();
-        $matrix[$role][] = $permission;
-
-        return $matrix;
+        return [...Permissions::grantedMap()[$role], $permission];
     }
 }

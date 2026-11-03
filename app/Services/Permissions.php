@@ -295,6 +295,17 @@ class Permissions
         return $changes;
     }
 
+    /**
+     * Replaces one role's grants, leaving the other roles as they are.
+     *
+     * @param  array<int, string>  $permissions
+     * @return array<int, array{role: string, permission: string, granted: bool}> what changed
+     */
+    public static function saveRole(string $role, array $permissions): array
+    {
+        return self::save(array_replace(self::grantedMap(), [$role => $permissions]));
+    }
+
     public static function forget(): void
     {
         Cache::forget(self::CACHE_KEY);
