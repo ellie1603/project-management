@@ -12,10 +12,10 @@
     >
         @can('create', App\Models\Project::class)
             <x-slot name="aside">
-                <a href="{{ route('projects.create') }}" class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 transition-transform duration-200 ease-elegant hover:-translate-y-0.5">
+                <button type="button" @click="$dispatch('open-modal', 'register-project')" class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 transition-transform duration-200 ease-elegant hover:-translate-y-0.5">
                     <i data-lucide="plus" class="h-4 w-4"></i>
                     Register Project
-                </a>
+                </button>
             </x-slot>
         @endcan
 
@@ -35,6 +35,10 @@
             </div>
         </x-slot>
     </x-page-hero>
+
+    @can('create', App\Models\Project::class)
+        @include('projects.partials.register-modal')
+    @endcan
 
     <form method="GET" class="mt-6 flex flex-wrap items-center gap-3 rounded-2xl glass p-3" data-ajax-form="ajax-results" data-turbo="false">
         <div class="relative min-w-[16rem] flex-1">

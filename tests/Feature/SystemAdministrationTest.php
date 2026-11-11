@@ -105,7 +105,7 @@ class SystemAdministrationTest extends TestCase
         $this->actingAs($this->sysadmin)->put(route('system.permissions.update', 'admin'), ['permissions' => $grants]);
 
         $this->actingAs($this->ceo)->get(route('projects.create'))->assertForbidden();
-        $this->actingAs($this->sysadmin)->get(route('projects.create'))->assertOk();
+        $this->actingAs($this->sysadmin)->get(route('projects.create'))->assertRedirect(route('projects.index', ['register' => 1]));
     }
 
     public function test_locked_permissions_cannot_be_granted(): void

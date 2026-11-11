@@ -7,6 +7,7 @@ use App\Services\Permissions;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -47,6 +48,16 @@ class User extends Authenticatable
     public function isFinance(): bool
     {
         return $this->role === 'finance_accounting';
+    }
+
+    /**
+     * Active Project Personnel who can be assigned to a project.
+     *
+     * @param  Builder<User>  $query
+     */
+    public function scopeAssignablePersonnel(Builder $query): void
+    {
+        $query->where('role', 'project_personnel')->where('is_active', true)->orderBy('name');
     }
 
     /**

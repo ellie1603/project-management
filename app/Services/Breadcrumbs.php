@@ -52,7 +52,6 @@ class Breadcrumbs
         $finance = $user?->isFinance() ? null : ['label' => 'Budget & Finance', 'url' => route('budget.overview')];
 
         return match ($name) {
-            'projects.create' => [$projects, $this->page('Register Project')],
             'projects.show' => [$projects, $projectCrumb],
             'projects.edit' => [$projects, $projectCrumb, $this->page('Edit')],
             'projects.budget.show' => [$projects, $projectCrumb, $this->page('Budget')],

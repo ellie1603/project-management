@@ -79,14 +79,14 @@ class ProjectController extends Controller
         return $this->respond($request, 'projects.index', 'projects.partials.results', compact('projects', 'categories', 'summaryStats'));
     }
 
-    public function create(): View
+    /**
+     * Registration happens in a modal on the projects list; this route opens it.
+     */
+    public function create(): RedirectResponse
     {
         $this->authorize('create', Project::class);
 
-        $categories = ProjectCategory::query()->orderBy('name')->get();
-        $projectPersonnel = $this->assignablePersonnel();
-
-        return view('projects.create', compact('categories', 'projectPersonnel'));
+        return redirect()->route('projects.index', ['register' => 1]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -680,7 +680,7 @@ class ProjectController extends Controller
 
     private function assignablePersonnel(): Collection
     {
-        return User::query()->where('role', 'project_personnel')->where('is_active', true)->orderBy('name')->get();
+        return User::query()->assignablePersonnel()->get();
     }
 
     protected function generateProjectCode(): string

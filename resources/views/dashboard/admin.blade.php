@@ -15,10 +15,12 @@
     >
         <x-slot name="aside">
             <div class="flex flex-wrap items-center gap-3">
-                <a href="{{ route('projects.create') }}" class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 transition-transform duration-200 ease-elegant hover:-translate-y-0.5">
-                    <i data-lucide="plus" class="h-4 w-4"></i>
-                    Register Project
-                </a>
+                @can('create', App\Models\Project::class)
+                    <button type="button" @click="$dispatch('open-modal', 'register-project')" class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 transition-transform duration-200 ease-elegant hover:-translate-y-0.5">
+                        <i data-lucide="plus" class="h-4 w-4"></i>
+                        Register Project
+                    </button>
+                @endcan
                 <a href="{{ route('projects.index') }}" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors duration-200 hover:bg-slate-50 hover:text-slate-900">
                     All Projects
                     <i data-lucide="arrow-right" class="h-4 w-4"></i>
@@ -56,6 +58,10 @@
             </div>
         </x-slot>
     </x-page-hero>
+
+    @can('create', App\Models\Project::class)
+        @include('projects.partials.register-modal')
+    @endcan
 
     <div class="mt-6 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-5">
         <x-stat-card label="Total Projects" :value="$stats['total_projects']" icon="folder" :sub="$stats['registered'].' registered'" class="animate-rise-in" style="animation-delay: 30ms" />

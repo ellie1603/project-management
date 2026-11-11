@@ -94,4 +94,37 @@ class ProjectRegistrationTest extends TestCase
 
         $this->assertDatabaseHas('projects', ['title' => 'Unassigned Project', 'status' => 'Registered']);
     }
+
+    public function test_register_project_form_is_a_modal_on_the_projects_list(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'position_type' => null]);
+        $finance = User::factory()->create(['role' => 'finance_accounting', 'position_type' => null]);
+
+        $this->actingAs($admin)->get(route('projects.create'))
+            ->assertRedirect(route('projects.index', ['register' => 1]));
+
+        $this->actingAs($admin)->get(route('projects.index'))
+            ->assertOk()
+            ->assertSee("open-modal', 'register-project'", false)
+            ->assertSee('name="_form" value="register-project"', false);
+
+        $this->actingAs($finance)->get(route('projects.index'))
+            ->assertOk()
+            ->assertDontSee('register-project');
+    }
+
+    public function test_failed_registration_returns_to_the_page_with_the_modal_and_input(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'position_type' => null]);
+
+        $this->actingAs($admin)
+            ->from(route('projects.index'))
+            ->post('/projects', ['_form' => 'register-project', 'title' => 'Half-filled Project'])
+            ->assertRedirect(route('projects.index'));
+
+        $this->actingAs($admin)->get(route('projects.index'))
+            ->assertSee('value="Half-filled Project"', false)
+            ->assertSee('The location field is required.')
+            ->assertSee('The approved budget field is required.');
+    }
 }
