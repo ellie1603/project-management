@@ -5,7 +5,6 @@
     <x-page-hero
         eyebrow="Reports"
         title="Report Center"
-        subtitle="Export any report as PDF, Excel, or view it on screen."
         class="animate-rise-in"
     />
 

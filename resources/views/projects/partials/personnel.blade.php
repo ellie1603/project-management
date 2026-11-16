@@ -1,6 +1,5 @@
 <section class="rounded-xl glass p-5">
-    <div class="flex items-center justify-between gap-4">
-        <h2 class="text-lg font-semibold text-slate-900">Personnel</h2>
+    <div class="flex items-center justify-end gap-4">
         <span class="text-sm text-slate-500">{{ $project->assignments->count() }} assigned</span>
     </div>
 

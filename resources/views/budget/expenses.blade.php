@@ -11,7 +11,6 @@
         <div>
             <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Finance</p>
             <h1 class="mt-1 text-2xl font-semibold tracking-tight text-slate-900">Expenses</h1>
-            <p class="mt-1 text-sm text-slate-600">Every expense recorded across all projects.</p>
         </div>
 
         @if (auth()->user()->can('create', App\Models\ProjectExpense::class))

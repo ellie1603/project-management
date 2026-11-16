@@ -18,7 +18,6 @@
     <x-page-hero
         eyebrow="Administration"
         title="Project Documents"
-        subtitle="Approved designs, contracts, reports, and photos uploaded across every project — organized in one searchable archive."
         class="animate-rise-in"
     >
         <x-slot name="footer">

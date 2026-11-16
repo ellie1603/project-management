@@ -8,9 +8,6 @@
     <div class="mb-6">
         <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">System</p>
         <h1 class="mt-1 text-2xl font-semibold tracking-tight text-slate-900">Roles &amp; Permissions</h1>
-        <p class="mt-1 max-w-2xl text-sm text-slate-600">
-            Choose what each role can do. Changes apply to everyone in that role as soon as you save, and every change is recorded in the audit log.
-        </p>
     </div>
 
     <section class="overflow-hidden rounded-3xl glass">

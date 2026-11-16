@@ -1,6 +1,5 @@
 <section class="rounded-xl glass p-5">
-    <h2 class="text-lg font-semibold text-slate-900">Project Overview</h2>
-    <dl class="mt-4 grid gap-4 sm:grid-cols-2">
+    <dl class="grid gap-4 sm:grid-cols-2">
         <div>
             <dt class="text-xs uppercase tracking-wide text-slate-500">Project Code</dt>
             <dd class="mt-1 text-sm text-slate-700">{{ $project->project_code }}</dd>

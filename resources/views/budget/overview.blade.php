@@ -6,7 +6,6 @@
     <x-page-hero
         eyebrow="Finance"
         title="Budget & Finance"
-        subtitle="Org-wide budget totals and utilization across every project."
         class="animate-rise-in"
     >
         <x-slot name="aside">

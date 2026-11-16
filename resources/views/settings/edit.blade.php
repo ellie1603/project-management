@@ -5,7 +5,6 @@
     <x-page-hero
         eyebrow="Administration"
         title="System Settings"
-        subtitle="Organization-wide defaults used across budgeting, reporting, and project registration."
         class="animate-rise-in"
     />
 

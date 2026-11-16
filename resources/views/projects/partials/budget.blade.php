@@ -5,11 +5,7 @@
     $canRecordExpense = auth()->user()->can('create', App\Models\ProjectExpense::class);
 @endphp
 
-<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
-    <div>
-        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Budget Monitoring</p>
-        <h2 class="mt-1 text-xl font-semibold text-slate-900">{{ $project->title }}</h2>
-    </div>
+<div class="mb-4 flex justify-end">
     <x-status-badge :status="$budget['budget_status']" />
 </div>
 

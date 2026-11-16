@@ -5,7 +5,6 @@
     <x-page-hero
         eyebrow="Project Personnel"
         title="My Projects"
-        subtitle="Projects assigned to you — keep progress and issues up to date."
         class="animate-rise-in"
     />
 

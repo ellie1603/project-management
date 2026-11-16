@@ -10,7 +10,6 @@
     <x-page-hero
         eyebrow="Admin Dashboard"
         title="Overview"
-        subtitle="Live status of every registered project — budget utilization, schedule health, and items needing your attention."
         class="animate-rise-in"
     >
         <x-slot name="aside">

@@ -4,9 +4,7 @@
 @endphp
 
 <section class="rounded-xl glass p-5">
-    <h2 class="text-lg font-semibold text-slate-900">Budget Request</h2>
-
-    <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
             <p class="text-xs uppercase tracking-wide text-slate-500">Approved Project Budget</p>
             <p class="mt-2 text-lg font-semibold text-slate-900">₱{{ number_format((float) $budget['approved_budget'], 2) }}</p>

@@ -34,11 +34,7 @@
 @endphp
 
 <section class="rounded-xl glass p-5">
-    <div class="flex flex-wrap items-center justify-between gap-4">
-        <div>
-            <h2 class="text-lg font-semibold text-slate-900">Project Progress</h2>
-            <p class="mt-0.5 text-sm text-slate-500">Infrastructure completion and schedule health.</p>
-        </div>
+    <div class="flex flex-wrap items-center justify-end gap-4">
         <div class="flex flex-wrap items-center gap-3">
             <x-status-badge :status="$timeline['timeline_status']" />
             @if ($canWriteProgress)

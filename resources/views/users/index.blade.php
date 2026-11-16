@@ -8,7 +8,6 @@
     <x-page-hero
         eyebrow="Administration"
         title="Users"
-        subtitle="Manage login accounts for Admin, Finance & Accounting, and Project Personnel — including contractor/provider profiles."
         class="animate-rise-in"
     >
         <x-slot name="aside">

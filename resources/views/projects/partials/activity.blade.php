@@ -1,6 +1,5 @@
 <section class="rounded-xl glass p-5" x-data="pager(10)" data-pager>
-    <h2 class="text-lg font-semibold text-slate-900">Activity Log</h2>
-    <ul class="mt-4 divide-y divide-slate-100">
+    <ul class="divide-y divide-slate-100">
         @forelse ($activityLog as $entry)
             <li data-page-item class="py-3 text-sm">
                 <p class="text-slate-800">{{ $entry->description }}</p>

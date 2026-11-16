@@ -6,7 +6,6 @@
     <x-page-hero
         eyebrow="Finance & Accounting"
         title="Budget Monitoring"
-        subtitle="Organization-wide financial utilization across every registered project."
         class="animate-rise-in"
     >
         <x-slot name="aside">

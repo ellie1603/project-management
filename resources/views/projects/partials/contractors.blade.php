@@ -3,11 +3,6 @@
     $quotationCount = $project->quotations->count();
 @endphp
 
-<div class="mb-6">
-    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Contractors & Providers</p>
-    <h2 class="mt-1 text-xl font-semibold text-slate-900">{{ $project->title }}</h2>
-</div>
-
 @if (! $hasContractorHistory && $quotationCount < 3)
     <div class="mb-6 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
         <i data-lucide="alert-triangle" class="mt-0.5 h-4 w-4 shrink-0"></i>

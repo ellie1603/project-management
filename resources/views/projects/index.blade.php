@@ -7,7 +7,6 @@
     <x-page-hero
         eyebrow="Projects"
         title="All Projects"
-        subtitle="Every project you have access to — search, filter, and open any one for full budget, timeline, and progress detail."
         class="animate-rise-in"
     >
         @can('create', App\Models\Project::class)

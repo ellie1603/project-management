@@ -16,7 +16,6 @@
     <x-page-hero
         eyebrow="Account"
         title="My Account"
-        subtitle="Your sign-in details, password, and which notifications you receive."
     />
 
     <div class="grid gap-6 lg:grid-cols-3">

@@ -5,7 +5,6 @@
     <x-page-hero
         eyebrow="Administration"
         title="Audit Logs"
-        subtitle="A complete, unmodifiable trail of important actions taken across the system."
         class="animate-rise-in"
     />
 
