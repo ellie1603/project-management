@@ -14,20 +14,15 @@
                 @forelse ($users as $user)
                     <tr class="transition-colors duration-150 hover:bg-slate-50/80">
                         <td class="px-5 py-3.5">
-                            <div class="flex items-center gap-3">
-                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full chip-ink text-xs font-semibold">
-                                    {{ strtoupper(substr($user->name, 0, 1)) }}
-                                </span>
-                                <div class="min-w-0">
-                                    <p class="truncate text-sm font-semibold text-slate-900">{{ $user->name }}</p>
-                                    <p class="truncate text-xs text-slate-500">{{ $user->email }}</p>
-                                    @if ($user->contractor)
-                                        <a href="{{ route('contractors.show', $user->contractor) }}" class="mt-0.5 inline-flex items-center gap-1 text-xs font-medium text-brand-600 transition-colors duration-150 hover:text-brand-700">
-                                            <i data-lucide="hard-hat" class="h-3 w-3"></i>
-                                            {{ $user->contractor->name }}
-                                        </a>
-                                    @endif
-                                </div>
+                            <div class="min-w-0">
+                                <p class="truncate text-sm font-semibold text-slate-900">{{ $user->name }}</p>
+                                <p class="truncate text-xs text-slate-500">{{ $user->email }}</p>
+                                @if ($user->contractor)
+                                    <a href="{{ route('contractors.show', $user->contractor) }}" class="mt-0.5 inline-flex items-center gap-1 text-xs font-medium text-brand-600 transition-colors duration-150 hover:text-brand-700">
+                                        <i data-lucide="hard-hat" class="h-3 w-3"></i>
+                                        {{ $user->contractor->name }}
+                                    </a>
+                                @endif
                             </div>
                         </td>
                         <td class="px-4 py-3.5">
@@ -115,14 +110,9 @@
             <input type="hidden" name="_editing_user_id" value="{{ $user->id }}">
 
             <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
-                <div class="flex items-center gap-3">
-                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl chip-ink text-xs font-semibold">
-                        {{ strtoupper(substr($user->name, 0, 1)) }}
-                    </span>
-                    <div>
-                        <h2 class="font-display text-lg font-semibold text-slate-900">Edit {{ $user->name }}</h2>
-                        <p class="mt-0.5 text-sm text-slate-500">{{ $user->email }}</p>
-                    </div>
+                <div>
+                    <h2 class="font-display text-lg font-semibold text-slate-900">Edit {{ $user->name }}</h2>
+                    <p class="mt-0.5 text-sm text-slate-500">{{ $user->email }}</p>
                 </div>
                 <button type="button" @click="$dispatch('close-modal', 'edit-user-{{ $user->id }}')" class="shrink-0 rounded-lg p-1.5 text-slate-400 outline-none transition-colors duration-150 hover:bg-slate-100 hover:text-slate-700 focus-visible:ring-2 focus-visible:ring-brand-200" aria-label="Close">
                     <i data-lucide="x" class="h-5 w-5"></i>

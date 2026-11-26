@@ -1,9 +1,10 @@
 <header class="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-4 border-b border-slate-200/60 bg-white/60 px-4 shadow-[0_1px_0_rgba(15,23,42,0.03)] backdrop-blur-xl sm:px-6 lg:px-8">
     <button
         type="button"
-        class="rounded-lg p-1.5 text-slate-500 transition-colors duration-150 hover:bg-slate-100 hover:text-slate-900 lg:hidden"
-        @click="sidebarOpen = ! sidebarOpen"
+        class="rounded-lg p-1.5 text-slate-500 transition-colors duration-150 hover:bg-slate-100 hover:text-slate-900"
+        @click="window.matchMedia('(min-width: 1024px)').matches ? window.bmpcToggleSidebar() : (sidebarOpen = ! sidebarOpen)"
         aria-label="Toggle navigation"
+        title="Toggle navigation"
     >
         <i data-lucide="menu" class="h-6 w-6"></i>
     </button>
@@ -111,15 +112,12 @@
 
         <x-dropdown align="right" width="48">
             <x-slot name="trigger">
-                <button class="flex items-center gap-2.5 rounded-lg py-1.5 pl-1.5 pr-2 text-slate-600 transition-colors duration-150 hover:bg-slate-100">
-                    <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full chip-ink text-xs font-semibold">
-                        {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                <button class="flex items-center gap-2 rounded-lg px-2 py-1.5 text-slate-600 transition-colors duration-150 hover:bg-slate-100">
+                    <div class="min-w-0 text-left leading-tight">
+                        <p class="max-w-[6rem] truncate sm:max-w-[8rem] text-xs font-semibold text-slate-800">{{ Auth::user()->name }}</p>
+                        <p class="hidden text-[11px] text-slate-400 md:block">{{ Auth::user()->roleLabel() }}</p>
                     </div>
-                    <div class="hidden text-left leading-tight md:block">
-                        <p class="max-w-[8rem] truncate text-xs font-semibold text-slate-800">{{ Auth::user()->name }}</p>
-                        <p class="text-[11px] text-slate-400">{{ Auth::user()->roleLabel() }}</p>
-                    </div>
-                    <i data-lucide="chevron-down" class="hidden h-3.5 w-3.5 shrink-0 text-slate-400 md:block"></i>
+                    <i data-lucide="chevron-down" class="h-3.5 w-3.5 shrink-0 text-slate-400"></i>
                 </button>
             </x-slot>
 

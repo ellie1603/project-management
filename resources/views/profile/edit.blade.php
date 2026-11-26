@@ -21,14 +21,9 @@
     <div class="grid gap-6 lg:grid-cols-3">
         {{-- Who you are in the system; role and position are set by the administrator. --}}
         <aside class="{{ $card }} h-fit lg:sticky lg:top-24">
-            <div class="flex items-center gap-4">
-                <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full chip-ink font-display text-xl font-semibold">
-                    {{ strtoupper(substr($user->name, 0, 1)) }}
-                </div>
-                <div class="min-w-0">
-                    <p class="truncate font-display text-lg font-semibold text-slate-900">{{ $user->name }}</p>
-                    <p class="truncate text-sm text-slate-500">{{ $user->email }}</p>
-                </div>
+            <div class="min-w-0">
+                <p class="truncate font-display text-lg font-semibold text-slate-900">{{ $user->name }}</p>
+                <p class="truncate text-sm text-slate-500">{{ $user->email }}</p>
             </div>
 
             <dl class="mt-5 divide-y divide-slate-100 text-sm">

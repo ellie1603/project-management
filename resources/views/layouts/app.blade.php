@@ -13,6 +13,7 @@
             (function () {
                 try {
                     document.documentElement.classList.toggle('dark', localStorage.getItem('bmpc-theme') === 'dark');
+                    document.documentElement.classList.toggle('sidebar-collapsed', localStorage.getItem('bmpc-sidebar') === 'collapsed');
                 } catch (e) {}
             })();
         </script>
@@ -59,14 +60,14 @@
 
             <!-- Sidebar: always fixed to the viewport, scrolls independently of the page -->
             <aside
-                class="fixed inset-y-0 left-0 z-40 flex w-64 transform flex-col border-r border-slate-200/60 bg-white/70 shadow-xl backdrop-blur-xl transition-transform duration-300 ease-smooth lg:translate-x-0 lg:shadow-none"
+                class="fixed inset-y-0 left-0 z-40 flex w-64 transform flex-col border-r border-slate-200/60 bg-white/70 shadow-xl backdrop-blur-xl transition-transform duration-300 ease-smooth lg:translate-x-0 lg:shadow-none lg:[.sidebar-collapsed_&]:-translate-x-full"
                 :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
             >
                 @include('layouts.partials.sidebar')
             </aside>
 
-            <!-- Main column, offset past the fixed sidebar on large screens -->
-            <div class="flex min-h-screen min-w-0 flex-col lg:pl-64">
+            <!-- Main column, offset past the fixed sidebar on large screens (full width when the sidebar is hidden) -->
+            <div class="flex min-h-screen min-w-0 flex-col transition-[padding] duration-300 ease-smooth lg:pl-64 lg:[.sidebar-collapsed_&]:pl-0">
                 @include('layouts.partials.topbar')
 
                 @isset($header)

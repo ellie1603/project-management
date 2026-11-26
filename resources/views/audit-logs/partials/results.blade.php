@@ -28,12 +28,7 @@
                     <tr class="transition-colors duration-150 hover:bg-slate-50/80">
                         <td class="whitespace-nowrap px-5 py-3.5 text-sm text-slate-500">{{ $auditLog->created_at->format('M d, Y h:i A') }}</td>
                         <td class="px-4 py-3.5">
-                            <div class="flex items-center gap-2.5">
-                                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[11px] font-semibold text-slate-600">
-                                    {{ strtoupper(substr($auditLog->user?->name ?? 'S', 0, 1)) }}
-                                </span>
-                                <span class="text-sm font-medium text-slate-800">{{ $auditLog->user?->name ?? 'System' }}</span>
-                            </div>
+                            <span class="text-sm font-medium text-slate-800">{{ $auditLog->user?->name ?? 'System' }}</span>
                         </td>
                         <td class="px-4 py-3.5">
                             <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold {{ $meta['chip'] }}">

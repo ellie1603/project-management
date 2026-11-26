@@ -193,14 +193,11 @@
             @endphp
             <li data-page-item class="rounded-xl border border-slate-200 p-4">
                 <div class="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
-                    <div class="flex min-w-0 items-center gap-3">
-                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full chip-ink text-xs font-semibold">{{ strtoupper(substr($entry->user->name, 0, 1)) }}</span>
-                        <div class="min-w-0">
-                            <p class="truncate text-sm font-semibold text-slate-900">{{ $entry->user->name }}</p>
-                            <p class="truncate text-xs text-slate-500">
-                                {{ $positions[$entry->user_id] ?? 'Project Personnel' }} &middot; {{ $entry->progress_date->format('M d, Y') }}
-                            </p>
-                        </div>
+                    <div class="min-w-0">
+                        <p class="truncate text-sm font-semibold text-slate-900">{{ $entry->user->name }}</p>
+                        <p class="truncate text-xs text-slate-500">
+                            {{ $positions[$entry->user_id] ?? 'Project Personnel' }} &middot; {{ $entry->progress_date->format('M d, Y') }}
+                        </p>
                     </div>
                     <div class="flex flex-wrap items-center justify-end gap-2 text-xs">
                         <span class="font-semibold tabular-nums text-slate-900">{{ $previous }}% &rarr; {{ $entry->progress_percentage }}%</span>

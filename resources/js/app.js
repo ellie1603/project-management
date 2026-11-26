@@ -119,6 +119,20 @@ Alpine.data('tabSlide', (initial = 'overview', order = []) => ({
  * cross-fade so every surface transitions together. Pages with charts listen
  * for `bmpc:theme` to redraw with the new palette. Returns the new state.
  */
+// Desktop hamburger: hides or shows the fixed sidebar and remembers the choice.
+// The <head> script in layouts/app.blade.php restores it before first paint.
+window.bmpcToggleSidebar = function bmpcToggleSidebar() {
+    const collapsed = document.documentElement.classList.toggle('sidebar-collapsed');
+
+    try {
+        localStorage.setItem('bmpc-sidebar', collapsed ? 'collapsed' : 'expanded');
+    } catch (e) {
+        // Storage can be unavailable (private mode); the toggle still applies for this page.
+    }
+
+    return collapsed;
+};
+
 window.bmpcSetTheme = function bmpcSetTheme(dark) {
     const root = document.documentElement;
 
